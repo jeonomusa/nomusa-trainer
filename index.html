@@ -969,7 +969,11 @@
   }
 
   // 모의고사 탭 클릭 시 문제 DB 로드
-  document.querySelector('.nav-menu a:nth-child(2)').addEventListener('click', loadQuestionDB);
+  document.querySelectorAll('.nav-menu a').forEach(a => {
+    a.addEventListener('click', () => {
+      if (a.textContent.includes('모의고사')) loadQuestionDB();
+    });
+  });
 
 </script>
 </body>
