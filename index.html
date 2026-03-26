@@ -120,6 +120,21 @@
     .ai-box textarea { width: 100%; height: 150px; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; resize: vertical; margin-bottom: 12px; font-family: 'Malgun Gothic', sans-serif; }
     #ai-loading { text-align: center; color: #888; margin-top: 12px; display: none; }
     #ai-result { background: white; border-radius: 12px; padding: 24px; margin-top: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); display: none; white-space: pre-wrap; line-height: 1.8; }
+        .upload-area {
+      border: 2px dashed #ddd; border-radius: 12px; padding: 24px;
+      text-align: center; cursor: pointer; transition: all 0.2s; background: #fafafa;
+      position: relative;
+    }
+    .upload-area:hover { border-color: #27ae60; background: #f0faf4; }
+    .upload-area.has-file { border-color: #27ae60; background: #f0faf4; }
+    .upload-area input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+    .q-card { border: 1px solid #eee; border-radius: 10px; padding: 16px; margin-bottom: 10px; }
+    .q-card.has-rubric { border-left: 4px solid #27ae60; }
+    .q-card.no-rubric { border-left: 4px solid #e67e22; }
+    .rubric-badge { font-size: 11px; padding: 2px 8px; border-radius: 20px; display: inline-block; margin-top: 6px; }
+    .rubric-badge.yes { background: #e8f8f0; color: #27ae60; }
+    .rubric-badge.no { background: #fef3e8; color: #e67e22; }
+
   </style>
 </head>
 <body>
@@ -297,77 +312,59 @@
 <div id="convert" class="page">
   <div class="page-title">🤖 AI 자료 변환</div>
 
+  <!-- 업로드 영역 -->
   <div class="card" style="margin-bottom:16px;">
-    <div style="font-size:14px;font-weight:bold;color:#555;margin-bottom:12px;">📥 자료 입력</div>
+    <div style="font-size:14px;font-weight:bold;color:#555;margin-bottom:16px;">📥 파일 업로드</div>
 
-    <!-- 입력 방식 탭 -->
-    <div style="display:flex;gap:8px;margin-bottom:16px;">
-      <button id="tab-text" onclick="switchTab('text')" style="padding:8px 16px;border-radius:8px;border:none;background:#27ae60;color:white;font-size:13px;cursor:pointer;font-weight:bold;">📝 텍스트</button>
-      <button id="tab-pdf" onclick="switchTab('pdf')" style="padding:8px 16px;border-radius:8px;border:1px solid #ddd;background:white;color:#555;font-size:13px;cursor:pointer;">📄 PDF</button>
-      <button id="tab-image" onclick="switchTab('image')" style="padding:8px 16px;border-radius:8px;border:1px solid #ddd;background:white;color:#555;font-size:13px;cursor:pointer;">🖼️ 이미지</button>
-    </div>
-
-    <!-- 텍스트 입력 -->
-    <div id="input-text">
-      <textarea id="convert-text" placeholder="기출문제, 강사 자료 등 텍스트를 붙여넣으세요..." style="width:100%;height:200px;padding:12px;border:1px solid #ddd;border-radius:8px;font-size:14px;resize:vertical;font-family:'Malgun Gothic',sans-serif;"></textarea>
-    </div>
-
-    <!-- PDF 입력 -->
-    <div id="input-pdf" style="display:none;">
-      <div onclick="document.getElementById('pdf-file').click()" style="border:2px dashed #ddd;border-radius:8px;padding:40px;text-align:center;cursor:pointer;color:#aaa;font-size:14px;">
-        📄 PDF 파일을 클릭해서 업로드하세요
-        <div style="font-size:12px;margin-top:8px;">디지털 PDF / 스캔본 모두 가능</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
+      <!-- 문제 PDF -->
+      <div>
+        <div style="font-size:13px;font-weight:bold;color:#2c3e50;margin-bottom:8px;">📋 문제 파일</div>
+        <div id="upload-q-box" class="upload-area" onclick="document.getElementById('upload-q').click()">
+          <input type="file" id="upload-q" accept=".pdf" onchange="handleUpload('q',this)">
+          <div style="font-size:28px;margin-bottom:8px;">📄</div>
+          <div style="font-size:13px;color:#555;font-weight:bold;">문제 PDF 업로드</div>
+          <div style="font-size:11px;color:#aaa;margin-top:4px;">기출문제, 강사 문제 등</div>
+        </div>
+        <div id="status-q" style="font-size:12px;color:#888;margin-top:6px;min-height:18px;"></div>
       </div>
-      <input type="file" id="pdf-file" accept=".pdf" style="display:none;" onchange="handlePDF(this)">
-      <div id="pdf-status" style="margin-top:8px;font-size:13px;color:#888;"></div>
+
+      <!-- 채점기준 PDF -->
+      <div>
+        <div style="font-size:13px;font-weight:bold;color:#2c3e50;margin-bottom:8px;">📝 채점기준 파일 <span style="font-size:11px;color:#aaa;font-weight:normal;">(선택)</span></div>
+        <div id="upload-r-box" class="upload-area" onclick="document.getElementById('upload-r').click()">
+          <input type="file" id="upload-r" accept=".pdf" onchange="handleUpload('r',this)">
+          <div style="font-size:28px;margin-bottom:8px;">📝</div>
+          <div style="font-size:13px;color:#555;font-weight:bold;">채점기준 PDF 업로드</div>
+          <div style="font-size:11px;color:#aaa;margin-top:4px;">채점평, 모범답안 등</div>
+        </div>
+        <div id="status-r" style="font-size:12px;color:#888;margin-top:6px;min-height:18px;"></div>
+      </div>
     </div>
 
-    <!-- 이미지 입력 -->
-    <div id="input-image" style="display:none;">
-      <div onclick="document.getElementById('image-file').click()" style="border:2px dashed #ddd;border-radius:8px;padding:40px;text-align:center;cursor:pointer;color:#aaa;font-size:14px;">
-        🖼️ 이미지 파일을 클릭해서 업로드하세요
-        <div style="font-size:12px;margin-top:8px;">JPG, PNG 등 스캔본 이미지</div>
-      </div>
-      <input type="file" id="image-file" accept="image/*" style="display:none;" onchange="handleImage(this)">
-      <div id="image-preview" style="margin-top:12px;"></div>
+    <!-- 과목 선택 -->
+    <div style="margin-bottom:16px;">
+      <div style="font-size:13px;font-weight:bold;color:#2c3e50;margin-bottom:8px;">📚 과목</div>
+      <select id="convert-subject" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;font-size:14px;">
+        <option>노동법Ⅰ (개별적 근로관계법)</option>
+        <option>노동법Ⅱ (집단적 노사관계법)</option>
+        <option>인사노무관리</option>
+        <option>행정쟁송법</option>
+        <option>민사소송법</option>
+      </select>
     </div>
+
+    <button onclick="extractAndSave()" id="convert-btn" class="btn btn-green">🤖 AI로 문제 추출 및 저장</button>
   </div>
 
-  <!-- 변환 설정 -->
-  <div class="card" style="margin-bottom:16px;">
-    <div style="font-size:14px;font-weight:bold;color:#555;margin-bottom:12px;">⚙️ 변환 설정</div>
-    <div style="display:flex;gap:16px;flex-wrap:wrap;">
-      <div style="flex:1;min-width:200px;">
-        <label style="font-size:13px;color:#888;display:block;margin-bottom:6px;">과목</label>
-        <select id="convert-subject" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:8px;font-size:14px;">
-          <option>노동법Ⅰ (개별적 근로관계법)</option>
-          <option>노동법Ⅱ (집단적 노사관계법)</option>
-          <option>인사노무관리</option>
-          <option>행정쟁송법</option>
-          <option>민사소송법</option>
-        </select>
-      </div>
-      <div style="flex:1;min-width:200px;">
-        <label style="font-size:13px;color:#888;display:block;margin-bottom:6px;">변환 유형</label>
-        <select id="convert-type" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:8px;font-size:14px;">
-          <option value="question">📝 모의고사 문제로 저장</option>
-          <option value="flashcard">🃏 플래시카드로 변환</option>
-          <option value="blank">📋 빈칸 목차로 변환</option>
-        </select>
-      </div>
+  <!-- 저장된 문제 목록 -->
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+      <div style="font-size:14px;font-weight:bold;color:#555;">📚 저장된 문제 목록</div>
+      <button onclick="clearQuestionDB()" style="font-size:12px;padding:4px 12px;border:1px solid #e74c3c;background:white;color:#e74c3c;border-radius:6px;cursor:pointer;">🗑️ 전체 삭제</button>
     </div>
-  </div>
-
-  <button onclick="convertMaterial()" class="btn btn-green" style="margin-bottom:16px;">🤖 AI 변환 시작</button>
-
-  <!-- 변환 결과 미리보기 -->
-  <div id="convert-result" style="display:none;">
-    <div class="card" style="margin-bottom:16px;">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-        <div style="font-size:14px;font-weight:bold;color:#555;">👀 변환 결과 미리보기</div>
-        <button onclick="saveConverted()" style="padding:8px 20px;background:#27ae60;color:white;border:none;border-radius:8px;font-size:13px;font-weight:bold;cursor:pointer;">💾 저장하기</button>
-      </div>
-      <div id="convert-preview"></div>
+    <div id="question-db-list">
+      <div style="text-align:center;padding:40px;color:#aaa;">저장된 문제가 없어요!<br>PDF를 업로드해서 문제를 추출해보세요 😊</div>
     </div>
   </div>
 </div>
@@ -758,166 +755,187 @@
     document.getElementById('ai-result').style.display = 'block';
     document.getElementById('ai-result').textContent = result;
   }
-  // AI 자료 변환
-  let convertedData = null;
-  let imageBase64 = null;
+  // ========== AI 자료 변환 ==========
+  let pdfTextQ = '';   // 문제 PDF 텍스트
+  let pdfTextR = '';   // 채점기준 PDF 텍스트
 
-  function switchTab(tab) {
-    ['text','pdf','image'].forEach(t => {
-      document.getElementById('input-' + t).style.display = t === tab ? 'block' : 'none';
-      const btn = document.getElementById('tab-' + t);
-      btn.style.background = t === tab ? '#27ae60' : 'white';
-      btn.style.color = t === tab ? 'white' : '#555';
-      btn.style.border = t === tab ? 'none' : '1px solid #ddd';
+  async function handleUpload(type, input) {
+    const file = input.files[0];
+    if (!file) return;
+
+    const statusEl = document.getElementById('status-' + type);
+    const boxEl = document.getElementById('upload-' + type + '-box');
+    statusEl.textContent = '⏳ PDF 읽는 중...';
+
+    try {
+      const text = await extractPDFText(file);
+      if (type === 'q') pdfTextQ = text;
+      else pdfTextR = text;
+
+      boxEl.classList.add('has-file');
+      statusEl.textContent = `✅ ${file.name} (${Math.round(text.length/100)/10}KB 추출)`;
+      statusEl.style.color = '#27ae60';
+    } catch(e) {
+      statusEl.textContent = '❌ PDF 읽기 실패';
+      statusEl.style.color = '#e74c3c';
+    }
+  }
+
+  async function extractPDFText(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        try {
+          const typedArray = new Uint8Array(e.target.result);
+          const pdf = await pdfjsLib.getDocument(typedArray).promise;
+          let text = '';
+          for (let i = 1; i <= pdf.numPages; i++) {
+            const page = await pdf.getPage(i);
+            const content = await page.getTextContent();
+            text += content.items.map(item => item.str).join(' ') + '\n';
+          }
+          resolve(text);
+        } catch(e) { reject(e); }
+      };
+      reader.readAsArrayBuffer(file);
     });
   }
 
-  async function handlePDF(input) {
-    const file = input.files[0];
-    if (!file) return;
-    document.getElementById('pdf-status').textContent = '⏳ PDF 읽는 중...';
+  async function extractAndSave() {
+    if (!pdfTextQ.trim()) { alert('문제 PDF를 먼저 업로드해주세요!'); return; }
 
-    const reader = new FileReader();
-    reader.onload = async (e) => {
-      const typedArray = new Uint8Array(e.target.result);
-      const pdf = await pdfjsLib.getDocument(typedArray).promise;
-      let text = '';
-      for (let i = 1; i <= pdf.numPages; i++) {
-        const page = await pdf.getPage(i);
-        const content = await page.getTextContent();
-        text += content.items.map(item => item.str).join(' ') + '\n';
-      }
-      if (text.trim().length > 50) {
-        document.getElementById('convert-text').value = text;
-        switchTab('text');
-        document.getElementById('pdf-status').textContent = `✅ 텍스트 추출 완료 (${pdf.numPages}페이지)`;
-      } else {
-        document.getElementById('pdf-status').textContent = '⚠️ 스캔본 감지 → 이미지로 처리합니다';
-        // 스캔본은 이미지로 변환
-        const page = await pdf.getPage(1);
-        const viewport = page.getViewport({ scale: 2 });
-        const canvas = document.createElement('canvas');
-        canvas.width = viewport.width;
-        canvas.height = viewport.height;
-        await page.render({ canvasContext: canvas.getContext('2d'), viewport }).promise;
-        imageBase64 = canvas.toDataURL('image/jpeg', 0.8).split(',')[1];
-        document.getElementById('pdf-status').textContent = `✅ 이미지 변환 완료 (${pdf.numPages}페이지 중 1페이지 처리)`;
-      }
-    };
-    reader.readAsArrayBuffer(file);
-  }
-
-  function handleImage(input) {
-    const file = input.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      imageBase64 = e.target.result.split(',')[1];
-      document.getElementById('image-preview').innerHTML = `<img src="${e.target.result}" style="max-width:100%;border-radius:8px;max-height:300px;object-fit:contain;">`;
-    };
-    reader.readAsDataURL(file);
-  }
-
-  async function convertMaterial() {
-    const type = document.getElementById('convert-type').value;
     const subject = document.getElementById('convert-subject').value;
-    const text = document.getElementById('convert-text').value;
+    const btn = document.getElementById('convert-btn');
+    btn.textContent = '⏳ AI가 문제 추출 중...';
+    btn.disabled = true;
+
     const API_KEY = 'AIzaSyApB5J0IXoab-iYRyosBvdLkdTDeEWAW5I';
 
-    if (!text.trim() && !imageBase64) { alert('자료를 입력해주세요!'); return; }
+    // 텍스트 길이 제한 (너무 길면 잘라서 전송)
+    const qText = pdfTextQ.slice(0, 4000);
+    const rText = pdfTextR ? pdfTextR.slice(0, 4000) : '';
 
-    document.getElementById('convert-result').style.display = 'none';
-    document.querySelector('#convert .btn-green').textContent = '⏳ 변환 중...';
+    const prompt = `당신은 노무사 2차 시험 전문가입니다.
+아래 자료에서 시험 문제를 추출해주세요.
 
-    let prompt = '';
-    if (type === 'question') {
-      prompt = `다음 자료에서 노무사 2차 시험 문제를 추출하거나 생성해주세요.
-과목: ${subject}
-자료: ${text}
+[문제 자료]
+${qText}
 
-아래 JSON 형식으로만 답해주세요:
+${rText ? `[채점기준/채점평 자료]\n${rText}` : ''}
+
+다음 규칙을 따라주세요:
+1. 문제를 하나씩 추출하세요
+2. 채점기준 자료가 있으면 각 문제에 맞는 채점기준을 매칭해주세요
+3. 채점기준이 없으면 rubric 필드를 빈 문자열로 두세요
+4. 반드시 아래 JSON 형식으로만 답하세요 (다른 텍스트 없이)
+
 [
-  {"question": "문제 내용", "subject": "${subject}", "source": "자료명"},
-  {"question": "문제 내용2", "subject": "${subject}", "source": "자료명"}
-]`;
-    } else if (type === 'flashcard') {
-      prompt = `다음 자료에서 노무사 2차 시험 플래시카드를 만들어주세요.
-과목: ${subject}
-자료: ${text}
-
-아래 JSON 형식으로만 답해주세요:
-[
-  {"front": "질문", "back": "답변", "subject": "${subject}"},
-  {"front": "질문2", "back": "답변2", "subject": "${subject}"}
-]`;
-    }
-
-    const body = imageBase64 ? {
-      contents: [{ parts: [
-        { text: prompt || `이 이미지에서 노무사 2차 시험 문제를 추출해주세요. 과목: ${subject}. JSON 형식: [{"question":"문제","subject":"${subject}","source":"스캔본"}]` },
-        { inline_data: { mime_type: 'image/jpeg', data: imageBase64 } }
-      ]}]
-    } : {
-      contents: [{ parts: [{ text: prompt }] }]
-    };
-
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${API_KEY}`, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body)
-    });
-    const data = await response.json();
-    let result = data.candidates[0].content.parts[0].text;
-
-    // JSON 추출
-    const jsonMatch = result.match(/$$$[\s\S]*$$$/);
-    if (!jsonMatch) { alert('변환 실패! 다시 시도해주세요.'); document.querySelector('#convert .btn-green').textContent = '🤖 AI 변환 시작'; return; }
-
-    convertedData = JSON.parse(jsonMatch[0]);
-    renderPreview(type, convertedData);
-    document.querySelector('#convert .btn-green').textContent = '🤖 AI 변환 시작';
-    document.getElementById('convert-result').style.display = 'block';
+  {
+    "subject": "${subject}",
+    "question": "문제 전체 내용",
+    "rubric": "채점기준 및 채점평 내용 (없으면 빈 문자열)",
+    "source": "파일명 또는 출처"
   }
+]`;
 
-  function renderPreview(type, data) {
-    const el = document.getElementById('convert-preview');
-    if (type === 'question') {
-      el.innerHTML = data.map((q, i) => `
-        <div style="border:1px solid #eee;border-radius:8px;padding:16px;margin-bottom:12px;">
-          <div style="font-size:12px;color:#27ae60;margin-bottom:6px;">문제 ${i+1} · ${q.subject}</div>
-          <div style="font-size:14px;line-height:1.8;color:#2c3e50;">${q.question}</div>
-        </div>`).join('');
-    } else if (type === 'flashcard') {
-      el.innerHTML = data.map((c, i) => `
-        <div style="border:1px solid #eee;border-radius:8px;padding:16px;margin-bottom:12px;display:flex;gap:16px;">
-          <div style="flex:1;background:#f8f9fa;border-radius:8px;padding:12px;">
-            <div style="font-size:11px;color:#888;margin-bottom:4px;">앞면</div>
-            <div style="font-size:14px;">${c.front}</div>
-          </div>
-          <div style="flex:1;background:#f0faf4;border-radius:8px;padding:12px;">
-            <div style="font-size:11px;color:#888;margin-bottom:4px;">뒷면</div>
-            <div style="font-size:14px;">${c.back}</div>
-          </div>
-        </div>`).join('');
-    }
-  }
+    try {
+      const response = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${API_KEY}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: prompt }] }],
+            generationConfig: { maxOutputTokens: 8192 }
+          })
+        }
+      );
+      const data = await response.json();
+      const result = data.candidates[0].content.parts[0].text;
 
-  function saveConverted() {
-    const type = document.getElementById('convert-type').value;
-    if (type === 'question') {
+      // JSON 추출
+      const jsonMatch = result.match(/$$$[\s\S]*$$$/);
+      if (!jsonMatch) throw new Error('JSON 파싱 실패');
+
+      const questions = JSON.parse(jsonMatch[0]);
+
+      // 저장
       const db = JSON.parse(localStorage.getItem('questionDB') || '[]');
-      convertedData.forEach(q => db.push({ ...q, id: Date.now() + Math.random() }));
+      questions.forEach(q => {
+        db.push({
+          id: Date.now() + Math.random(),
+          subject: q.subject || subject,
+          question: q.question,
+          rubric: q.rubric || '',
+          source: q.source || '업로드 자료',
+          createdAt: new Date().toLocaleDateString('ko-KR')
+        });
+      });
       localStorage.setItem('questionDB', JSON.stringify(db));
-      alert(`✅ 문제 ${convertedData.length}개 저장 완료!`);
-    } else if (type === 'flashcard') {
-      const db = JSON.parse(localStorage.getItem('flashcardDB') || '[]');
-      convertedData.forEach(c => db.push({ ...c, id: Date.now() + Math.random(), nextReview: Date.now(), interval: 1, easeFactor: 2.5, repetitions: 0 }));
-      localStorage.setItem('flashcardDB', JSON.stringify(db));
-      alert(`✅ 카드 ${convertedData.length}개 저장 완료!`);
+
+      alert(`✅ 문제 ${questions.length}개 저장 완료!`);
+      renderQuestionDB();
+
+      // 초기화
+      pdfTextQ = '';
+      pdfTextR = '';
+      document.getElementById('upload-q').value = '';
+      document.getElementById('upload-r').value = '';
+      document.getElementById('upload-q-box').classList.remove('has-file');
+      document.getElementById('upload-r-box').classList.remove('has-file');
+      document.getElementById('status-q').textContent = '';
+      document.getElementById('status-r').textContent = '';
+
+    } catch(e) {
+      alert('추출 실패! 다시 시도해주세요.\n' + e.message);
     }
-    document.getElementById('convert-result').style.display = 'none';
-    document.getElementById('convert-text').value = '';
-    imageBase64 = null;
-    convertedData = null;
+
+    btn.textContent = '🤖 AI로 문제 추출 및 저장';
+    btn.disabled = false;
   }
+
+  function renderQuestionDB() {
+    const db = JSON.parse(localStorage.getItem('questionDB') || '[]');
+    const el = document.getElementById('question-db-list');
+    if (db.length === 0) {
+      el.innerHTML = '<div style="text-align:center;padding:40px;color:#aaa;">저장된 문제가 없어요!<br>PDF를 업로드해서 문제를 추출해보세요 😊</div>';
+      return;
+    }
+    el.innerHTML = db.slice().reverse().map((q, i) => `
+      <div class="q-card ${q.rubric ? 'has-rubric' : 'no-rubric'}">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+          <div style="flex:1;">
+            <div style="font-size:11px;color:#27ae60;font-weight:bold;margin-bottom:6px;">${q.subject}</div>
+            <div style="font-size:14px;color:#2c3e50;line-height:1.7;">${q.question.slice(0, 100)}${q.question.length > 100 ? '...' : ''}</div>
+            <div style="margin-top:8px;">
+              <span class="rubric-badge ${q.rubric ? 'yes' : 'no'}">
+                ${q.rubric ? '✅ 채점기준 있음' : '⚠️ 채점기준 없음 (AI 자동채점)'}
+              </span>
+            </div>
+            <div style="font-size:11px;color:#aaa;margin-top:4px;">${q.source} · ${q.createdAt}</div>
+          </div>
+          <button onclick="deleteQuestion('${q.id}')" style="font-size:11px;padding:4px 8px;border:1px solid #eee;background:white;color:#aaa;border-radius:6px;cursor:pointer;margin-left:8px;flex-shrink:0;">삭제</button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function deleteQuestion(id) {
+    let db = JSON.parse(localStorage.getItem('questionDB') || '[]');
+    db = db.filter(q => String(q.id) !== String(id));
+    localStorage.setItem('questionDB', JSON.stringify(db));
+    renderQuestionDB();
+    loadQuestionDB();
+  }
+
+  function clearQuestionDB() {
+    if (!confirm('저장된 문제를 전체 삭제할까요?')) return;
+    localStorage.removeItem('questionDB');
+    renderQuestionDB();
+    loadQuestionDB();
+  }
+
+  // ========== 모의고사 문제 선택 ==========
   function switchQTab(tab) {
     document.getElementById('q-input-saved').style.display = tab === 'saved' ? 'block' : 'none';
     document.getElementById('q-input-direct').style.display = tab === 'direct' ? 'block' : 'none';
@@ -939,41 +957,243 @@
   function loadQuestionDB() {
     const db = JSON.parse(localStorage.getItem('questionDB') || '[]');
     const select = document.getElementById('exam-question-select');
+    if (!select) return;
     select.innerHTML = '<option value="">-- 저장된 문제 선택 --</option>';
     db.forEach(q => {
       const opt = document.createElement('option');
-      opt.value = q.question;
+      opt.value = q.id;
       opt.textContent = `[${q.subject}] ${q.question.slice(0, 30)}...`;
       select.appendChild(opt);
     });
   }
 
-  // startExam 함수에서 question 가져오는 부분 수정
-  const _origStartExam = startExam;
-  function startExam() {
-    const savedQ = document.getElementById('exam-question-select')?.value;
-    const directQ = document.getElementById('exam-question')?.value;
-    const question = savedQ || directQ;
-    if (!question || !question.trim()) { alert('문제를 선택하거나 입력해주세요!'); return; }
-    // 직접입력 textarea에 값 세팅 후 기존 함수 호출
-    if (!document.getElementById('exam-question')) {
-      const ta = document.createElement('textarea');
-      ta.id = 'exam-question';
-      ta.value = question;
-      ta.style.display = 'none';
-      document.getElementById('exam-setup').appendChild(ta);
-    } else {
-      document.getElementById('exam-question').value = question;
-    }
-    _origStartExam();
+  function fillQuestion(val) {
+    const preview = document.getElementById('selected-question-preview');
+    if (!val) { preview.style.display = 'none'; return; }
+    const db = JSON.parse(localStorage.getItem('questionDB') || '[]');
+    const q = db.find(q => String(q.id) === String(val));
+    if (!q) return;
+    preview.innerHTML = `
+      <div style="font-size:14px;line-height:1.8;color:#2c3e50;">${q.question}</div>
+      <div style="margin-top:8px;">
+        <span class="rubric-badge ${q.rubric ? 'yes' : 'no'}" style="font-size:11px;padding:2px 8px;border-radius:20px;display:inline-block;">
+          ${q.rubric ? '✅ 채점기준 있음' : '⚠️ 채점기준 없음 (AI 자동채점)'}
+        </span>
+      </div>`;
+    preview.style.display = 'block';
   }
 
-  // 모의고사 탭 클릭 시 문제 DB 로드
-  document.querySelectorAll('.nav-menu a').forEach(a => {
-    a.addEventListener('click', () => {
-      if (a.textContent.includes('모의고사')) loadQuestionDB();
-    });
-  });
+  // ========== 모의고사 시작 (문제 ID로 가져오기) ==========
+  function startExam() {
+    let question = '';
+    let rubric = '';
+    let questionId = '';
+
+    const savedVal = document.getElementById('exam-question-select')?.value;
+    const directVal = document.getElementById('exam-question')?.value;
+
+    if (savedVal) {
+      const db = JSON.parse(localStorage.getItem('questionDB') || '[]');
+      const q = db.find(q => String(q.id) === String(savedVal));
+      if (q) { question = q.question; rubric = q.rubric || ''; questionId = q.id; }
+    } else if (directVal && directVal.trim()) {
+      question = directVal.trim();
+      rubric = '';
+    }
+
+    if (!question.trim()) { alert('문제를 선택하거나 입력해주세요!'); return; }
+
+    const subject = document.getElementById('exam-subject').value;
+    const minutes = parseInt(document.getElementById('exam-time').value);
+    remainSeconds = minutes * 60;
+
+    if (minutes === 25) totalPages = 5;
+    else if (minutes === 50) totalPages = 10;
+    else if (minutes === 75) totalPages = 15;
+    else totalPages = 20;
+
+    currentPage = 1;
+    allLines = {};
+
+    // 채점기준 임시 저장
+    window._currentRubric = rubric;
+    window._currentQuestion = question;
+
+    document.getElementById('exam-subject-display').textContent = subject;
+    document.getElementById('exam-question-display').textContent = question;
+    document.getElementById('total-pages').textContent = totalPages;
+    document.getElementById('current-page').textContent = 1;
+
+    document.getElementById('exam-setup').style.display = 'none';
+    document.getElementById('exam-room').style.display = 'block';
+
+    renderPage(1);
+    updateTimer();
+
+    timerInterval = setInterval(() => {
+      remainSeconds--;
+      updateTimer();
+      if (remainSeconds <= 0) {
+        clearInterval(timerInterval);
+        alert('⏰ 시간이 종료되었습니다!');
+        submitExam();
+      }
+    }, 1000);
+
+    document.addEventListener('keydown', handleKeyPage);
+  }
+
+  // ========== 답안 제출 및 채점 ==========
+  async function submitExam() {
+    clearInterval(timerInterval);
+    document.removeEventListener('keydown', handleKeyPage);
+
+    const question = document.getElementById('exam-question-display').textContent;
+    const answer = getAllAnswer();
+    const subject = document.getElementById('exam-subject-display').textContent;
+    const examMinutes = parseInt(document.getElementById('exam-time').value);
+    const rubric = window._currentRubric || '';
+
+    document.getElementById('exam-room').style.display = 'none';
+    document.getElementById('exam-result').style.display = 'block';
+    document.getElementById('exam-result-content').textContent = '⏳ AI 채점 중...';
+
+    const API_KEY = 'AIzaSyApB5J0IXoab-iYRyosBvdLkdTDeEWAW5I';
+
+    // 채점기준 있으면 사용, 없으면 AI 자동채점
+    const prompt = rubric
+      ? `당신은 노무사 2차 시험 전문 채점관입니다.
+
+과목: ${subject}
+문제: ${question}
+
+【강사 채점기준 및 채점평】
+${rubric}
+
+【수험생 답안】
+${answer}
+
+위 채점기준에 따라 엄격하게 채점해주세요.
+
+【출력 형식】
+총점: XX점 / 100점
+
+항목별 점수:
+(채점기준에 있는 항목별로 점수 부여)
+
+✅ 잘한 점:
+(구체적으로)
+
+❌ 누락된 내용:
+(채점기준 대비 빠진 내용)
+
+💡 개선 포인트:
+(구체적으로)
+
+📌 다음에 반드시 챙길 것 3가지:
+1.
+2.
+3.`
+
+      : `당신은 노무사 2차 시험 전문 채점관입니다.
+등록된 채점기준이 없으므로 노무사 2차 시험 수준에 맞게 채점해주세요.
+노무사 시험 전문 강사 교재 및 기출 채점 기준을 참고하여 채점합니다.
+
+과목: ${subject}
+문제: ${question}
+
+【수험생 답안】
+${answer}
+
+【채점 기준】
+- 쟁점 파악 (25점): 핵심 쟁점을 정확히 파악했는가
+- 법적 근거 인용 (30점): 관련 법조문/판례를 정확히 인용했는가
+- 논리적 전개 (25점): 논리적으로 체계적으로 서술했는가
+- 결론 명확성 (10점): 결론이 명확한가
+- 답안 형식·구조 (10점): 목차/들여쓰기 등 형식이 적절한가
+
+【출력 형식】
+⚠️ 채점기준 미등록 - AI 자동채점 결과입니다
+
+총점: XX점 / 100점
+
+항목별 점수:
+- 쟁점 파악: XX/25
+- 법적 근거 인용: XX/30
+- 논리적 전개: XX/25
+- 결론 명확성: XX/10
+- 답안 형식·구조: XX/10
+
+✅ 잘한 점:
+(구체적으로)
+
+❌ 누락된 쟁점:
+(구체적으로)
+
+💡 개선 포인트:
+(구체적으로)
+
+📌 다음에 반드시 챙길 것 3가지:
+1.
+2.
+3.`;
+
+    try {
+      const response = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${API_KEY}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: prompt }] }],
+            generationConfig: { maxOutputTokens: 4096 }
+          })
+        }
+      );
+      const data = await response.json();
+      const result = data.candidates[0].content.parts[0].text;
+      document.getElementById('exam-result-content').textContent = result;
+
+      // 점수 추출
+      const scoreMatch = result.match(/총점[:\s]*(\d+)점/);
+      const score = scoreMatch ? parseInt(scoreMatch[1]) : null;
+
+      // 기록 저장
+      const record = {
+        id: Date.now(),
+        date: new Date().toLocaleDateString('ko-KR'),
+        subject: subject,
+        question: question,
+        answer: answer,
+        score: score,
+        feedback: result,
+        minutes: examMinutes,
+        hasRubric: !!rubric
+      };
+      const history = JSON.parse(localStorage.getItem('examHistory') || '[]');
+      history.push(record);
+      localStorage.setItem('examHistory', JSON.stringify(history));
+      renderDashboard();
+
+    } catch(e) {
+      document.getElementById('exam-result-content').textContent = '❌ 채점 실패! 다시 시도해주세요.\n' + e.message;
+    }
+  }
+
+  function resetExam() {
+    document.removeEventListener('keydown', handleKeyPage);
+    document.getElementById('exam-result').style.display = 'none';
+    document.getElementById('exam-setup').style.display = 'block';
+    allLines = {};
+    currentPage = 1;
+    window._currentRubric = '';
+    window._currentQuestion = '';
+  }
+
+  // 페이지 로드시 실행
+  renderQuestionDB();
+  loadQuestionDB();
+ 
 
 </script>
 </body>
