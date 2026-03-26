@@ -853,11 +853,24 @@ ${rText ? `[채점기준/채점평 자료]\n${rText}` : ''}
       const data = await response.json();
       const result = data.candidates[0].content.parts[0].text;
 
-      // JSON 추출
-      const jsonMatch = result.match(/$$$[\s\S]*$$$/);
+      // JSON 추출 (```json ``` 제거 후 파싱)
+      let cleaned = result
+        .replace(/```json/gi, '')
+        .replace(/```/g, '')
+        .trim();
+
+      const jsonMatch = cleaned.match(/$$$[\s\S]*$$$/);
       if (!jsonMatch) throw new Error('JSON 파싱 실패');
 
-      const questions = JSON.parse(jsonMatch[0]);
+      // 잘린 JSON 복구 시도
+      let jsonStr = jsonMatch[0];
+      try {
+        var questions = JSON.parse(jsonStr);
+      } catch(e) {
+        // 마지막 불완전한 객체 제거 후 재시도
+        jsonStr = jsonStr.replace(/,\s*\{[^}]*$/, '') + ']';
+        var questions = JSON.parse(jsonStr);
+      }
 
       // 저장
       const db = JSON.parse(localStorage.getItem('questionDB') || '[]');
