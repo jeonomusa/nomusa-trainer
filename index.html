@@ -65,8 +65,7 @@
 
   <div id="loading-overlay">
     <div class="spinner"></div>
-    <div id="loading-text" class="text-lg font-bold text-slate-700">AI 채점관이 답안을 분석 중입니다...</div>
-    <div class="text-xs text-gray-400 mt-2">약 10~20초 소요될 수 있습니다.</div>
+    <div id="loading-text" class="text-lg font-bold text-slate-700">처리 중입니다...</div>
   </div>
 
   <div id="message-box"></div>
@@ -85,7 +84,7 @@
       <button class="desktop-nav-btn" id="d-nav-exam" onclick="navigate('exam')">모의고사</button>
       <button class="desktop-nav-btn" id="d-nav-settings" onclick="navigate('settings')">설정</button>
     </nav>
-    <div class="text-[10px] font-bold text-slate-400 uppercase tracking-widest bg-slate-800 px-3 py-1 rounded-full hidden md:block">
+    <div id="header-auth-status" class="text-[10px] font-bold text-slate-400 uppercase tracking-widest bg-slate-800 px-3 py-1 rounded-full hidden md:block transition-colors">
       Mode: Local Storage
     </div>
   </header>
@@ -312,7 +311,7 @@
             </div>
             
             <!-- 실제 퀴즈 영역 -->
-            <div id="quiz-lines" class="text-[15px] leading-loose text-slate-700 font-medium mb-8">
+            <div id="quiz-lines" class="text-[15px] leading-loose text-slate-700 font-medium mb-8 overflow-x-auto pb-4">
                <!-- JS Rendered lines -->
             </div>
 
@@ -462,20 +461,49 @@
       </div>
     </div>
 
-    <!-- 8. 설정 -->
+    <!-- 8. 설정 및 Firebase 로그인 -->
     <div id="page-settings" class="page-content">
       <h2 class="text-2xl font-extrabold text-slate-800 mb-6 flex items-center gap-2"><i class="ri-settings-4-line"></i> 시스템 설정</h2>
       <div class="max-w-xl mx-auto space-y-6">
+        
+        <!-- 동기화 (Firebase Auth) 섹션 -->
+        <div class="neo-card p-8 border-2 border-blue-100 bg-blue-50/30">
+          <h3 class="font-bold text-blue-700 mb-2 flex items-center gap-2"><i class="ri-cloud-windy-line"></i> 클라우드 동기화</h3>
+          <p class="text-xs text-gray-500 mb-4 leading-relaxed">구글 계정으로 로그인하면 PC와 모바일 기기 간에 학습 데이터가 실시간으로 동기화됩니다.</p>
+          
+          <div class="flex items-center justify-between mb-4 bg-white p-4 rounded-xl border border-blue-100">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center text-slate-500">
+                <i class="ri-user-3-fill text-xl"></i>
+              </div>
+              <div>
+                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">현재 상태</p>
+                <p class="text-sm font-bold text-slate-800" id="auth-status">로컬 모드 (로그인 안됨)</p>
+              </div>
+            </div>
+          </div>
+          
+          <button id="login-btn" onclick="window.loginWithGoogle()" class="w-full py-3 bg-white border border-gray-300 text-gray-700 font-bold rounded-xl hover:bg-gray-50 flex justify-center items-center gap-2 shadow-sm transition-all">
+            <svg class="w-5 h-5" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/><path fill="none" d="M1 1h22v22H1z"/></svg>
+            구글로 로그인
+          </button>
+          
+          <button id="logout-btn" onclick="window.logoutGoogle()" class="w-full py-3 bg-slate-100 text-slate-600 font-bold rounded-xl hover:bg-slate-200 flex justify-center items-center gap-2 shadow-sm transition-all hidden">
+            로그아웃
+          </button>
+        </div>
+
         <div class="neo-card p-8 border-2 border-emerald-100 bg-emerald-50/30">
           <h3 class="font-bold text-emerald-700 mb-2 flex items-center gap-2"><i class="ri-key-2-line"></i> Gemini API 키 설정 (필수)</h3>
           <p class="text-xs text-gray-500 mb-4 leading-relaxed">로컬 환경에서 AI 기능을 사용하려면 무료 API 키가 필요합니다.<br>
-            <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-blue-500 underline">여기서 발급</a>받아 입력해주세요. 데이터는 브라우저에만 저장됩니다.
+            <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-emerald-600 font-bold underline">여기서 발급</a>받아 입력해주세요. 데이터는 안전하게 보관됩니다.
           </p>
           <div class="flex gap-2">
             <input type="password" id="api-key-input" class="flex-1 bg-white p-3 rounded-xl border border-emerald-200 outline-none text-sm font-mono" placeholder="AIzaSy...">
             <button onclick="saveApiKey()" class="px-6 bg-emerald-500 text-white font-bold rounded-xl hover:bg-emerald-600">저장</button>
           </div>
         </div>
+        
         <div class="neo-card p-8">
           <h3 class="font-bold text-slate-800 mb-4">학습 데이터 관리</h3>
           <div class="space-y-3">
@@ -496,7 +524,6 @@
 
   </main>
 
-  <!-- 하단 모바일 네비게이션 (스크롤 적용) -->
   <div class="fixed bottom-0 left-0 right-0 h-20 bg-white border-t border-gray-100 flex md:hidden items-center justify-start overflow-x-auto px-2 z-50">
     <button class="nav-btn active" id="m-nav-dashboard" onclick="navigate('dashboard')"><i class="ri-dashboard-line text-xl"></i><span class="text-[10px]">홈</span></button>
     <button class="nav-btn" id="m-nav-convert" onclick="navigate('convert')"><i class="ri-robot-line text-xl"></i><span class="text-[10px]">변환</span></button>
@@ -529,10 +556,9 @@
       const saved = localStorage.getItem('nomusa_db_v4');
       if (saved) {
         db = JSON.parse(saved);
-        if(!db.outlines) db.outlines = []; // 이전 버전 호환
+        if(!db.outlines) db.outlines = [];
       }
 
-      // 샘플 목차 데이터 주입 (최초 1회)
       if (db.outlines.length === 0) {
         db.outlines.push({
           id: 'sample-1', subject: '민사소송법', title: '변론관할(b)',
@@ -548,7 +574,11 @@
       renderDashboard();
     };
 
-    function saveDB() { localStorage.setItem('nomusa_db_v4', JSON.stringify(db)); }
+    function saveDB() { 
+      localStorage.setItem('nomusa_db_v4', JSON.stringify(db)); 
+      // 클라우드 동기화 트리거 (Firebase 모듈에서 정의됨)
+      if (window.triggerCloudSave) window.triggerCloudSave();
+    }
     
     function navigate(id) {
       document.querySelectorAll('.page-content').forEach(p => p.classList.remove('active'));
@@ -572,21 +602,12 @@
       }
     }
 
-    function showLoading(msg) { 
-      document.getElementById('loading-text').textContent = msg; 
-      document.getElementById('loading-overlay').style.display = 'flex'; 
-    }
+    function showLoading(msg) { document.getElementById('loading-text').textContent = msg; document.getElementById('loading-overlay').style.display = 'flex'; }
     function hideLoading() { document.getElementById('loading-overlay').style.display = 'none'; }
-    
     function showMsg(text) { 
       const box = document.getElementById('message-box'); 
-      if (box) {
-        box.textContent = text; 
-        box.style.display = 'block'; 
-        setTimeout(() => box.style.display = 'none', 3000); 
-      } else {
-        alert(text); 
-      }
+      if (box) { box.textContent = text; box.style.display = 'block'; setTimeout(() => box.style.display = 'none', 3000); } 
+      else { alert(text); }
     }
     
     function getToday() { const d = new Date(); d.setHours(0,0,0,0); return d.toISOString().split('T')[0]; }
@@ -603,17 +624,13 @@
     }
 
     // ==========================================
-    // 3. Gemini API 호출
+    // 3. Gemini API
     // ==========================================
     async function callGemini(prompt, schema, images = []) {
       const key = getApiKey();
       const url = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${key}`;
-      
       let parts = [{ text: prompt }];
-      if (images && images.length > 0) {
-        images.slice(0, 3).forEach(imgData => { parts.push({ inlineData: { mimeType: "image/jpeg", data: imgData } }); });
-      }
-
+      if (images && images.length > 0) { images.slice(0, 3).forEach(imgData => { parts.push({ inlineData: { mimeType: "image/jpeg", data: imgData } }); }); }
       const payload = { contents: [{ parts: parts }], generationConfig: { responseMimeType: "application/json", responseSchema: schema } };
 
       for (let i = 0; i <= 3; i++) {
@@ -624,8 +641,7 @@
             throw new Error(`HTTP ${res.status}`);
           }
           const data = await res.json();
-          const rawText = data.candidates[0].content.parts[0].text;
-          return parseJSON(rawText);
+          return parseJSON(data.candidates[0].content.parts[0].text);
         } catch (err) {
           if (i === 3) throw err;
           await new Promise(r => setTimeout(r, 1000 * Math.pow(2, i)));
@@ -652,7 +668,7 @@
       const today = getToday();
       if (db.lastStudyDate === today) return;
       const yesterday = new Date(); yesterday.setDate(yesterday.getDate() - 1);
-      if (db.lastStudyDate === yesterday.toISOString().split('T')[0]) { /* 유지 상태 */ } 
+      if (db.lastStudyDate === yesterday.toISOString().split('T')[0]) { /* 유지 */ } 
       else if (db.lastStudyDate !== null) db.streak = 0;
       saveDB();
     }
@@ -668,7 +684,7 @@
       }
     }
 
-    function renderDashboard() {
+    window.renderDashboard = function() {
       const target = new Date('2026-08-29');
       const diff = Math.ceil((target - new Date().setHours(0,0,0,0)) / (1000*60*60*24));
       document.getElementById('d-day-val').textContent = `D-${diff}`;
@@ -689,7 +705,7 @@
           <td class="py-3 px-2 text-right"><button onclick="viewHistory(${h.id})" class="px-3 py-1 bg-emerald-50 text-emerald-600 text-[10px] font-bold rounded hover:bg-emerald-500 hover:text-white transition-all">결과 보기</button></td>
         </tr>
       `).join('');
-    }
+    };
 
     function viewHistory(id) {
       const record = db.history.find(h => String(h.id) === String(id));
@@ -710,7 +726,7 @@
     }
 
     // ==========================================
-    // 5. 판례 검색 (AI 기반)
+    // 5. 판례 검색
     // ==========================================
     async function searchLawDB() {
       const kw = document.getElementById('law-search-input').value;
@@ -727,7 +743,7 @@
     }
 
     // ==========================================
-    // 6. AI 자료 변환 (PDF)
+    // 6. AI 자료 변환
     // ==========================================
     function handleFileDisplay(type) {
       const file = document.getElementById('file-'+type).files[0];
@@ -775,19 +791,15 @@
           });
           saveDB(); showMsg(`✅ 암기 카드 ${res.length}장 생성!`);
         }
-        
       } catch(e) { showMsg('변환 실패: ' + e.message); }
       finally { hideLoading(); }
     }
 
     // ==========================================
-    // 7. 플래시카드 (SM-2 망각곡선)
+    // 7. 플래시카드
     // ==========================================
-    let dueCards = []; let currentCard = null;
-
     function toggleManualCardForm() {
-      const form = document.getElementById('manual-card-form');
-      form.classList.toggle('hidden');
+      document.getElementById('manual-card-form').classList.toggle('hidden');
     }
 
     function addManualFlashcard() {
@@ -795,34 +807,17 @@
       const front = document.getElementById('manual-fc-front').value.trim();
       const back = document.getElementById('manual-fc-back').value.trim();
 
-      if (!front || !back) {
-        showMsg('⚠️ 앞면(질문)과 뒷면(정답)을 모두 입력해주세요.');
-        return;
-      }
+      if (!front || !back) { showMsg('⚠️ 앞면과 뒷면을 모두 입력해주세요.'); return; }
 
-      const card = {
-        id: Date.now() + Math.random(),
-        subject: subject,
-        front: front,
-        back: back,
-        repetition: 0,
-        interval: 0,
-        efactor: 2.5,
-        nextReview: getToday()
-      };
-
-      db.flashcards.push(card);
+      db.flashcards.push({ id: Date.now() + Math.random(), subject, front, back, repetition: 0, interval: 0, efactor: 2.5, nextReview: getToday() });
       saveDB();
-
-      document.getElementById('manual-fc-front').value = '';
-      document.getElementById('manual-fc-back').value = '';
-
+      document.getElementById('manual-fc-front').value = ''; document.getElementById('manual-fc-back').value = '';
       showMsg('✅ 새 플래시카드가 추가되었습니다!');
       toggleManualCardForm();
       renderDueFlashcards();
     }
 
-    function renderDueFlashcards() {
+    window.renderDueFlashcards = function() {
       const today = getToday();
       dueCards = db.flashcards.filter(c => c.nextReview <= today);
       document.getElementById('fc-due-display').textContent = dueCards.length;
@@ -835,7 +830,7 @@
         document.getElementById('fc-workspace').classList.add('hidden');
         document.getElementById('fc-empty').classList.remove('hidden');
       }
-    }
+    };
 
     function loadNextCard() {
       if (dueCards.length === 0) { renderDueFlashcards(); return; }
@@ -847,9 +842,7 @@
       document.getElementById('fc-front-text').textContent = currentCard.front || '';
       document.getElementById('fc-back-text').textContent = currentCard.back || '';
 
-      let e = currentCard.efactor || 2.5;
-      let r = currentCard.repetition || 0;
-      let iv = currentCard.interval || 0;
+      let e = currentCard.efactor || 2.5; let r = currentCard.repetition || 0; let iv = currentCard.interval || 0;
       let nextGood = r === 0 ? 1 : r === 1 ? 6 : Math.round(iv * e);
       let nextEasy = r === 0 ? 4 : Math.round(iv * e * 1.3);
       document.getElementById('fc-btn-good').textContent = nextGood + "일 후";
@@ -863,18 +856,12 @@
 
     function rateCard(rating) {
       let q = rating === 1 ? 0 : rating === 2 ? 3 : rating === 3 ? 4 : 5;
-      let r = currentCard.repetition || 0;
-      let iv = currentCard.interval || 0;
-      let e = currentCard.efactor || 2.5;
+      let r = currentCard.repetition || 0; let iv = currentCard.interval || 0; let e = currentCard.efactor || 2.5;
 
       if (q >= 3) {
-        if (r === 0) iv = (q === 4 ? 4 : 1);
-        else if (r === 1) iv = 6;
-        else iv = Math.round(iv * e * (q === 4 ? 1.3 : 1));
+        if (r === 0) iv = (q === 4 ? 4 : 1); else if (r === 1) iv = 6; else iv = Math.round(iv * e * (q === 4 ? 1.3 : 1));
         r++;
-      } else {
-        r = 0; iv = (rating === 2 ? 0.5 : 0);
-      }
+      } else { r = 0; iv = (rating === 2 ? 0.5 : 0); }
 
       e = e + (0.1 - (5 - q) * (0.08 + (5 - q) * 0.02));
       if (e < 1.3) e = 1.3;
@@ -890,78 +877,53 @@
 
       const idx = db.flashcards.findIndex(c => c.id === currentCard.id);
       if (idx > -1) db.flashcards[idx] = currentCard;
-      saveDB();
-      markStudiedToday();
-
-      dueCards.shift();
-      if (rating === 1) dueCards.push(currentCard);
+      saveDB(); markStudiedToday();
+      dueCards.shift(); if (rating === 1) dueCards.push(currentCard);
       loadNextCard();
     }
 
     // ==========================================
-    // 7.5 빈칸 채우기 (목차 암기)
+    // 7.5 빈칸 채우기
     // ==========================================
-    function toggleOutlineAdder() {
-      const form = document.getElementById('outline-adder');
-      form.classList.toggle('hidden');
-    }
+    function toggleOutlineAdder() { document.getElementById('outline-adder').classList.toggle('hidden'); }
 
     function saveOutline() {
       const subject = document.getElementById('outline-subject').value;
       const title = document.getElementById('outline-title').value.trim();
       const content = document.getElementById('outline-content').value.trim();
-
       if (!title || !content) { showMsg("제목과 내용을 모두 입력해주세요."); return; }
-
-      const newOutline = { id: Date.now() + Math.random(), subject, title, content };
-      db.outlines.push(newOutline);
+      db.outlines.push({ id: Date.now() + Math.random(), subject, title, content });
       saveDB();
-
-      document.getElementById('outline-title').value = '';
-      document.getElementById('outline-content').value = '';
-      toggleOutlineAdder();
-      renderOutlineList();
-      showMsg("새 목차가 등록되었습니다.");
+      document.getElementById('outline-title').value = ''; document.getElementById('outline-content').value = '';
+      toggleOutlineAdder(); renderOutlineList(); showMsg("새 목차가 등록되었습니다.");
     }
 
-    function renderOutlineList() {
+    window.renderOutlineList = function() {
       const container = document.getElementById('outline-list');
-      if (!db.outlines || db.outlines.length === 0) {
-        container.innerHTML = '<p class="col-span-2 text-center text-gray-400 py-10">등록된 목차가 없습니다.</p>';
-        return;
-      }
-
+      if (!db.outlines || db.outlines.length === 0) { container.innerHTML = '<p class="col-span-2 text-center text-gray-400 py-10">등록된 목차가 없습니다.</p>'; return; }
       container.innerHTML = db.outlines.map(o => `
         <div class="p-6 bg-white border border-gray-200 rounded-xl shadow-sm flex flex-col justify-between hover:border-emerald-500 transition-all">
-          <div>
-            <span class="text-[10px] font-bold text-emerald-500 bg-emerald-50 px-2 py-1 rounded-full">${o.subject}</span>
-            <h4 class="font-extrabold text-slate-800 text-lg mt-3 mb-2">${o.title}</h4>
-          </div>
+          <div><span class="text-[10px] font-bold text-emerald-500 bg-emerald-50 px-2 py-1 rounded-full">${o.subject}</span><h4 class="font-extrabold text-slate-800 text-lg mt-3 mb-2">${o.title}</h4></div>
           <div class="flex justify-end gap-2 mt-4">
             <button onclick="deleteOutline('${o.id}')" class="px-3 py-1.5 border border-red-100 text-red-500 rounded-lg text-xs font-bold hover:bg-red-50">삭제</button>
             <button onclick="startBlankQuiz('${o.id}')" class="px-4 py-1.5 bg-emerald-500 text-white rounded-lg text-xs font-bold hover:bg-emerald-600 shadow-sm">퀴즈 시작</button>
           </div>
         </div>
       `).join('');
-    }
+    };
 
     function deleteOutline(id) {
       if(!confirm("삭제하시겠습니까?")) return;
-      db.outlines = db.outlines.filter(o => String(o.id) !== String(id));
-      saveDB();
-      renderOutlineList();
+      db.outlines = db.outlines.filter(o => String(o.id) !== String(id)); saveDB(); renderOutlineList();
     }
 
     function startBlankQuiz(id) {
       blankState.outline = db.outlines.find(o => String(o.id) === String(id));
       if(!blankState.outline) return;
-
       document.getElementById('blank-list-view').classList.add('hidden');
       document.getElementById('blank-quiz-view').classList.remove('hidden');
-      
       document.getElementById('quiz-subject').textContent = blankState.outline.subject;
       document.getElementById('quiz-title').textContent = blankState.outline.title;
-
       generateBlankQuiz();
     }
 
@@ -973,54 +935,26 @@
     function generateBlankQuiz() {
       const level = document.getElementById('quiz-level').value;
       const lines = blankState.outline.content.split('\n');
-      
-      // 번호 접두사와 내용을 분리하는 정규식 (I., 1., (1), ① 등 매칭)
       const regex = /^([\s]*[IVX]+\.|[\s]*\d+\.|[\s]*\(\d+\)|[\s]*[①-⑨])(.*)$/;
       
       let parsedLines = lines.map((line, idx) => {
-        let prefix = '';
-        let content = line;
+        let prefix = ''; let content = line;
         const match = line.match(regex);
-        
-        if (match) {
-          prefix = match[1];
-          content = match[2].trim();
-        } else {
-          // 접두사가 없으면 앞의 들여쓰기 공백만 분리
-          const spaceMatch = line.match(/^(\s*)(.*)$/);
-          if (spaceMatch) {
-            prefix = spaceMatch[1];
-            content = spaceMatch[2];
-          }
-        }
+        if (match) { prefix = match[1]; content = match[2].trim(); } 
+        else { const spaceMatch = line.match(/^(\s*)(.*)$/); if (spaceMatch) { prefix = spaceMatch[1]; content = spaceMatch[2]; } }
         return { id: idx, original: line, prefix, content, isBlank: false };
       });
 
       let candidates = parsedLines.filter(l => l.content.length > 0);
+      if (level === 'all') candidates.forEach(l => l.isBlank = true);
+      else if (level === '50') { candidates.sort(() => Math.random() - 0.5); candidates.slice(0, Math.ceil(candidates.length / 2)).forEach(l => l.isBlank = true); }
+      else if (level === '30') { candidates.sort(() => Math.random() - 0.5); candidates.slice(0, Math.ceil(candidates.length * 0.3)).forEach(l => l.isBlank = true); }
+      else if (level === 'main') candidates.forEach(l => { if (l.prefix.match(/[IVX]+\.|\d+\./)) l.isBlank = true; });
 
-      if (level === 'all') {
-        candidates.forEach(l => l.isBlank = true);
-      } else if (level === '50') {
-        candidates.sort(() => Math.random() - 0.5);
-        candidates.slice(0, Math.ceil(candidates.length / 2)).forEach(l => l.isBlank = true);
-      } else if (level === '30') {
-        candidates.sort(() => Math.random() - 0.5);
-        candidates.slice(0, Math.ceil(candidates.length * 0.3)).forEach(l => l.isBlank = true);
-      } else if (level === 'main') {
-        // 대목차 (I. 또는 1. 으로 시작하는 것만 빈칸)
-        candidates.forEach(l => {
-          if (l.prefix.match(/[IVX]+\.|\d+\./)) l.isBlank = true;
-        });
-      }
-
-      // 원래 순서대로 복원
       parsedLines.sort((a,b) => a.id - b.id);
-      
       blankState.lines = parsedLines;
       blankState.answers = parsedLines.filter(l => l.isBlank).map(l => l.content);
-      // 단어 풀 생성을 위해 정답 셔플
       blankState.answers.sort(() => Math.random() - 0.5); 
-
       renderBlankQuizRoom();
     }
 
@@ -1028,17 +962,12 @@
       const container = document.getElementById('quiz-lines');
       container.innerHTML = '';
 
-      // 모든 빈칸 중 가장 긴 정답의 글자 수 계산 (길이로 힌트를 얻지 못하도록 통일)
       const blankLines = blankState.lines.filter(l => l.isBlank);
-      const maxCharLen = blankLines.length > 0
-        ? Math.max(...blankLines.map(l => l.content.length))
-        : 15;
-      // 최소 15자 이상의 너비로 일괄 통일
+      const maxCharLen = blankLines.length > 0 ? Math.max(...blankLines.map(l => l.content.length)) : 15;
       const uniformWidth = `calc(${Math.max(maxCharLen, 15)}ch + 32px)`;
 
       blankState.lines.forEach(line => {
         const row = document.createElement('div');
-        // 들여쓰기 유지를 위해 whitespace-pre 속성 적용
         row.className = "mb-3 whitespace-pre flex items-center"; 
         
         const prefixSpan = document.createElement('span');
@@ -1048,45 +977,26 @@
 
         if (line.isBlank) {
           const input = document.createElement('input');
-          input.type = "text";
-          input.className = "blank-input";
-          input.dataset.answer = line.content;
-          
-          // 정답 길이에 상관없이 가장 긴 빈칸에 맞춰 너비 통일 (힌트 방지 및 글자 잘림 방지)
+          input.type = "text"; input.className = "blank-input"; input.dataset.answer = line.content;
           input.style.width = uniformWidth;
           
-          // 포커스 될 때마다 활성 인풋 기록 (단어 풀 입력을 위해) 및 초기화
-          input.addEventListener('focus', (e) => {
-            blankState.activeInput = e.target;
-            e.target.classList.remove('correct', 'wrong');
-          });
-          
-          input.addEventListener('input', (e) => {
-            e.target.classList.remove('correct', 'wrong');
-          });
-          
+          input.addEventListener('focus', (e) => { blankState.activeInput = e.target; e.target.classList.remove('correct', 'wrong'); });
+          input.addEventListener('input', (e) => { e.target.classList.remove('correct', 'wrong'); });
           row.appendChild(input);
         } else {
-          const contentSpan = document.createElement('span');
-          contentSpan.textContent = line.content;
-          row.appendChild(contentSpan);
+          const contentSpan = document.createElement('span'); contentSpan.textContent = line.content; row.appendChild(contentSpan);
         }
-        
         container.appendChild(row);
       });
 
-      // 단어장 (Word Bank) 렌더링
       const bankContainer = document.getElementById('quiz-word-bank');
       bankContainer.innerHTML = '';
       blankState.answers.forEach(ans => {
-        const chip = document.createElement('div');
-        chip.className = "word-chip";
-        chip.textContent = ans;
+        const chip = document.createElement('div'); chip.className = "word-chip"; chip.textContent = ans;
         chip.onclick = () => fillWordChip(ans);
         bankContainer.appendChild(chip);
       });
 
-      // 포커스 초기화
       blankState.activeInput = null;
       const firstInput = document.querySelector('.blank-input');
       if(firstInput) firstInput.focus();
@@ -1095,81 +1005,42 @@
     function fillWordChip(word) {
       if (blankState.activeInput) {
         blankState.activeInput.value = word;
-        blankState.activeInput.classList.remove('correct', 'wrong'); // 값 덮어쓰면 오답 상태 초기화
-        
-        // 다음 빈칸으로 자동 포커스 이동
+        blankState.activeInput.classList.remove('correct', 'wrong');
         const inputs = Array.from(document.querySelectorAll('.blank-input'));
-        const currentIndex = inputs.indexOf(blankState.activeInput);
-        
-        // 아직 비어있는 다음 칸 찾기
-        const nextEmpty = inputs.slice(currentIndex + 1).find(i => !i.value) || inputs.find(i => !i.value);
-        if (nextEmpty) {
-          nextEmpty.focus();
-        }
-      } else {
-        showMsg("먼저 채워넣을 빈칸을 터치(클릭)해주세요.");
-      }
+        const nextEmpty = inputs.slice(inputs.indexOf(blankState.activeInput) + 1).find(i => !i.value) || inputs.find(i => !i.value);
+        if (nextEmpty) nextEmpty.focus();
+      } else { showMsg("먼저 채워넣을 빈칸을 터치(클릭)해주세요."); }
     }
 
     function checkBlankAnswers() {
       const inputs = document.querySelectorAll('.blank-input');
       let correctCount = 0;
-
       inputs.forEach(input => {
-        const actual = input.dataset.answer.replace(/\s+/g, ''); // 공백 무시 비교
-        const user = input.value.replace(/\s+/g, '');
-        
-        if (actual === user) {
-          input.classList.add('correct');
-          input.classList.remove('wrong');
-          input.placeholder = '';
-          correctCount++;
-        } else {
-          input.classList.add('wrong');
-          input.classList.remove('correct');
-          // 오답인 경우 값을 비우고 placeholder를 띄우면 사용자가 입력된 것으로 착각할 수 있으므로
-          // 입력값을 유지한 채로 스타일만 붉은색으로 표기하여 재수정 유도
-          if (!input.value) {
-            input.placeholder = "?";
-          }
-        }
+        const actual = input.dataset.answer.replace(/\s+/g, ''); const user = input.value.replace(/\s+/g, '');
+        if (actual === user) { input.classList.add('correct'); input.classList.remove('wrong'); input.placeholder = ''; correctCount++; } 
+        else { input.classList.add('wrong'); input.classList.remove('correct'); if (!input.value) input.placeholder = "?"; }
       });
-
-      if (correctCount === inputs.length) {
-        showMsg("🎉 완벽합니다! 모두 맞혔습니다!");
-        markStudiedToday();
-      } else {
-        showMsg(`${inputs.length}개 중 ${correctCount}개 정답입니다. 붉은 칸을 다시 확인하세요!`);
-      }
+      if (correctCount === inputs.length) { showMsg("🎉 완벽합니다! 모두 맞혔습니다!"); markStudiedToday(); } 
+      else { showMsg(`${inputs.length}개 중 ${correctCount}개 정답입니다. 붉은 칸을 다시 확인하세요!`); }
     }
 
-
     // ==========================================
-    // 8. 실전 모의고사 (40자 제한 답안지)
+    // 8. 실전 모의고사
     // ==========================================
-    function updateExamQList() {
+    window.updateExamQList = function() {
       const sub = document.getElementById('exam-subject').value;
       const sel = document.getElementById('exam-question-select');
       sel.innerHTML = '<option value="">직접 입력하기</option>';
-      db.questions
-        .filter(q => q.subject === sub)
-        .forEach(q => {
-          const opt = document.createElement('option');
-          opt.value = String(q.id);
-          opt.textContent = `[추출] ${q.question.substring(0, 30)}...`;
-          sel.appendChild(opt);
-        });
+      db.questions.filter(q => q.subject === sub).forEach(q => {
+        const opt = document.createElement('option'); opt.value = String(q.id); opt.textContent = `[추출] ${q.question.substring(0, 30)}...`; sel.appendChild(opt);
+      });
       previewQuestion();
-    }
+    };
 
     function previewQuestion() {
       const id = document.getElementById('exam-question-select').value;
-      if (id) {
-        const q = db.questions.find(x => String(x.id) === String(id));
-        if (q) document.getElementById('exam-direct-q').value = q.question;
-      } else {
-        document.getElementById('exam-direct-q').value = '';
-      }
+      if (id) { const q = db.questions.find(x => String(x.id) === String(id)); if (q) document.getElementById('exam-direct-q').value = q.question; } 
+      else { document.getElementById('exam-direct-q').value = ''; }
     }
 
     function startExam() {
@@ -1180,52 +1051,27 @@
       let rubric = '';
 
       if (!qText) { showMsg("문제를 입력해주세요."); return; }
-      if (id) {
-        const q = db.questions.find(x => String(x.id) === String(id));
-        if (q) rubric = q.rubric;
-      }
+      if (id) { const q = db.questions.find(x => String(x.id) === String(id)); if (q) rubric = q.rubric; }
 
       if (examState.timer) clearInterval(examState.timer);
+      examState = { subject: sub, question: qText, rubric: rubric, time: time, seconds: time * 60, totalPage: Math.floor(time / 5), currPage: 1, answers: {}, timer: null };
 
-      examState = {
-        subject: sub, question: qText, rubric: rubric,
-        time: time, seconds: time * 60,
-        totalPage: Math.floor(time / 5), currPage: 1, answers: {}, timer: null
-      };
-
-      document.getElementById('room-subject').textContent = sub;
-      document.getElementById('room-q-preview').textContent = qText;
-      document.getElementById('room-q-full').textContent = qText;
-      document.getElementById('room-total-page').textContent = examState.totalPage;
+      document.getElementById('room-subject').textContent = sub; document.getElementById('room-q-preview').textContent = qText;
+      document.getElementById('room-q-full').textContent = qText; document.getElementById('room-total-page').textContent = examState.totalPage;
       document.getElementById('char-count').textContent = '0';
+      document.getElementById('exam-setup').style.display = 'none'; document.getElementById('exam-room').style.display = 'block';
 
-      document.getElementById('exam-setup').style.display = 'none';
-      document.getElementById('exam-room').style.display = 'block';
-
-      renderAnswerSheet();
-      updateTimerDisplay();
-
+      renderAnswerSheet(); updateTimerDisplay();
       examState.timer = setInterval(() => {
-        examState.seconds--;
-        updateTimerDisplay();
-        if (examState.seconds <= 0) {
-          clearInterval(examState.timer);
-          showMsg("⏰ 시간이 종료되었습니다! 자동 제출합니다.");
-          submitExam(true);
-        }
+        examState.seconds--; updateTimerDisplay();
+        if (examState.seconds <= 0) { clearInterval(examState.timer); showMsg("⏰ 시간이 종료되었습니다! 자동 제출합니다."); submitExam(true); }
       }, 1000);
     }
 
     function updateTimerDisplay() {
-      const m = Math.floor(examState.seconds / 60).toString().padStart(2, '0');
-      const s = (examState.seconds % 60).toString().padStart(2, '0');
-      const el = document.getElementById('timer');
-      el.textContent = `${m}:${s}`;
-      if (examState.seconds < 300) {
-        el.classList.add('text-rose-500');
-      } else {
-        el.classList.remove('text-rose-500');
-      }
+      const m = Math.floor(examState.seconds / 60).toString().padStart(2, '0'); const s = (examState.seconds % 60).toString().padStart(2, '0');
+      const el = document.getElementById('timer'); el.textContent = `${m}:${s}`;
+      if (examState.seconds < 300) el.classList.add('text-rose-500'); else el.classList.remove('text-rose-500');
     }
 
     function renderAnswerSheet() {
@@ -1233,34 +1079,14 @@
       container.innerHTML = '';
 
       for (let i = 1; i <= LINES_PER_PAGE; i++) {
-        const key = `${examState.currPage}-${i}`;
-        const savedVal = examState.answers[key] || '';
-        const row = document.createElement('div');
-        row.className = 'answer-row';
-
-        const numDiv = document.createElement('div');
-        numDiv.className = 'row-num';
-        numDiv.textContent = i;
-
-        const wrapDiv = document.createElement('div');
-        wrapDiv.className = 'row-input-wrapper';
-
-        const input = document.createElement('input');
-        input.type = 'text';
-        input.className = 'row-input';
-        input.maxLength = MAX_CHARS_PER_LINE;
-        input.dataset.key = key;
-        input.value = savedVal;
-
-        const indicator = document.createElement('span');
-        indicator.className = 'char-indicator';
-        indicator.textContent = `${savedVal.length}/${MAX_CHARS_PER_LINE}`;
-
-        wrapDiv.appendChild(input);
-        wrapDiv.appendChild(indicator);
-        row.appendChild(numDiv);
-        row.appendChild(wrapDiv);
-        container.appendChild(row);
+        const key = `${examState.currPage}-${i}`; const savedVal = examState.answers[key] || '';
+        const row = document.createElement('div'); row.className = 'answer-row';
+        const numDiv = document.createElement('div'); numDiv.className = 'row-num'; numDiv.textContent = i;
+        const wrapDiv = document.createElement('div'); wrapDiv.className = 'row-input-wrapper';
+        const input = document.createElement('input'); input.type = 'text'; input.className = 'row-input'; input.maxLength = MAX_CHARS_PER_LINE; input.dataset.key = key; input.value = savedVal;
+        const indicator = document.createElement('span'); indicator.className = 'char-indicator'; indicator.textContent = `${savedVal.length}/${MAX_CHARS_PER_LINE}`;
+        
+        wrapDiv.appendChild(input); wrapDiv.appendChild(indicator); row.appendChild(numDiv); row.appendChild(wrapDiv); container.appendChild(row);
       }
 
       document.getElementById('room-curr-page').textContent = examState.currPage;
@@ -1268,53 +1094,27 @@
       const inputs = container.querySelectorAll('.row-input');
       inputs.forEach((input, idx) => {
         input.addEventListener('input', (e) => {
-          const val = e.target.value;
-          examState.answers[e.target.dataset.key] = val;
-          const ind = e.target.nextElementSibling;
-          ind.textContent = `${val.length}/${MAX_CHARS_PER_LINE}`;
-
-          if (val.length >= MAX_CHARS_PER_LINE) {
-            ind.classList.add('full');
-            if (idx < inputs.length - 1) inputs[idx + 1].focus();
-          } else {
-            ind.classList.remove('full');
-          }
-
-          const total = Object.values(examState.answers).join('').length;
-          document.getElementById('char-count').textContent = total;
+          const val = e.target.value; examState.answers[e.target.dataset.key] = val;
+          const ind = e.target.nextElementSibling; ind.textContent = `${val.length}/${MAX_CHARS_PER_LINE}`;
+          if (val.length >= MAX_CHARS_PER_LINE) { ind.classList.add('full'); if (idx < inputs.length - 1) inputs[idx + 1].focus(); } 
+          else { ind.classList.remove('full'); }
+          document.getElementById('char-count').textContent = Object.values(examState.answers).join('').length;
         });
 
         input.addEventListener('keydown', (e) => {
-          if (e.key === 'Enter') {
-            e.preventDefault();
-            if (idx < inputs.length - 1) inputs[idx + 1].focus();
-            else changePage(1);
-          } else if (e.key === 'Backspace' && e.target.value === '' && idx > 0) {
-            e.preventDefault();
-            inputs[idx - 1].focus();
-          } else if (e.key === 'ArrowUp' && idx > 0) {
-            e.preventDefault();
-            inputs[idx - 1].focus();
-          } else if (e.key === 'ArrowDown' && idx < inputs.length - 1) {
-            e.preventDefault();
-            inputs[idx + 1].focus();
-          }
+          if (e.key === 'Enter') { e.preventDefault(); if (idx < inputs.length - 1) inputs[idx + 1].focus(); else changePage(1); } 
+          else if (e.key === 'Backspace' && e.target.value === '' && idx > 0) { e.preventDefault(); inputs[idx - 1].focus(); } 
+          else if (e.key === 'ArrowUp' && idx > 0) { e.preventDefault(); inputs[idx - 1].focus(); } 
+          else if (e.key === 'ArrowDown' && idx < inputs.length - 1) { e.preventDefault(); inputs[idx + 1].focus(); }
         });
       });
-
       if (inputs.length > 0) inputs[0].focus();
     }
 
     function changePage(dir) {
       const next = examState.currPage + dir;
-      if (next >= 1 && next <= examState.totalPage) {
-        examState.currPage = next;
-        renderAnswerSheet();
-      } else if (dir > 0) {
-        showMsg("마지막 페이지입니다.");
-      } else {
-        showMsg("첫 번째 페이지입니다.");
-      }
+      if (next >= 1 && next <= examState.totalPage) { examState.currPage = next; renderAnswerSheet(); } 
+      else if (dir > 0) showMsg("마지막 페이지입니다."); else showMsg("첫 번째 페이지입니다.");
     }
 
     // ==========================================
@@ -1322,80 +1122,26 @@
     // ==========================================
     async function submitExam(auto = false) {
       if (!auto && !confirm("제출하고 AI 채점을 진행하시겠습니까?")) return;
+      clearInterval(examState.timer); showLoading("AI 채점관이 답안을 분석 중입니다...");
 
-      clearInterval(examState.timer);
-      showLoading("AI 채점관이 답안을 분석 중입니다...");
-
-      const fullAnswer = Object.keys(examState.answers)
-        .sort((a, b) => {
-          const [ap, al] = a.split('-').map(Number);
-          const [bp, bl] = b.split('-').map(Number);
+      const fullAnswer = Object.keys(examState.answers).sort((a, b) => {
+          const [ap, al] = a.split('-').map(Number); const [bp, bl] = b.split('-').map(Number);
           return ap !== bp ? ap - bp : al - bl;
-        })
-        .map(k => examState.answers[k])
-        .filter(v => v.trim())
-        .join('\n');
+        }).map(k => examState.answers[k]).filter(v => v.trim()).join('\n');
 
-      const schema = {
-        type: "OBJECT",
-        properties: {
-          score: { type: "INTEGER" },
-          details: {
-            type: "OBJECT",
-            properties: { issue: { type: "INTEGER" }, law: { type: "INTEGER" }, logic: { type: "INTEGER" }, conclusion: { type: "INTEGER" }, format: { type: "INTEGER" } },
-            required: ["issue", "law", "logic", "conclusion", "format"]
-          },
-          feedback: { type: "STRING" }, good: { type: "STRING" }, missing: { type: "STRING" }, advice: { type: "STRING" }, next3: { type: "ARRAY", items: { type: "STRING" } }
-        },
-        required: ["score", "details", "feedback", "good", "missing", "advice", "next3"]
-      };
-
-      const prompt = `당신은 노무사 2차 시험 전문 채점관입니다.
-과목: ${examState.subject}
-문제: ${examState.question}
-채점기준: ${examState.rubric || "노무사 2차 시험 일반 채점기준"}
-
-[학생 답안]
-${fullAnswer || "미작성"}
-
-위 답안을 아래 기준으로 100점 만점 채점하세요.
-- 쟁점 파악: 25점 (핵심 법적 쟁점 파악 여부)
-- 법적 근거: 30점 (관련 법조문, 판례 인용 정확성)
-- 논리 전개: 25점 (논리적 흐름과 설득력)
-- 결론 명확성: 10점 (결론의 명확성)
-- 형식·구조: 10점 (답안 형식과 구조)`;
+      const schema = { type: "OBJECT", properties: { score: { type: "INTEGER" }, details: { type: "OBJECT", properties: { issue: { type: "INTEGER" }, law: { type: "INTEGER" }, logic: { type: "INTEGER" }, conclusion: { type: "INTEGER" }, format: { type: "INTEGER" } }, required: ["issue", "law", "logic", "conclusion", "format"] }, feedback: { type: "STRING" }, good: { type: "STRING" }, missing: { type: "STRING" }, advice: { type: "STRING" }, next3: { type: "ARRAY", items: { type: "STRING" } } }, required: ["score", "details", "feedback", "good", "missing", "advice", "next3"] };
+      const prompt = `과목: ${examState.subject}\n문제: ${examState.question}\n채점기준: ${examState.rubric || "일반 채점기준"}\n\n[학생 답안]\n${fullAnswer || "미작성"}\n\n100점 만점 채점하세요. 쟁점25, 법적근거30, 논리25, 결론10, 형식10`;
 
       try {
         const result = await callGemini(prompt, schema);
-
-        result.details = result.details || {};
-        result.details.issue = result.details.issue || 0;
-        result.details.law = result.details.law || 0;
-        result.details.logic = result.details.logic || 0;
-        result.details.conclusion = result.details.conclusion || 0;
-        result.details.format = result.details.format || 0;
-        result.next3 = result.next3 || [];
-
-        const record = {
-          id: Date.now(), date: getToday(), subject: examState.subject,
-          score: result.score, feedback: result
-        };
-
-        db.history.push(record);
-        markStudiedToday();
-        saveDB();
-
-        document.getElementById('exam-room').style.display = 'none';
-        document.getElementById('exam-setup').style.display = 'block';
+        result.details = result.details || {}; result.details.issue = result.details.issue || 0; result.details.law = result.details.law || 0; result.details.logic = result.details.logic || 0; result.details.conclusion = result.details.conclusion || 0; result.details.format = result.details.format || 0; result.next3 = result.next3 || [];
+        const record = { id: Date.now(), date: getToday(), subject: examState.subject, score: result.score, feedback: result };
+        db.history.push(record); markStudiedToday(); saveDB();
+        document.getElementById('exam-room').style.display = 'none'; document.getElementById('exam-setup').style.display = 'block';
         renderExamResult(record);
-
       } catch(e) {
-        showMsg("채점 실패: " + e.message);
-        document.getElementById('exam-room').style.display = 'none';
-        document.getElementById('exam-setup').style.display = 'block';
-      } finally {
-        hideLoading();
-      }
+        showMsg("채점 실패: " + e.message); document.getElementById('exam-room').style.display = 'none'; document.getElementById('exam-setup').style.display = 'block';
+      } finally { hideLoading(); }
     }
 
     function renderExamResult(data) {
@@ -1403,72 +1149,124 @@ ${fullAnswer || "미작성"}
       document.getElementById('res-score').innerHTML = `${data.score}<span class="text-2xl text-gray-300">점</span>`;
       document.getElementById('res-feedback').textContent = fb.feedback || '';
 
-      const setBar = (id, val, max) => {
-        const safeVal = Math.min(Math.max(val || 0, 0), max);
-        document.getElementById(`score-${id}`).textContent = safeVal;
-        document.getElementById(`bar-${id}`).style.width = `${(safeVal / max) * 100}%`;
-      };
+      const setBar = (id, val, max) => { const safeVal = Math.min(Math.max(val || 0, 0), max); document.getElementById(`score-${id}`).textContent = safeVal; document.getElementById(`bar-${id}`).style.width = `${(safeVal / max) * 100}%`; };
+      setBar('issue', fb.details.issue, 25); setBar('law', fb.details.law, 30); setBar('logic', fb.details.logic, 25); setBar('conc', fb.details.conclusion, 10); setBar('form', fb.details.format, 10);
 
-      setBar('issue', fb.details.issue, 25);
-      setBar('law', fb.details.law, 30);
-      setBar('logic', fb.details.logic, 25);
-      setBar('conc', fb.details.conclusion, 10);
-      setBar('form', fb.details.format, 10);
-
-      document.getElementById('res-good').textContent = fb.good || '';
-      document.getElementById('res-miss').textContent = fb.missing || '';
-      document.getElementById('res-next').innerHTML = (fb.next3 || []).map(t => `<li>${t}</li>`).join('');
-
+      document.getElementById('res-good').textContent = fb.good || ''; document.getElementById('res-miss').textContent = fb.missing || ''; document.getElementById('res-next').innerHTML = (fb.next3 || []).map(t => `<li>${t}</li>`).join('');
       navigate('result');
     }
 
     // ==========================================
     // 10. 데이터 관리
     // ==========================================
-    function exportDB() {
-      const blob = new Blob([JSON.stringify(db, null, 2)], { type: 'application/json' });
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = `nomusa_backup_${getToday()}.json`;
-      a.click();
-      showMsg("✅ 백업 파일이 다운로드되었습니다.");
-    }
-
-    function importDB() {
-      document.getElementById('import-file-input').click();
-    }
-
+    function exportDB() { const blob = new Blob([JSON.stringify(db, null, 2)], { type: 'application/json' }); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `nomusa_backup_${getToday()}.json`; a.click(); showMsg("✅ 백업 파일이 다운로드되었습니다."); }
+    function importDB() { document.getElementById('import-file-input').click(); }
     function doImportDB(event) {
-      const file = event.target.files[0];
-      if (!file) return;
-      const reader = new FileReader();
+      const file = event.target.files[0]; if (!file) return; const reader = new FileReader();
       reader.onload = (e) => {
         try {
           const imported = JSON.parse(e.target.result);
-          if (!imported.history || !imported.flashcards) {
-            showMsg("❌ 올바른 백업 파일이 아닙니다.");
-            return;
-          }
-          if (confirm(`백업 데이터를 복구하시겠습니까?\n(현재 데이터는 덮어씌워집니다)`)) {
-            db = imported;
-            saveDB();
-            renderDashboard();
-            showMsg("✅ 데이터가 복구되었습니다!");
-          }
-        } catch(err) {
-          showMsg("❌ 파일 파싱 오류: " + err.message);
-        }
+          if (!imported.history || !imported.flashcards) { showMsg("❌ 올바른 백업 파일이 아닙니다."); return; }
+          if (confirm(`백업 데이터를 복구하시겠습니까?\n(현재 데이터는 덮어씌워집니다)`)) { db = imported; saveDB(); renderDashboard(); showMsg("✅ 데이터가 복구되었습니다!"); }
+        } catch(err) { showMsg("❌ 파일 파싱 오류: " + err.message); }
       };
-      reader.readAsText(file);
-      event.target.value = '';
+      reader.readAsText(file); event.target.value = '';
     }
+    function resetDB() { if (confirm("정말로 모든 학습 기록을 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다!")) { localStorage.removeItem('nomusa_db_v4'); location.reload(); } }
 
-    function resetDB() {
-      if (confirm("정말로 모든 학습 기록을 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다!")) {
-        localStorage.removeItem('nomusa_db_v4');
-        location.reload();
+  </script>
+
+  <!-- ========================================== -->
+  <!-- 11. Firebase 모듈 (클라우드 실시간 동기화) -->
+  <!-- ========================================== -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+    // 사용자님의 Firebase 설정
+    const firebaseConfig = {
+      apiKey: "AIzaSyAkAfhZev3uF9qzAcqfhwBrKWorV10qNWE",
+      authDomain: "nomusa-trainer.firebaseapp.com",
+      projectId: "nomusa-trainer",
+      storageBucket: "nomusa-trainer.firebasestorage.app",
+      messagingSenderId: "361338496072",
+      appId: "1:361338496072:web:798c1a6695cbfab5a7647d"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const firestore = getFirestore(app);
+    let unsubSnapshot = null;
+
+    // 로그인 팝업 호출
+    window.loginWithGoogle = () => {
+      const provider = new GoogleAuthProvider();
+      signInWithPopup(auth, provider).catch(error => {
+        console.error("Login Error:", error);
+        alert("로그인 중 오류가 발생했습니다.");
+      });
+    };
+
+    // 로그아웃
+    window.logoutGoogle = () => {
+      signOut(auth).then(() => {
+        alert("로그아웃 되었습니다.");
+      });
+    };
+
+    // 인증 상태 감지
+    onAuthStateChanged(auth, (user) => {
+      window.currentUser = user;
+      const statusEl = document.getElementById('auth-status');
+      const headerStatus = document.getElementById('header-auth-status');
+      const loginBtn = document.getElementById('login-btn');
+      const logoutBtn = document.getElementById('logout-btn');
+
+      if (user) {
+        statusEl.textContent = user.displayName + " (연동됨)";
+        headerStatus.textContent = "Cloud Sync: ON";
+        headerStatus.classList.replace('text-slate-400', 'text-blue-400');
+        loginBtn.classList.add('hidden');
+        logoutBtn.classList.remove('hidden');
+
+        // 실시간 동기화 시작 (클라우드 -> 로컬)
+        unsubSnapshot = onSnapshot(doc(firestore, 'users', user.uid), (docSnap) => {
+          if (docSnap.exists()) {
+            const cloudDB = docSnap.data().db;
+            if (cloudDB) {
+              window.db = cloudDB; // 전역 db 덮어쓰기
+              localStorage.setItem('nomusa_db_v4', JSON.stringify(window.db));
+              
+              // 현재 화면 새로고침
+              if(window.renderDashboard) window.renderDashboard();
+              if(window.renderDueFlashcards) window.renderDueFlashcards();
+              if(window.updateExamQList) window.updateExamQList();
+              if(window.renderOutlineList) window.renderOutlineList();
+            }
+          } else {
+            // 처음 로그인한 경우 로컬 데이터를 클라우드에 업로드
+            window.triggerCloudSave();
+          }
+        });
+      } else {
+        statusEl.textContent = "로컬 모드 (로그인 안됨)";
+        headerStatus.textContent = "Mode: Local Storage";
+        headerStatus.classList.replace('text-blue-400', 'text-slate-400');
+        loginBtn.classList.remove('hidden');
+        logoutBtn.classList.add('hidden');
+        
+        if (unsubSnapshot) unsubSnapshot();
       }
-    }
+    });
+
+    // 로컬 데이터가 변경될 때 클라우드로 전송하는 함수
+    window.triggerCloudSave = () => {
+      if (window.currentUser) {
+        setDoc(doc(firestore, 'users', window.currentUser.uid), { db: window.db }, { merge: true })
+          .catch(err => console.error("Sync Error:", err));
+      }
+    };
   </script>
 </body>
 </html>
