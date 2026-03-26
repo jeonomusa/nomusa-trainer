@@ -46,7 +46,7 @@
     .fc-buttons-wrap.show { display: flex; }
     
     /* Blank Fill (목차 빈칸) Styles */
-    .blank-input { border: none; border-bottom: 2px solid #cbd5e1; background: transparent; width: 160px; text-align: center; font-size: 15px; font-weight: 700; color: #0f172a; outline: none; transition: all 0.2s; padding: 2px 4px; margin: 0 4px; }
+    .blank-input { border: none; border-bottom: 2px solid #cbd5e1; background: transparent; min-width: 80px; max-width: 100%; text-align: center; font-size: 15px; font-weight: 700; color: #0f172a; outline: none; transition: all 0.2s; padding: 2px 8px; margin: 0 4px; }
     .blank-input:focus { border-bottom-color: #10b981; background: #f0fdf4; }
     .blank-input.correct { border-bottom-color: #10b981; color: #10b981; background: #ecfdf5; }
     .blank-input.wrong { border-bottom-color: #ef4444; color: #ef4444; background: #fef2f2; }
@@ -1044,9 +1044,18 @@
           input.className = "blank-input";
           input.dataset.answer = line.content;
           
-          // 포커스 될 때마다 활성 인풋 기록 (단어 풀 입력을 위해)
+          // 정답 길이에 비례하여 동적 너비 설정 (텍스트 잘림 방지)
+          const charLen = line.content.length;
+          input.style.width = `calc(${charLen}ch + 32px)`;
+          
+          // 포커스 될 때마다 활성 인풋 기록 (단어 풀 입력을 위해) 및 초기화
           input.addEventListener('focus', (e) => {
             blankState.activeInput = e.target;
+            e.target.classList.remove('correct', 'wrong');
+          });
+          
+          input.addEventListener('input', (e) => {
+            e.target.classList.remove('correct', 'wrong');
           });
           
           row.appendChild(input);
@@ -1079,6 +1088,7 @@
     function fillWordChip(word) {
       if (blankState.activeInput) {
         blankState.activeInput.value = word;
+        blankState.activeInput.classList.remove('correct', 'wrong'); // 값 덮어쓰면 오답 상태 초기화
         
         // 다음 빈칸으로 자동 포커스 이동
         const inputs = Array.from(document.querySelectorAll('.blank-input'));
@@ -1105,13 +1115,16 @@
         if (actual === user) {
           input.classList.add('correct');
           input.classList.remove('wrong');
+          input.placeholder = '';
           correctCount++;
         } else {
           input.classList.add('wrong');
           input.classList.remove('correct');
-          // 오답인 경우 원래 답을 placeholder로 슬쩍 보여주기 (선택사항)
-          input.value = '';
-          input.placeholder = input.dataset.answer;
+          // 오답인 경우 값을 비우고 placeholder를 띄우면 사용자가 입력된 것으로 착각할 수 있으므로
+          // 입력값을 유지한 채로 스타일만 붉은색으로 표기하여 재수정 유도
+          if (!input.value) {
+            input.placeholder = "?";
+          }
         }
       });
 
