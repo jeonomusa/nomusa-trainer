@@ -113,6 +113,79 @@
     .timer-warning { color: #e67e22 !important; }
     .timer-danger { color: #e74c3c !important; animation: blink 1s infinite; }
     @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+    /* 답안지 스타일 */
+    .answer-sheet {
+      background: white;
+      border: 2px solid #333;
+      border-radius: 4px;
+      padding: 0;
+      margin-bottom: 16px;
+      overflow: hidden;
+    }
+    .answer-sheet-title {
+      text-align: center;
+      font-size: 13px;
+      color: #555;
+      padding: 8px;
+      border-bottom: 1px solid #333;
+      letter-spacing: 3px;
+    }
+    .answer-sheet-body {
+      display: flex;
+    }
+    .answer-line-numbers {
+      width: 36px;
+      border-right: 1px solid #333;
+      flex-shrink: 0;
+      padding-top: 0;
+    }
+    .answer-line-numbers div {
+      height: 2.6em;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      color: #aaa;
+      border-bottom: 1px dashed #ddd;
+    }
+    .answer-textarea {
+      flex: 1;
+      border: none;
+      outline: none;
+      resize: none;
+      font-size: 15px;
+      line-height: 2.6em;
+      font-family: 'Malgun Gothic', '맑은 고딕', sans-serif;
+      padding: 0 8px;
+      color: #1a1a1a;
+      background: repeating-linear-gradient(
+        transparent,
+        transparent calc(2.6em - 1px),
+        #c8d8e8 calc(2.6em - 1px),
+        #c8d8e8 2.6em
+      );
+      width: 100%;
+      min-height: 700px;
+      overflow-y: hidden;
+    }
+    .answer-sheet-footer {
+      text-align: center;
+      font-size: 11px;
+      color: #888;
+      padding: 6px;
+      border-top: 1px solid #333;
+      letter-spacing: 1px;
+    }
+    .char-guide {
+      font-size: 12px;
+      color: #888;
+      text-align: right;
+      margin-bottom: 6px;
+    }
+    .char-guide span {
+      font-weight: bold;
+      color: #2c3e50;
+    }
 
     /* coming soon */
     .coming-soon {
@@ -191,6 +264,7 @@
         <select id="exam-time">
           <option value="25">25분</option>
           <option value="50">50분</option>
+          <option value="75">75분</option>
           <option value="100">100분</option>
         </select>
       </div>
@@ -217,10 +291,26 @@
       </div>
 
       <!-- 답안 작성 -->
-      <div style="background:white; border-radius:12px; padding:20px; box-shadow:0 2px 8px rgba(0,0,0,0.08); margin-bottom:16px;">
-        <div style="font-size:13px; color:#888; margin-bottom:8px;">✏️ 답안 작성</div>
-        <textarea id="exam-answer" style="height:400px; font-size:15px; line-height:1.9;" placeholder="답안을 작성하세요...&#10;&#10;Tip: Tab키로 들여쓰기 할 수 있어요!" oninput="countChars()"></textarea>
+      <div class="char-guide">한 줄 약 28자 기준 · 글자수 <span id="char-count">0</span>자 · 약 <span id="line-count">0</span>줄</div>
+      <div class="answer-sheet">
+        <div class="answer-sheet-title">답 안 지</div>
+        <div class="answer-sheet-body">
+          <div class="answer-line-numbers" id="line-numbers">
+            <div>1</div><div>2</div><div>3</div><div>4</div><div>5</div>
+            <div>6</div><div>7</div><div>8</div><div>9</div><div>10</div>
+            <div>11</div><div>12</div><div>13</div><div>14</div><div>15</div>
+            <div>16</div><div>17</div><div>18</div><div>19</div><div>20</div>
+            <div>21</div><div>22</div><div>23</div><div>24</div><div>25</div>
+            <div>26</div><div>27</div><div>28</div><div>29</div><div>30</div>
+          </div>
+          <textarea id="exam-answer" class="answer-textarea"
+            placeholder="답안을 작성하세요..."
+            oninput="countChars()"></textarea>
+        </div>
+        <div class="answer-sheet-footer">HRDK 한국산업인력공단</div>
       </div>
+
+
 
       <!-- 제출 버튼 -->
       <button class="btn btn-green" onclick="submitExam()">✅ 답안 제출 및 AI 첨삭 받기</button>
@@ -358,8 +448,24 @@
 
     function countChars() {
       const text = document.getElementById('exam-answer').value;
-      document.getElementById('char-count').textContent = text.length;
+      const charCount = text.length;
+      const lineCount = Math.ceil(charCount / 28);
+      document.getElementById('char-count').textContent = charCount;
+      document.getElementById('line-count').textContent = lineCount;
+
+      // 줄 수에 따라 번호 자동 추가
+      const lineNumbersEl = document.getElementById('line-numbers');
+      const currentLines = lineNumbersEl.children.length;
+      const neededLines = Math.max(30, lineCount + 5);
+      if (neededLines > currentLines) {
+        for (let i = currentLines + 1; i <= neededLines; i++) {
+          const div = document.createElement('div');
+          div.textContent = i;
+          lineNumbersEl.appendChild(div);
+        }
+      }
     }
+
 
     async function submitExam() {
       clearInterval(timerInterval);
