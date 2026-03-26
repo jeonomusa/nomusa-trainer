@@ -16,9 +16,15 @@
     .nav-btn { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 10px; color: #64748b; transition: all 0.2s; border-radius: 12px; flex-shrink: 0; }
     .nav-btn.active { color: #10b981; background: #ecfdf5; font-weight: 800; }
     .nav-btn:hover { color: #10b981; }
-    .desktop-nav-btn { padding: 8px 16px; border-radius: 8px; font-size: 14px; font-weight: 600; color: #94a3b8; transition: all 0.2s; background: transparent; }
-    .desktop-nav-btn:hover { color: white; background: #1e293b; }
-    .desktop-nav-btn.active { background: #10b981; color: white; }
+    
+    /* Desktop Navigation Refined (세련된 모던 스타일) */
+    .desktop-nav-btn { position: relative; padding: 8px 14px; border-radius: 8px; font-size: 14px; font-weight: 600; color: #94a3b8; transition: all 0.2s ease; background: transparent; white-space: nowrap; height: 40px; display: inline-flex; align-items: center; justify-content: center; }
+    .desktop-nav-btn:hover { color: #e2e8f0; background: rgba(255, 255, 255, 0.05); }
+    .desktop-nav-btn.active { color: #10b981; font-weight: 800; }
+    .desktop-nav-btn.active::after { content: ''; position: absolute; bottom: 2px; left: 50%; transform: translateX(-50%); width: 24px; height: 3px; background: #10b981; border-radius: 4px; box-shadow: 0 0 8px rgba(16, 185, 129, 0.4); }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
     .neo-card { background: white; border: 1px solid #e2e8f0; border-radius: 24px; padding: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.03); }
     .page-content { display: none; animation: slideUp 0.3s ease; }
     .page-content.active { display: block; }
@@ -70,12 +76,13 @@
 
   <div id="message-box"></div>
 
-  <header class="fixed top-0 left-0 right-0 h-16 bg-slate-900 text-white flex items-center justify-between px-6 z-50 shadow-md">
-    <div class="flex items-center gap-2 cursor-pointer" onclick="navigate('dashboard')">
+  <header class="fixed top-0 left-0 right-0 h-16 bg-[#0f172a] border-b border-slate-800 text-white flex items-center justify-between px-4 lg:px-6 z-50 shadow-md">
+    <div class="flex items-center gap-2 cursor-pointer shrink-0" onclick="navigate('dashboard')">
       <i class="ri-scales-3-line text-emerald-400 text-2xl"></i>
       <h1 class="text-lg font-extrabold tracking-tight">NOMUSA <span class="text-emerald-400">TRAINER</span></h1>
     </div>
-    <nav class="hidden md:flex gap-2">
+    
+    <nav class="hidden md:flex flex-1 justify-center gap-1 mx-4 overflow-x-auto no-scrollbar">
       <button class="desktop-nav-btn active" id="d-nav-dashboard" onclick="navigate('dashboard')">대시보드</button>
       <button class="desktop-nav-btn" id="d-nav-convert" onclick="navigate('convert')">자료 변환</button>
       <button class="desktop-nav-btn" id="d-nav-flashcard" onclick="navigate('flashcard')">플래시카드</button>
@@ -84,7 +91,8 @@
       <button class="desktop-nav-btn" id="d-nav-exam" onclick="navigate('exam')">모의고사</button>
       <button class="desktop-nav-btn" id="d-nav-settings" onclick="navigate('settings')">설정</button>
     </nav>
-    <div id="header-auth-status" class="text-[10px] font-bold text-slate-400 uppercase tracking-widest bg-slate-800 px-3 py-1 rounded-full hidden md:block transition-colors">
+    
+    <div id="header-auth-status" class="shrink-0 text-[10px] font-bold text-slate-400 uppercase tracking-widest bg-slate-800 border border-slate-700 px-3 py-1.5 rounded-full hidden lg:block transition-colors">
       Mode: Local Storage
     </div>
   </header>
@@ -539,9 +547,14 @@
     // 1. 핵심 전역 상태
     // ==========================================
     let db = { history: [], questions: [], flashcards: [], outlines: [], lastStudyDate: null, streak: 0 };
+    
+    // 클라우드 모듈과 데이터를 주고받기 위한 브릿지 함수
+    window.getAppDB = () => db;
+    window.setAppDB = (newDB) => { db = newDB; };
+
     const LINES_PER_PAGE = 22;
     const MAX_CHARS_PER_LINE = 40;
-    const MODEL_NAME = "gemini-2.5-flash";
+    const MODEL_NAME = "gemini-1.5-flash";
     
     let examState = { subject: '', question: '', rubric: '', time: 0, seconds: 0, totalPage: 5, currPage: 1, timer: null, answers: {} };
     let pdfTextQ = ''; let pdfTextR = ''; let pdfImagesQ = [];
@@ -752,6 +765,8 @@
 
     async function processAIConvert() {
       const fileQ = document.getElementById('file-q').files[0];
+      const fileR = document.getElementById('file-r').files[0]; // 추가됨: 채점기준 파일 읽기
+      
       if (!fileQ) { showMsg('문제 PDF를 업로드해주세요.'); return; }
       
       showLoading('AI가 PDF 텍스트 및 스캔본을 분석 중입니다...');
@@ -759,13 +774,15 @@
       const subject = document.getElementById('convert-subject').value;
 
       try {
-        const buf = await fileQ.arrayBuffer(); const pdf = await pdfjsLib.getDocument(buf).promise;
-        let text = ''; let images = [];
-        for (let i=1; i<=pdf.numPages; i++) {
-          const page = await pdf.getPage(i);
+        // 1. 문제 PDF 읽기
+        const bufQ = await fileQ.arrayBuffer(); 
+        const pdfQ = await pdfjsLib.getDocument(bufQ).promise;
+        let textQ = ''; let images = [];
+        for (let i=1; i<=pdfQ.numPages; i++) {
+          const page = await pdfQ.getPage(i);
           const content = await page.getTextContent();
           const pText = content.items.map(it => it.str).join(' ');
-          text += pText + '\n';
+          textQ += pText + '\n';
           if (pText.trim().length < 50 && images.length < 3) {
             const vp = page.getViewport({scale: 1.5}); const canvas = document.createElement('canvas'); const ctx = canvas.getContext('2d');
             canvas.height = vp.height; canvas.width = vp.width;
@@ -774,7 +791,22 @@
           }
         }
 
-        const basePrompt = `과목: ${subject}\n\n[문제 자료]\n${text.substring(0,3000)}`;
+        // 2. 채점기준 PDF 읽기 (선택사항)
+        let textR = '';
+        if (fileR) {
+          const bufR = await fileR.arrayBuffer(); 
+          const pdfR = await pdfjsLib.getDocument(bufR).promise;
+          for (let i=1; i<=pdfR.numPages; i++) {
+            const page = await pdfR.getPage(i);
+            const content = await page.getTextContent();
+            textR += content.items.map(it => it.str).join(' ') + '\n';
+          }
+        }
+
+        let basePrompt = `과목: ${subject}\n\n[문제 자료]\n${textQ.substring(0,3000)}`;
+        if (textR) {
+          basePrompt += `\n\n[채점기준 자료]\n${textR.substring(0,3000)}`;
+        }
 
         if (type === 'exam') {
           const schema = { type: "ARRAY", items: { type: "OBJECT", properties: { subject: { type: "STRING" }, question: { type: "STRING" }, rubric: { type: "STRING" } }, required: ["subject", "question", "rubric"] } };
@@ -791,6 +823,7 @@
           });
           saveDB(); showMsg(`✅ 암기 카드 ${res.length}장 생성!`);
         }
+        
       } catch(e) { showMsg('변환 실패: ' + e.message); }
       finally { hideLoading(); }
     }
@@ -1204,7 +1237,13 @@
       const provider = new GoogleAuthProvider();
       signInWithPopup(auth, provider).catch(error => {
         console.error("Login Error:", error);
-        alert("로그인 중 오류가 발생했습니다.");
+        if (error.code === 'auth/configuration-not-found') {
+          alert("Firebase 오류: Firebase 콘솔(console.firebase.google.com)에 접속하여 [Authentication] - [Sign-in method]에서 'Google' 로그인을 사용 설정해주세요.");
+        } else if (error.code === 'auth/unauthorized-domain') {
+          alert("Firebase 오류: 승인되지 않은 도메인입니다. Firebase 콘솔의 [Authentication] - [설정] - [승인된 도메인]에 현재 웹사이트 주소를 추가해주세요.");
+        } else {
+          alert("로그인 중 오류가 발생했습니다: " + error.message);
+        }
       });
     };
 
@@ -1234,9 +1273,9 @@
         unsubSnapshot = onSnapshot(doc(firestore, 'users', user.uid), (docSnap) => {
           if (docSnap.exists()) {
             const cloudDB = docSnap.data().db;
-            if (cloudDB) {
-              window.db = cloudDB; // 전역 db 덮어쓰기
-              localStorage.setItem('nomusa_db_v4', JSON.stringify(window.db));
+            if (cloudDB && window.setAppDB) {
+              window.setAppDB(cloudDB); // 클라우드 데이터로 로컬 변수 덮어쓰기
+              localStorage.setItem('nomusa_db_v4', JSON.stringify(cloudDB));
               
               // 현재 화면 새로고침
               if(window.renderDashboard) window.renderDashboard();
@@ -1262,9 +1301,17 @@
 
     // 로컬 데이터가 변경될 때 클라우드로 전송하는 함수
     window.triggerCloudSave = () => {
-      if (window.currentUser) {
-        setDoc(doc(firestore, 'users', window.currentUser.uid), { db: window.db }, { merge: true })
-          .catch(err => console.error("Sync Error:", err));
+      if (window.currentUser && window.getAppDB) {
+        // 깊은 복사를 통해 파이어베이스가 싫어하는 'undefined' 찌꺼기를 완전히 증발시킴
+        const sanitizedDB = JSON.parse(JSON.stringify(window.getAppDB()));
+        
+        setDoc(doc(firestore, 'users', window.currentUser.uid), { db: sanitizedDB }, { merge: true })
+          .catch(err => {
+            console.error("Sync Error:", err);
+            if (err.code === 'permission-denied') {
+              alert("동기화 권한 오류: Firebase 콘솔에서 [Firestore Database] 규칙을 확인해주세요.");
+            }
+          });
       }
     };
   </script>
