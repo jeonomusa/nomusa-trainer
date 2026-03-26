@@ -144,21 +144,41 @@
       <div class="card-sub">2026년 노무사 2차</div>
     </div>
     <div class="card">
-      <div class="card-title">연속 학습일</div>
-      <div class="card-value streak">0일 🔥</div>
-      <div class="card-sub">오늘도 화이팅!</div>
+      <div class="card-title">모의고사</div>
+      <div class="card-value" id="exam-count">0회</div>
+      <div class="card-sub">누적 응시 횟수</div>
     </div>
     <div class="card">
-      <div class="card-title">오늘 복습 카드</div>
-      <div class="card-value">0장</div>
-      <div class="card-sub">플래시카드 복습 예정</div>
+      <div class="card-title">최근 점수</div>
+      <div class="card-value dday" id="last-score">-</div>
+      <div class="card-sub">직전 모의고사</div>
     </div>
   </div>
+
+  <div class="card" style="margin-bottom:16px;">
+    <div class="card-title" style="margin-bottom:12px;">📈 점수 추이 (최근 10회)</div>
+    <div id="score-chart"></div>
+  </div>
+
   <div class="card">
-    <div class="card-title">📈 모의고사 점수 추이</div>
-    <div style="text-align:center;padding:40px;color:#aaa;">모의고사를 응시하면 점수가 표시돼요!</div>
+    <div class="card-title" style="margin-bottom:12px;">📋 최근 시험 기록</div>
+    <table style="width:100%;border-collapse:collapse;">
+      <thead>
+        <tr style="border-bottom:2px solid #f0f0f0;">
+          <th style="padding:8px;font-size:12px;color:#888;text-align:left;">날짜</th>
+          <th style="padding:8px;font-size:12px;color:#888;text-align:left;">과목</th>
+          <th style="padding:8px;font-size:12px;color:#888;text-align:left;">문제</th>
+          <th style="padding:8px;font-size:12px;color:#888;text-align:left;">점수</th>
+          <th style="padding:8px;font-size:12px;color:#888;text-align:left;"></th>
+        </tr>
+      </thead>
+      <tbody id="exam-history-list">
+        <tr><td colspan="5" style="text-align:center;padding:20px;color:#aaa;">기록 없음</td></tr>
+      </tbody>
+    </table>
   </div>
 </div>
+
 
 <!-- 모의고사 -->
 <div id="exam" class="page">
@@ -280,11 +300,76 @@
   }
 
   // D-day
-  const exam = new Date('2026-08-29');
+  const examDate = new Date('2026-08-29');
   const today = new Date();
   today.setHours(0,0,0,0);
-  const diff = Math.ceil((exam - today) / (1000*60*60*24));
+  const diff = Math.ceil((examDate - today) / (1000*60*60*24));
   document.getElementById('dday').textContent = 'D-' + diff;
+
+  function renderDashboard() {
+    const history = JSON.parse(localStorage.getItem('examHistory') || '[]');
+
+    // 모의고사 횟수
+    document.getElementById('exam-count').textContent = history.length + '회';
+
+    // 최근 점수
+    if (history.length > 0) {
+      const last = history[history.length - 1];
+      document.getElementById('last-score').textContent = last.score ? last.score + '점' : '-';
+    }
+
+    // 점수 추이 그래프
+    const chartEl = document.getElementById('score-chart');
+    if (history.length === 0) {
+      chartEl.innerHTML = '<div style="text-align:center;padding:40px;color:#aaa;">모의고사를 응시하면 점수가 표시돼요!</div>';
+      return;
+    }
+
+    const recent = history.slice(-10);
+    const max = 100;
+    const bars = recent.map(r => {
+      const h = r.score ? Math.round((r.score / max) * 120) : 0;
+      const color = r.score >= 80 ? '#27ae60' : r.score >= 60 ? '#3498db' : '#e74c3c';
+      return `
+        <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
+          <div style="font-size:11px;font-weight:bold;color:${color};">${r.score ?? '-'}점</div>
+          <div style="width:36px;height:${h}px;background:${color};border-radius:4px 4px 0 0;"></div>
+          <div style="font-size:10px;color:#aaa;writing-mode:vertical-rl;transform:rotate(180deg);height:50px;">${r.date}</div>
+        </div>`;
+    }).join('');
+
+    chartEl.innerHTML = `
+      <div style="display:flex;align-items:flex-end;gap:8px;height:180px;padding:0 8px;">
+        ${bars}
+      </div>`;
+
+    // 히스토리 목록
+    const histEl = document.getElementById('exam-history-list');
+    const rows = history.slice().reverse().slice(0, 5).map(r => `
+      <tr style="border-bottom:1px solid #f0f0f0;">
+        <td style="padding:10px 8px;font-size:13px;color:#888;">${r.date}</td>
+        <td style="padding:10px 8px;font-size:13px;">${r.subject}</td>
+        <td style="padding:10px 8px;font-size:13px;color:#2c3e50;">${r.question.slice(0,20)}...</td>
+        <td style="padding:10px 8px;font-size:14px;font-weight:bold;color:${r.score >= 80 ? '#27ae60' : r.score >= 60 ? '#3498db' : '#e74c3c'};">${r.score ?? '-'}점</td>
+        <td style="padding:10px 8px;">
+          <button onclick="retryExam(${r.id})" style="font-size:12px;padding:4px 10px;border:1px solid #27ae60;background:white;color:#27ae60;border-radius:6px;cursor:pointer;">재도전</button>
+        </td>
+      </tr>`).join('');
+
+    histEl.innerHTML = rows || '<tr><td colspan="5" style="text-align:center;padding:20px;color:#aaa;">기록 없음</td></tr>';
+  }
+
+  function retryExam(id) {
+    const history = JSON.parse(localStorage.getItem('examHistory') || '[]');
+    const record = history.find(r => r.id === id);
+    if (!record) return;
+    showPage('exam', document.querySelector('.nav-menu a:nth-child(2)'));
+    document.getElementById('exam-question').value = record.question;
+    document.getElementById('exam-setup').style.display = 'block';
+    document.getElementById('exam-result').style.display = 'none';
+  }
+
+  renderDashboard();
 
   // 모의고사
   let timerInterval = null;
@@ -450,6 +535,7 @@
     const question = document.getElementById('exam-question-display').textContent;
     const answer = getAllAnswer();
     const subject = document.getElementById('exam-subject-display').textContent;
+    const examMinutes = parseInt(document.getElementById('exam-time').value);
 
     document.getElementById('exam-room').style.display = 'none';
     document.getElementById('exam-result').style.display = 'block';
@@ -503,6 +589,26 @@
     const data = await response.json();
     const result = data.candidates[0].content.parts[0].text;
     document.getElementById('exam-result-content').textContent = result;
+
+    // 점수 추출 (총점: XX점)
+    const scoreMatch = result.match(/총점[:\s]*(\d+)점/);
+    const score = scoreMatch ? parseInt(scoreMatch[1]) : null;
+
+    // 기록 저장
+    const record = {
+      id: Date.now(),
+      date: new Date().toLocaleDateString('ko-KR'),
+      subject: subject,
+      question: question,
+      answer: answer,
+      score: score,
+      feedback: result,
+      minutes: examMinutes
+    };
+    const history = JSON.parse(localStorage.getItem('examHistory') || '[]');
+    history.push(record);
+    localStorage.setItem('examHistory', JSON.stringify(history));
+    renderDashboard();
   }
 
   function resetExam() {
