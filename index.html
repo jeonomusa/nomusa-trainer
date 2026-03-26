@@ -1,65 +1,274 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>노무사 아웃풋 트레이너</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Noto Sans KR', sans-serif; background: #f5f5f5; }
-        .container { max-width: 800px; margin: 0 auto; padding: 20px; }
-        h1 { text-align: center; padding: 30px 0; color: #333; }
-        .input-box { background: white; padding: 20px; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        textarea { width: 100%; height: 150px; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 16px; resize: vertical; }
-        button { width: 100%; padding: 15px; background: #4CAF50; color: white; border: none; border-radius: 5px; font-size: 18px; cursor: pointer; }
-        button:hover { background: #45a049; }
-        .result-box { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); display: none; }
-        .result-box h2 { margin-bottom: 15px; color: #333; }
-        .result-content { line-height: 1.8; color: #555; white-space: pre-wrap; }
-        .loading { text-align: center; padding: 20px; color: #888; display: none; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>노무사 아웃풋 트레이너</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', sans-serif; background: #f5f6fa; }
+
+    /* 네비게이션 */
+    nav {
+      background: #2c3e50;
+      padding: 0 20px;
+      display: flex;
+      align-items: center;
+      height: 60px;
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+    }
+    .nav-logo {
+      color: white;
+      font-size: 18px;
+      font-weight: bold;
+      margin-right: 40px;
+    }
+    .nav-menu {
+      display: flex;
+      gap: 5px;
+      list-style: none;
+    }
+    .nav-menu li a {
+      color: #bdc3c7;
+      text-decoration: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-size: 14px;
+      transition: all 0.2s;
+    }
+    .nav-menu li a:hover {
+      background: #34495e;
+      color: white;
+    }
+    .nav-menu li a.active {
+      background: #27ae60;
+      color: white;
+    }
+
+    /* 페이지 공통 */
+    .page { display: none; padding: 80px 20px 20px; max-width: 900px; margin: 0 auto; }
+    .page.active { display: block; }
+    .page-title { font-size: 24px; font-weight: bold; margin-bottom: 20px; color: #2c3e50; }
+
+    /* 대시보드 */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    .card-title { font-size: 13px; color: #888; margin-bottom: 8px; }
+    .card-value { font-size: 32px; font-weight: bold; color: #2c3e50; }
+    .card-sub { font-size: 12px; color: #aaa; margin-top: 4px; }
+    .dday { color: #27ae60; }
+    .streak { color: #e67e22; }
+
+    /* 모의고사 */
+    .exam-setup { background: white; border-radius: 12px; padding: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; font-size: 14px; font-weight: bold; color: #555; margin-bottom: 6px; }
+    .form-group select, .form-group input {
+      width: 100%; padding: 10px; border: 1px solid #ddd;
+      border-radius: 8px; font-size: 14px;
+    }
+    .btn {
+      padding: 12px 24px; border: none; border-radius: 8px;
+      font-size: 15px; font-weight: bold; cursor: pointer; transition: all 0.2s;
+    }
+    .btn-green { background: #27ae60; color: white; width: 100%; }
+    .btn-green:hover { background: #219a52; }
+
+    /* AI 질문 (기존) */
+    .question-box { background: white; border-radius: 12px; padding: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+    textarea {
+      width: 100%; height: 150px; padding: 12px;
+      border: 1px solid #ddd; border-radius: 8px;
+      font-size: 14px; resize: vertical; margin-bottom: 12px;
+    }
+    #loading { text-align: center; color: #888; margin-top: 12px; display: none; }
+    #result { background: white; border-radius: 12px; padding: 24px; margin-top: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); display: none; white-space: pre-wrap; line-height: 1.8; }
+
+    /* 플래시카드 */
+    .flashcard {
+      background: white; border-radius: 16px; padding: 40px;
+      text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      min-height: 200px; display: flex; align-items: center; justify-content: center;
+      font-size: 18px; color: #2c3e50; margin-bottom: 16px; cursor: pointer;
+    }
+    .flashcard-hint { font-size: 13px; color: #aaa; text-align: center; margin-bottom: 16px; }
+    .btn-row { display: flex; gap: 8px; }
+    .btn-again { background: #e74c3c; color: white; flex: 1; }
+    .btn-hard { background: #e67e22; color: white; flex: 1; }
+    .btn-good { background: #3498db; color: white; flex: 1; }
+    .btn-easy { background: #27ae60; color: white; flex: 1; }
+
+    /* coming soon */
+    .coming-soon {
+      text-align: center; padding: 60px;
+      color: #aaa; font-size: 18px;
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <h1>⚖️ 노무사 아웃풋 트레이너</h1>
-        <div class="input-box">
-            <textarea id="question" placeholder="노무 관련 질문을 입력하세요..."></textarea>
-            <br><br>
-            <button onclick="getAnswer()">답변 받기</button>
-        </div>
-        <div class="loading" id="loading">⏳ 답변 생성 중...</div>
-        <div class="result-box" id="result">
-            <h2>📋 답변</h2>
-            <div class="result-content" id="result-content"></div>
-        </div>
-    </div>
-    <script>
-        async function getAnswer() {
-            const question = document.getElementById('question').value;
-            if (!question.trim()) { alert('질문을 입력해주세요!'); return; }
-            
-            document.getElementById('loading').style.display = 'block';
-            document.getElementById('result').style.display = 'none';
-            
-            const API_KEY = 'AIzaSyApB5J0IXoab-iYRyosBvdLkdTDeEWAW5I';
-            
-            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${API_KEY}
 
-`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    contents: [{ parts: [{ text: `당신은 노무사 시험 전문 트레이너입니다. 다음 질문에 대해 노무사 시험 답안 형식으로 답변해주세요:\n\n${question}` }] }]
-                })
-            });
-            
-            const data = await response.json();
-            const answer = data.candidates[0].content.parts[0].text;
-            
-            document.getElementById('loading').style.display = 'none';
-            document.getElementById('result').style.display = 'block';
-            document.getElementById('result-content').textContent = answer;
-        }
-    </script>
+  <!-- 네비게이션 -->
+  <nav>
+    <div class="nav-logo">⚖️ 노무사 트레이너</div>
+    <ul class="nav-menu">
+      <li><a href="#" class="active" onclick="showPage('dashboard', this)">📊 대시보드</a></li>
+      <li><a href="#" onclick="showPage('exam', this)">⏱️ 모의고사</a></li>
+      <li><a href="#" onclick="showPage('flashcard', this)">🃏 플래시카드</a></li>
+      <li><a href="#" onclick="showPage('blank', this)">📝 빈칸채우기</a></li>
+      <li><a href="#" onclick="showPage('ai', this)">🤖 AI 질문</a></li>
+      <li><a href="#" onclick="showPage('db', this)">📚 판례·조문</a></li>
+    </ul>
+  </nav>
+
+  <!-- 대시보드 -->
+  <div id="dashboard" class="page active">
+    <div class="page-title">📊 대시보드</div>
+    <div class="dashboard-grid">
+      <div class="card">
+        <div class="card-title">시험까지</div>
+        <div class="card-value dday" id="dday">D-?</div>
+        <div class="card-sub">2026년 노무사 1차</div>
+      </div>
+      <div class="card">
+        <div class="card-title">연속 학습일</div>
+        <div class="card-value streak">0일 🔥</div>
+        <div class="card-sub">오늘도 화이팅!</div>
+      </div>
+      <div class="card">
+        <div class="card-title">오늘 복습 카드</div>
+        <div class="card-value">0장</div>
+        <div class="card-sub">플래시카드 복습 예정</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">📈 모의고사 점수 추이</div>
+      <div style="text-align:center; padding: 40px; color: #aaa;">모의고사를 응시하면 점수가 표시돼요!</div>
+    </div>
+  </div>
+
+  <!-- 모의고사 -->
+  <div id="exam" class="page">
+    <div class="page-title">⏱️ 모의고사</div>
+    <div class="exam-setup">
+      <div class="form-group">
+        <label>과목 선택</label>
+        <select>
+          <option>노동법 1 (개별적 근로관계법)</option>
+          <option>노동법 2 (집단적 노사관계법)</option>
+          <option>인사노무관리론</option>
+          <option>경영조직론</option>
+          <option>노동경제학</option>
+          <option>사회보험법</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>시험 시간</label>
+        <select>
+          <option>25분</option>
+          <option>50분</option>
+          <option>100분</option>
+        </select>
+      </div>
+      <button class="btn btn-green">⏱️ 모의고사 시작</button>
+    </div>
+  </div>
+
+  <!-- 플래시카드 -->
+  <div id="flashcard" class="page">
+    <div class="page-title">🃏 플래시카드</div>
+    <div class="flashcard" onclick="flipCard()">
+      <div id="card-content">카드를 추가해주세요!</div>
+    </div>
+    <div class="flashcard-hint">카드를 클릭하면 뒤집혀요</div>
+    <div class="btn-row">
+      <button class="btn btn-again">다시</button>
+      <button class="btn btn-hard">어려움</button>
+      <button class="btn btn-good">보통</button>
+      <button class="btn btn-easy">쉬움</button>
+    </div>
+  </div>
+
+  <!-- 빈칸채우기 -->
+  <div id="blank" class="page">
+    <div class="page-title">📝 빈칸 채우기</div>
+    <div class="coming-soon">🚧 준비 중이에요!</div>
+  </div>
+
+  <!-- AI 질문 -->
+  <div id="ai" class="page">
+    <div class="page-title">🤖 AI 질문</div>
+    <div class="question-box">
+      <textarea id="question" placeholder="노무 관련 질문을 입력하세요..."></textarea>
+      <button class="btn btn-green" onclick="getAnswer()">답변 받기</button>
+    </div>
+    <div id="loading">⏳ 답변 생성 중...</div>
+    <div id="result"></div>
+  </div>
+
+  <!-- 판례·조문 DB -->
+  <div id="db" class="page">
+    <div class="page-title">📚 판례·조문 DB</div>
+    <div class="coming-soon">🚧 준비 중이에요!</div>
+  </div>
+
+  <script>
+    // 페이지 전환
+    function showPage(pageId, el) {
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.nav-menu a').forEach(a => a.classList.remove('active'));
+      document.getElementById(pageId).classList.add('active');
+      el.classList.add('active');
+    }
+
+    // D-day 계산
+    function calcDday() {
+      const exam = new Date('2026-05-09');
+      const today = new Date();
+      const diff = Math.ceil((exam - today) / (1000 * 60 * 60 * 24));
+      document.getElementById('dday').textContent = 'D-' + diff;
+    }
+    calcDday();
+
+    // AI 답변
+    async function getAnswer() {
+      const question = document.getElementById('question').value;
+      if (!question.trim()) { alert('질문을 입력해주세요!'); return; }
+      document.getElementById('loading').style.display = 'block';
+      document.getElementById('result').style.display = 'none';
+
+      const API_KEY = 'AIzaSyApB5J0IXoab-iYRyosBvdLkdTDeEWAW5I';
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${API_KEY}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: `당신은 노무사 시험 전문 트레이너입니다. 다음 질문에 대해 노무사 시험 답안 형식으로 답변해주세요:\n\n${question}` }] }]
+        })
+      });
+      const data = await response.json();
+      const answer = data.candidates[0].content.parts[0].text;
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('result').style.display = 'block';
+      document.getElementById('result').textContent = answer;
+    }
+
+    // 플래시카드 뒤집기
+    let isFlipped = false;
+    function flipCard() {
+      isFlipped = !isFlipped;
+      document.getElementById('card-content').textContent = isFlipped ? '뒷면 내용이 여기 나와요!' : '카드를 추가해주세요!';
+    }
+  </script>
 </body>
 </html>
