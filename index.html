@@ -161,7 +161,11 @@
   </div>
 
   <div class="card">
-    <div class="card-title" style="margin-bottom:12px;">📋 최근 시험 기록</div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+      <div class="card-title">📋 최근 시험 기록</div>
+      <button onclick="clearHistory()" style="font-size:12px;padding:4px 12px;border:1px solid #e74c3c;background:white;color:#e74c3c;border-radius:6px;cursor:pointer;">🗑️ 기록 전체 삭제</button>
+    </div>
+
     <table style="width:100%;border-collapse:collapse;">
       <thead>
         <tr style="border-bottom:2px solid #f0f0f0;">
@@ -369,7 +373,14 @@
     document.getElementById('exam-result').style.display = 'none';
   }
 
+  function clearHistory() {
+    if (!confirm('시험 기록을 전체 삭제할까요?')) return;
+    localStorage.removeItem('examHistory');
+    renderDashboard();
+  }
+
   renderDashboard();
+
 
   // 모의고사
   let timerInterval = null;
