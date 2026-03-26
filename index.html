@@ -510,8 +510,9 @@
         const input = document.createElement('input');
         input.type = 'text';
         input.className = 'line-input';
+        input.maxLength = 28;
         input.value = (allLines[page] && allLines[page][i]) ? allLines[page][i] : '';
-        input.addEventListener('input', countChars);
+
 
         // 엔터키로 다음 줄 이동
         input.addEventListener('keydown', (e) => {
@@ -534,27 +535,20 @@
             }
           }
         });
-
-        // 28자 초과 입력 시 자동으로 다음 줄로 이동
-        input.addEventListener('input', (e) => {
-          const MAX_CHARS = 28;
-          if (e.target.value.length >= MAX_CHARS) {
-            const overflow = e.target.value.slice(MAX_CHARS);
-            e.target.value = e.target.value.slice(0, MAX_CHARS);
+        // 28자 되면 자동 다음 줄
+        input.addEventListener('keyup', (e) => {
+          if (e.target.value.length >= 28) {
             const inputs = document.querySelectorAll('.line-input');
             const idx = Array.from(inputs).indexOf(e.target);
             if (idx < inputs.length - 1) {
-              inputs[idx + 1].value = overflow + inputs[idx + 1].value;
               inputs[idx + 1].focus();
-              // 커서를 overflow 길이만큼 뒤로
-              const pos = overflow.length;
-              inputs[idx + 1].setSelectionRange(pos, pos);
             } else {
               changePage(1);
             }
-            countChars();
           }
+          countChars();
         });
+
 
 
         lineDiv.appendChild(numDiv);
