@@ -249,7 +249,7 @@
     <!-- 4. 빈칸 채우기 (목차 암기) -->
     <div id="page-blank" class="page-content">
       <h2 class="text-2xl font-extrabold text-slate-800 mb-2 flex items-center gap-2"><i class="ri-edit-2-line"></i> 목차 빈칸 뚫기</h2>
-      <p class="text-sm text-gray-500 mb-6">전체적인 구조 암기를 위해 목차의 빈칸을 채워보세요. 단어 풀(Word Bank)을 탭하여 쉽게 입력할 수 있습니다.</p>
+      <p class="text-sm text-gray-500 mb-6">전체적인 구조 암기를 위해 목차의 빈칸을 채워보세요. 단어 풀(Word Bank)을 활용하여 쉽게 입력할 수 있습니다.</p>
 
       <!-- 목록 및 추가 뷰 -->
       <div id="blank-list-view">
@@ -290,41 +290,49 @@
       <!-- 퀴즈 룸 뷰 -->
       <div id="blank-quiz-view" class="hidden">
         <button onclick="closeBlankQuiz()" class="text-sm font-bold text-gray-500 hover:text-gray-800 mb-4 flex items-center gap-1"><i class="ri-arrow-left-line"></i> 목록으로</button>
-        <div class="neo-card p-8 mb-6">
-          <div class="flex justify-between items-end mb-6 border-b border-gray-100 pb-4">
-            <div>
-              <span class="text-[10px] font-bold text-emerald-500 bg-emerald-50 px-2 py-1 rounded-full mb-2 inline-block" id="quiz-subject">과목명</span>
-              <h3 class="text-2xl font-extrabold text-slate-800" id="quiz-title">주제명</h3>
+        
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          
+          <!-- 왼쪽 퀴즈 영역 -->
+          <div class="lg:col-span-8 neo-card p-8 mb-6">
+            <div class="flex justify-between items-end mb-6 border-b border-gray-100 pb-4">
+              <div>
+                <span class="text-[10px] font-bold text-emerald-500 bg-emerald-50 px-2 py-1 rounded-full mb-2 inline-block" id="quiz-subject">과목명</span>
+                <h3 class="text-2xl font-extrabold text-slate-800" id="quiz-title">주제명</h3>
+              </div>
+              <div class="flex items-center gap-2">
+                <select id="quiz-level" class="p-2 border border-gray-200 rounded-lg text-sm font-bold text-slate-700 outline-none">
+                  <option value="50">무작위 50% 빈칸</option>
+                  <option value="30">무작위 30% 빈칸</option>
+                  <option value="main">대목차만 빈칸 (I, 1 등)</option>
+                  <option value="all">전체 빈칸 (하드코어)</option>
+                </select>
+                <button onclick="generateBlankQuiz()" class="px-4 py-2 bg-slate-900 text-white rounded-lg text-sm font-bold hover:bg-slate-800 transition-all">적용</button>
+              </div>
             </div>
-            <div class="flex items-center gap-2">
-              <select id="quiz-level" class="p-2 border border-gray-200 rounded-lg text-sm font-bold text-slate-700 outline-none">
-                <option value="50">무작위 50% 빈칸</option>
-                <option value="30">무작위 30% 빈칸</option>
-                <option value="main">대목차만 빈칸 (I, 1 등)</option>
-                <option value="all">전체 빈칸 (하드코어)</option>
-              </select>
-              <button onclick="generateBlankQuiz()" class="px-4 py-2 bg-slate-900 text-white rounded-lg text-sm font-bold hover:bg-slate-800 transition-all">적용</button>
+            
+            <!-- 실제 퀴즈 영역 -->
+            <div id="quiz-lines" class="text-[15px] leading-loose text-slate-700 font-medium mb-8">
+               <!-- JS Rendered lines -->
+            </div>
+
+            <!-- 정답 확인 버튼 -->
+            <div class="text-center mt-8">
+              <button onclick="checkBlankAnswers()" class="px-8 py-3 bg-emerald-500 text-white rounded-xl font-bold text-lg hover:bg-emerald-600 shadow-md transition-all active:scale-95"><i class="ri-check-double-line"></i> 정답 확인하기</button>
+            </div>
+          </div>
+
+          <!-- 오른쪽 단어 풀 (Word Bank) -->
+          <div class="lg:col-span-4">
+            <div class="neo-card p-6 bg-slate-50 border-2 border-slate-200 sticky top-24 max-h-[calc(100vh-120px)] overflow-y-auto flex flex-col">
+              <h4 class="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3"><i class="ri-drag-drop-line"></i> Word Bank (단어장)</h4>
+              <p class="text-[11px] text-gray-400 mb-4">빈칸을 먼저 터치(클릭)한 후, 아래 단어를 누르면 쏙 들어갑니다.</p>
+              <div id="quiz-word-bank" class="flex flex-wrap gap-2">
+                <!-- JS Rendered Chips -->
+              </div>
             </div>
           </div>
           
-          <!-- 실제 퀴즈 영역 -->
-          <div id="quiz-lines" class="text-[15px] leading-loose text-slate-700 font-medium mb-8">
-             <!-- JS Rendered lines -->
-          </div>
-
-          <!-- 정답 확인 버튼 -->
-          <div class="text-center mt-8">
-            <button onclick="checkBlankAnswers()" class="px-8 py-3 bg-emerald-500 text-white rounded-xl font-bold text-lg hover:bg-emerald-600 shadow-md transition-all active:scale-95"><i class="ri-check-double-line"></i> 정답 확인하기</button>
-          </div>
-        </div>
-
-        <!-- 단어 풀 (Word Bank) -->
-        <div class="neo-card p-6 bg-slate-50 border-2 border-slate-200 sticky bottom-20 z-40">
-          <h4 class="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3"><i class="ri-drag-drop-line"></i> Word Bank (단어장)</h4>
-          <p class="text-[11px] text-gray-400 mb-3">위에서 빈칸을 먼저 터치(클릭)한 후, 아래 단어를 누르면 쏙 들어갑니다.</p>
-          <div id="quiz-word-bank" class="flex flex-wrap gap-2">
-            <!-- JS Rendered Chips -->
-          </div>
         </div>
       </div>
     </div>
@@ -488,7 +496,7 @@
 
   </main>
 
-  <!-- 하단 모바일 네비게이션 -->
+  <!-- 하단 모바일 네비게이션 (스크롤 적용) -->
   <div class="fixed bottom-0 left-0 right-0 h-20 bg-white border-t border-gray-100 flex md:hidden items-center justify-start overflow-x-auto px-2 z-50">
     <button class="nav-btn active" id="m-nav-dashboard" onclick="navigate('dashboard')"><i class="ri-dashboard-line text-xl"></i><span class="text-[10px]">홈</span></button>
     <button class="nav-btn" id="m-nav-convert" onclick="navigate('convert')"><i class="ri-robot-line text-xl"></i><span class="text-[10px]">변환</span></button>
