@@ -190,13 +190,14 @@
         <div class="mb-4 text-sm text-gray-600 bg-white p-4 rounded-xl border border-gray-200">
           <p class="font-bold mb-2 text-slate-700">📌 CSV 파일 작성 규칙 (엑셀 등에서 작성 후 .csv로 저장)</p>
           <ul class="list-disc pl-5 space-y-1 mb-3">
-            <li><strong>A열 (1번째 칸):</strong> 과목 (예: 노동법)</li>
+            <li><strong>A열 (1번째 칸):</strong> 과목 (노동법, 인사노무관리, 행정쟁송법, 민사소송법)</li>
             <li><strong>B열 (2번째 칸):</strong> 앞면 질문/키워드 (예: 경영상 해고 요건)</li>
             <li><strong>C열 (3번째 칸):</strong> 뒷면 정답 및 [빈칸] 내용 (예: 긴박한 [경영상 필요성]...)</li>
           </ul>
-          <p class="text-[11px] text-rose-500 font-bold">* 첫 번째 줄이 '과목', '앞면' 등으로 시작하면 제목 줄로 인식하여 자동으로 건너뜁니다.</p>
+          <p class="text-[11px] text-rose-500 font-bold">* 윈도우 엑셀의 한글 깨짐이나 미묘한 띄어쓰기는 시스템이 알아서 찰떡같이 잡아냅니다!</p>
+          <p class="text-[11px] text-emerald-600 font-bold mt-1">💡 꿀팁: 엑셀에서 저장하실 때 파일 형식을 'CSV UTF-8 (쉼표로 분리)'로 선택하시면 깨짐 현상을 가장 완벽하게 방지할 수 있습니다.</p>
         </div>
-        <div class="mb-4">
+        <div class="mb-4 flex flex-col gap-2">
           <input type="file" id="csv-file-input" accept=".csv" class="w-full p-2 bg-white rounded-xl border border-gray-200 text-sm cursor-pointer">
         </div>
         <div class="flex justify-end gap-2">
@@ -217,7 +218,11 @@
               <option value="민사소송법">민사소송법</option>
             </select>
           </div>
-          <button onclick="toggleFcManager()" class="text-sm text-gray-400 hover:text-gray-800"><i class="ri-close-line text-xl"></i></button>
+          <!-- 💡 편의성 개선: 일괄 삭제 버튼 추가 -->
+          <div class="flex items-center gap-2">
+            <button onclick="deleteAllFilteredFc()" class="px-3 py-1.5 bg-rose-50 text-rose-500 text-xs font-bold rounded-lg hover:bg-rose-100 transition-colors shadow-sm">현재 목록 비우기</button>
+            <button onclick="toggleFcManager()" class="text-sm text-gray-400 hover:text-gray-800"><i class="ri-close-line text-xl"></i></button>
+          </div>
         </div>
         <div id="fc-list" class="space-y-3 max-h-96 overflow-y-auto pr-2"></div>
       </div>
@@ -794,13 +799,13 @@
         if (type === 'exam') {
           const schema = { type: "ARRAY", items: { type: "OBJECT", properties: { subject: { type: "STRING" }, question: { type: "STRING" }, rubric: { type: "STRING" } }, required: ["subject", "question", "rubric"] } };
           const res = await callGemini(basePrompt + `\n\n위 자료를 바탕으로 노무사 2차 시험 '문제'와 '모범답안' 1세트를 추출하세요. 특히 rubric 필드에는 단순 요약이 아닌, 목차와 배점, 핵심 키워드가 포함된 상세한 모범답안을 최대한 원본에 가깝게 작성해주세요.`, schema, images);
-          res.forEach(q => { q.id = Date.now()+Math.random(); db.questions.push(q); });
+          res.forEach(q => { q.id = Date.now().toString() + '-' + Math.floor(Math.random() * 1000000); db.questions.push(q); });
           saveDB(); updateExamQList(); showMsg(`✅ 모의고사 문제 ${res.length}개 저장!`);
         } else {
           const schema = { type: "ARRAY", items: { type: "OBJECT", properties: { front: { type: "STRING" }, back: { type: "STRING" } }, required: ["front", "back"] } };
           const res = await callGemini(basePrompt + `\n\n위 자료에서 암기해야 할 핵심 쟁점이나 판례를 안키형 플래시카드(앞면/뒷면) 5~10개로 만들어주세요.\n중요: 뒷면 내용 중 반드시 암기해야 할 핵심 키워드나 문구는 양쪽에 [대괄호]로 묶어주세요. (예: 근로기준법상 [근로자]란...)`, schema, images);
           res.forEach(card => {
-            card.id = Date.now()+Math.random(); card.subject = subject;
+            card.id = Date.now().toString() + '-' + Math.floor(Math.random() * 1000000); card.subject = subject;
             card.repetition = 0; card.interval = 0; card.efactor = 2.5; card.nextReview = getLocalNow();
             db.flashcards.push(card);
           });
@@ -849,45 +854,66 @@
 
       const reader = new FileReader();
       reader.onload = function(e) {
-        const text = e.target.result;
-        const rows = parseCSV(text);
-        let addedCount = 0;
-
-        let startIndex = 0;
-        if (rows.length > 0 && rows[0][0] && (rows[0][0].includes("과목") || rows[0][1].includes("앞면"))) {
-          startIndex = 1; 
-        }
-
-        for (let i = startIndex; i < rows.length; i++) {
-          const row = rows[i];
-          if (row.length >= 3) {
-            const subject = row[0];
-            const front = row[1];
-            const back = row[2];
-            if (front && back) {
-              db.flashcards.push({
-                id: Date.now() + Math.random(),
-                subject: subject,
-                front: front,
-                back: back,
-                repetition: 0, interval: 0, efactor: 2.5, nextReview: getLocalNow()
-              });
-              addedCount++;
-            }
-          }
-        }
-
-        if (addedCount > 0) {
-          saveDB();
-          renderDueFlashcards();
-          showMsg(`✅ ${addedCount}개의 플래시카드가 일괄 등록되었습니다!`);
-          cancelCsvUpload();
-          fileInput.value = "";
+        let text = e.target.result;
+        if (text.includes('')) {
+          const readerEuc = new FileReader();
+          readerEuc.onload = function(e2) {
+            executeCsvParsing(e2.target.result);
+          };
+          readerEuc.readAsText(file, "EUC-KR");
         } else {
-          showMsg("등록할 수 있는 유효한 데이터가 없습니다. CSV 파일의 형식을 확인해주세요.");
+          executeCsvParsing(text);
         }
       };
       reader.readAsText(file, "UTF-8");
+    }
+
+    function executeCsvParsing(text) {
+      const rows = parseCSV(text);
+      let addedCount = 0;
+
+      let startIndex = 0;
+      if (rows.length > 0 && rows[0][0] && (rows[0][0].includes("과목") || rows[0][1]?.includes("앞면"))) {
+        startIndex = 1; 
+      }
+
+      for (let i = startIndex; i < rows.length; i++) {
+        const row = rows[i];
+        if (row.length >= 3) {
+          let subject = row[0].trim();
+          let front = row[1].trim();
+          let back = row[2].trim();
+          
+          if(subject.includes('노동')) subject = '노동법';
+          else if(subject.includes('인사') || subject.includes('노무')) subject = '인사노무관리';
+          else if(subject.includes('행정') || subject.includes('쟁송')) subject = '행정쟁송법';
+          else if(subject.includes('민사') || subject.includes('민소')) subject = '민사소송법';
+
+          if (front && back) {
+            db.flashcards.push({
+              id: Date.now().toString() + '-' + Math.floor(Math.random() * 1000000),
+              subject: subject,
+              front: front,
+              back: back,
+              repetition: 0, interval: 0, efactor: 2.5, nextReview: getLocalNow()
+            });
+            addedCount++;
+          }
+        }
+      }
+
+      if (addedCount > 0) {
+        saveDB();
+        renderDueFlashcards();
+        if (!document.getElementById('fc-manager-view').classList.contains('hidden')) {
+          renderFcList();
+        }
+        showMsg(`✅ ${addedCount}개의 플래시카드가 일괄 등록되었습니다!`);
+        cancelCsvUpload();
+        document.getElementById('csv-file-input').value = "";
+      } else {
+        showMsg("등록할 수 있는 유효한 데이터가 없습니다. CSV 파일의 형식을 확인해주세요.");
+      }
     }
 
     // ==========================================
@@ -949,6 +975,20 @@
       `).join('');
     }
 
+    // 💡 전체 삭제 로직 추가
+    window.deleteAllFilteredFc = function() {
+      const filter = document.getElementById('fc-filter-subject').value;
+      const msg = filter === 'all' ? '모든 플래시카드를 정말 삭제하시겠습니까?' : `[${filter}] 과목의 모든 카드를 삭제하시겠습니까?`;
+      if(!confirm(msg)) return;
+      
+      if (filter === 'all') {
+        db.flashcards = [];
+      } else {
+        db.flashcards = db.flashcards.filter(c => c.subject !== filter);
+      }
+      saveDB(); renderFcList(); renderDueFlashcards(); showMsg("일괄 삭제되었습니다.");
+    }
+
     function deleteFc(id) { if(!confirm('해당 카드를 삭제하시겠습니까?')) return; db.flashcards = db.flashcards.filter(c => String(c.id) !== String(id)); saveDB(); renderFcList(); renderDueFlashcards(); showMsg("카드가 삭제되었습니다."); }
 
     function editFc(id) {
@@ -977,7 +1017,7 @@
           if(idx > -1) { db.flashcards[idx].subject = subject; db.flashcards[idx].front = front; db.flashcards[idx].back = back; }
           editingFcId = null; showMsg('✅ 카드가 수정되었습니다!');
         } else {
-          db.flashcards.push({ id: Date.now() + Math.random(), subject, front, back, repetition: 0, interval: 0, efactor: 2.5, nextReview: getLocalNow() });
+          db.flashcards.push({ id: Date.now().toString() + '-' + Math.floor(Math.random() * 1000000), subject, front, back, repetition: 0, interval: 0, efactor: 2.5, nextReview: getLocalNow() });
           showMsg('✅ 카드가 추가되었습니다!');
         }
         saveDB(); document.getElementById('manual-card-form').classList.add('hidden'); renderDueFlashcards();
@@ -1157,7 +1197,7 @@
          const idx = db.outlines.findIndex(x => String(x.id) === String(editingOutlineId));
          if(idx > -1) { db.outlines[idx].subject = subject; db.outlines[idx].title = title; db.outlines[idx].content = content; }
          editingOutlineId = null; showMsg("목차가 수정되었습니다.");
-      } else { db.outlines.push({ id: Date.now() + Math.random(), subject, title, content }); showMsg("새 목차가 등록되었습니다."); }
+      } else { db.outlines.push({ id: Date.now().toString() + '-' + Math.floor(Math.random() * 1000000), subject, title, content }); showMsg("새 목차가 등록되었습니다."); }
       saveDB(); document.getElementById('outline-title').value = ''; document.getElementById('outline-content').value = ''; document.getElementById('outline-adder').classList.add('hidden'); renderOutlineList(); 
     }
     window.renderOutlineList = function() {
