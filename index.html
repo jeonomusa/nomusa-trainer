@@ -61,7 +61,6 @@
     @keyframes spin { 100% { transform: rotate(360deg); } }
     #message-box { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); padding: 12px 24px; border-radius: 50px; background: #333; color: white; font-size: 14px; font-weight: bold; z-index: 10000; display: none; box-shadow: 0 10px 20px rgba(0,0,0,0.2); white-space: nowrap; }
     
-    /* 체크박스 스타일 커스텀 */
     .fc-item-checkbox { width: 18px; height: 18px; border-radius: 4px; border-gray-300; text-emerald-500; cursor: pointer; }
   </style>
 </head>
@@ -220,7 +219,6 @@
               <option value="민사소송법">민사소송법</option>
             </select>
           </div>
-          <!-- 💡 선택 체크박스 및 관리 버튼 영역 -->
           <div class="flex flex-wrap items-center gap-2">
             <label class="flex items-center gap-1 text-xs font-bold text-gray-600 cursor-pointer mr-2 bg-gray-50 px-2 py-1.5 rounded-lg border border-gray-200 hover:bg-gray-100">
               <input type="checkbox" id="fc-select-all" onchange="toggleSelectAllFc(this)" class="fc-item-checkbox rounded"> <span class="pt-0.5">전체 선택</span>
@@ -230,7 +228,6 @@
             <button onclick="toggleFcManager()" class="ml-1 text-sm text-gray-400 hover:text-gray-800"><i class="ri-close-line text-xl"></i></button>
           </div>
         </div>
-        <!-- 목록 리스트 영역 -->
         <div id="fc-list" class="space-y-3 max-h-96 overflow-y-auto pr-2"></div>
       </div>
 
@@ -957,7 +954,6 @@
       if (!view.classList.contains('hidden')) { renderFcList(); document.getElementById('manual-card-form').classList.add('hidden'); document.getElementById('csv-upload-form').classList.add('hidden'); }
     }
 
-    // 💡 변경된 기능: 플래시카드 리스트 렌더링 (체크박스 추가)
     function renderFcList() {
       const container = document.getElementById('fc-list');
       const filter = document.getElementById('fc-filter-subject').value;
@@ -989,13 +985,11 @@
       `).join('');
     }
 
-    // 💡 추가된 기능: 전체 선택 로직
     window.toggleSelectAllFc = function(source) {
       const checkboxes = document.querySelectorAll('.fc-item-checkbox');
       checkboxes.forEach(cb => cb.checked = source.checked);
     };
 
-    // 💡 추가된 기능: 개별 체크박스 조작 시 전체 선택 상태 업데이트
     window.updateSelectAllFcState = function() {
       const checkboxes = document.querySelectorAll('.fc-item-checkbox');
       const selectAllCb = document.getElementById('fc-select-all');
@@ -1004,7 +998,6 @@
       selectAllCb.checked = allChecked;
     };
 
-    // 💡 변경된 기능: 선택된 카드만 대괄호 일괄 제거
     window.removeBracketsFromSelected = function() {
       const selectedIds = Array.from(document.querySelectorAll('.fc-item-checkbox:checked')).map(cb => cb.value);
       
@@ -1032,7 +1025,6 @@
       }
     }
 
-    // 💡 변경된 기능: 선택된 카드 일괄 삭제
     window.deleteSelectedFc = function() {
       const selectedIds = Array.from(document.querySelectorAll('.fc-item-checkbox:checked')).map(cb => cb.value);
       
@@ -1097,7 +1089,6 @@
       if (dueCards.length === 0) { renderDueFlashcards(); return; }
       currentCard = dueCards[0];
       
-      // UI 리셋
       document.getElementById('fc-buttons').classList.remove('show');
       document.querySelectorAll('.sm2-btn').forEach(btn => btn.classList.remove('ring-4', 'ring-offset-2', 'ring-rose-400', 'ring-orange-400', 'ring-blue-400', 'ring-emerald-400', 'animate-pulse'));
       
@@ -1128,6 +1119,7 @@
       document.getElementById('fc-cloze-check-btn').classList.remove('hidden');
       
       const container = document.getElementById('fc-cloze-back');
+      // 💡 한글 목차도 잘 뚫릴 수 있도록 빈칸 추출 정규식 일관성 유지
       const regex = /\[(.*?)\]/g; let html = ''; let match; let lastIdx = 0; fcClozeState.answers = [];
 
       let matches = []; let tempMatch; const tempRegex = /\[(.*?)\]/g;
@@ -1219,7 +1211,7 @@
     }
 
     // ==========================================
-    // 7.5 빈칸 채우기 (💡 AI 목차 생성 기능 추가)
+    // 7.5 빈칸 채우기 (💡 목차 정규식 전면 업그레이드)
     // ==========================================
     async function generateOutlineWithAI() {
       const subject = document.getElementById('outline-subject').value;
@@ -1292,8 +1284,14 @@
       generateBlankQuiz();
     }
     function closeBlankQuiz() { document.getElementById('blank-quiz-view').classList.add('hidden'); document.getElementById('blank-list-view').classList.remove('hidden'); }
+    
     function generateBlankQuiz() {
-      const level = document.getElementById('quiz-level').value; const lines = blankState.outline.content.split('\n'); const regex = /^([\s]*[IVX]+\.|[\s]*\d+\.|[\s]*\(\d+\)|[\s]*[①-⑨])(.*)$/;
+      const level = document.getElementById('quiz-level').value; 
+      const lines = blankState.outline.content.split('\n'); 
+      
+      // 💡 목차 정규식 대폭 강화 (유니코드 로마자, 반괄호, 한글 목차 모두 포함)
+      const regex = /^([\s]*[IVX]+\.|[\s]*[Ⅰ-Ⅻ]+\.?|[\s]*\d+[\.\)]|[\s]*[가-힣]+[\.\)]|[\s]*\(\d+\)|[\s]*\([가-힣]+\)|[\s]*[①-⑳])(.*)$/;
+      
       let parsedLines = lines.map((line, idx) => {
         let prefix = ''; let content = line; const match = line.match(regex);
         if (match) { prefix = match[1]; content = match[2].trim(); } else { const spaceMatch = line.match(/^(\s*)(.*)$/); if (spaceMatch) { prefix = spaceMatch[1]; content = spaceMatch[2]; } }
@@ -1303,11 +1301,15 @@
       if (level === 'all') candidates.forEach(l => l.isBlank = true);
       else if (level === '50') { candidates.sort(() => Math.random() - 0.5); candidates.slice(0, Math.ceil(candidates.length / 2)).forEach(l => l.isBlank = true); }
       else if (level === '30') { candidates.sort(() => Math.random() - 0.5); candidates.slice(0, Math.ceil(candidates.length * 0.3)).forEach(l => l.isBlank = true); }
-      else if (level === 'main') candidates.forEach(l => { if (l.prefix.match(/[IVX]+\.|\d+\./)) l.isBlank = true; });
+      else if (level === 'main') candidates.forEach(l => { 
+        // 💡 대목차 판단 정규식도 같이 강화
+        if (l.prefix.match(/[IVX]+\.|[Ⅰ-Ⅻ]+\.?|\d+\.|[가-힣]+\./)) l.isBlank = true; 
+      });
 
       parsedLines.sort((a,b) => a.id - b.id); blankState.lines = parsedLines; blankState.answers = parsedLines.filter(l => l.isBlank).map(l => l.content); blankState.answers.sort(() => Math.random() - 0.5); 
       renderBlankQuizRoom();
     }
+    
     function renderBlankQuizRoom() {
       const container = document.getElementById('quiz-lines'); container.innerHTML = '';
       const blankLines = blankState.lines.filter(l => l.isBlank); const maxCharLen = blankLines.length > 0 ? Math.max(...blankLines.map(l => l.content.length)) : 15; const uniformWidth = `calc(${Math.max(maxCharLen, 15)}ch + 32px)`;
