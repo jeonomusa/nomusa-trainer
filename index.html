@@ -14,7 +14,6 @@
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;800&display=swap');
     
-    /* 💡 ZEN SERIF 폰트 불러오기 설정 완료 */
     @font-face {
         font-family: 'ZEN SERIF';
         src: url('ZEN-SERIF.otf') format('opentype'), url('ZEN-SERIF.ttf') format('truetype'); 
@@ -22,7 +21,6 @@
         font-style: normal;
     }
 
-    /* 💡 전체 앱의 기본 폰트를 ZEN SERIF로 변경 (만약 로딩 실패시 Pretendard 사용) */
     body { 
         font-family: 'ZEN SERIF', 'Pretendard', sans-serif; 
         background: #f8fafc; 
@@ -226,6 +224,7 @@
         <button onclick="toggleManualCardForm()" class="px-4 py-2 bg-slate-800 text-white rounded-lg text-sm font-bold hover:bg-slate-700 transition-all flex items-center gap-1 shadow-sm"><i class="ri-add-line"></i> 직접 만들기</button>
       </div>
 
+      <!-- CSV 일괄 등록 폼 -->
       <div id="csv-upload-form" class="hidden neo-card p-6 mb-8 bg-slate-50 border-2 border-blue-200 shadow-lg">
         <h3 class="font-bold text-slate-800 mb-4 text-lg flex items-center gap-2"><i class="ri-file-excel-2-line text-blue-500"></i> CSV 일괄 등록</h3>
         <div class="mb-4 text-sm text-gray-600 bg-white p-4 rounded-xl border border-gray-200">
@@ -840,7 +839,13 @@
             options: {
                 responsive: true, maintainAspectRatio: false,
                 plugins: { legend: { display: false } },
-                scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
+                scales: { 
+                    y: { 
+                        beginAtZero: true, 
+                        ticks: { precision: 0 },
+                        suggestedMax: 150 /* 💡 하루 목표치 150개 세팅 완료! */
+                    } 
+                }
             }
         });
       }
