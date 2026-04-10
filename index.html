@@ -13,7 +13,23 @@
   </script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;800&display=swap');
-    body { font-family: 'Pretendard', sans-serif; background: #f8fafc; color: #0f172a; overflow-x: hidden; }
+    
+    /* 💡 ZEN SERIF 폰트 불러오기 설정 완료 */
+    @font-face {
+        font-family: 'ZEN SERIF';
+        src: url('ZEN-SERIF.otf') format('opentype'), url('ZEN-SERIF.ttf') format('truetype'); 
+        font-weight: normal;
+        font-style: normal;
+    }
+
+    /* 💡 전체 앱의 기본 폰트를 ZEN SERIF로 변경 (만약 로딩 실패시 Pretendard 사용) */
+    body { 
+        font-family: 'ZEN SERIF', 'Pretendard', sans-serif; 
+        background: #f8fafc; 
+        color: #0f172a; 
+        overflow-x: hidden; 
+    }
+    
     .nav-btn { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 10px; color: #64748b; transition: all 0.2s; border-radius: 12px; flex-shrink: 0; }
     .nav-btn.active { color: #10b981; background: #ecfdf5; font-weight: 800; }
     .nav-btn:hover { color: #10b981; }
@@ -33,7 +49,7 @@
     .answer-row { display: flex; border-bottom: 1px solid #e2e8f0; height: 44px; position: relative; }
     .row-num { width: 44px; display: flex; align-items: center; justify-content: center; font-size: 12px; color: #94a3b8; font-weight: 700; border-right: 1px solid #e2e8f0; background: #f8fafc; }
     .row-input-wrapper { flex: 1; position: relative; display: flex; align-items: center; background: white; }
-    .row-input { width: 100%; height: 100%; border: none; outline: none; padding: 0 16px; font-size: 15px; font-family: 'Pretendard', monospace; letter-spacing: 1px; }
+    .row-input { width: 100%; height: 100%; border: none; outline: none; padding: 0 16px; font-size: 15px; font-family: 'ZEN SERIF', 'Pretendard', monospace; letter-spacing: 1px; }
     .row-input:focus { background: #f0fdf4; }
     .char-indicator { position: absolute; right: 12px; font-size: 10px; font-weight: 800; color: #cbd5e1; pointer-events: none; transition: color 0.2s; }
     .row-input:focus + .char-indicator { color: #10b981; }
@@ -63,8 +79,6 @@
     #message-box { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); padding: 12px 24px; border-radius: 50px; background: #333; color: white; font-size: 14px; font-weight: bold; z-index: 10000; display: none; box-shadow: 0 10px 20px rgba(0,0,0,0.2); white-space: nowrap; }
     
     .fc-item-checkbox { width: 18px; height: 18px; border-radius: 4px; border-gray-300; text-emerald-500; cursor: pointer; }
-    
-    /* 차트 컨테이너 스타일 */
     .chart-wrapper { position: relative; height: 220px; width: 100%; }
   </style>
 </head>
@@ -100,6 +114,7 @@
 
   <main class="pt-24 px-4 md:px-8 max-w-5xl mx-auto">
 
+    <!-- 1. 대시보드 -->
     <div id="page-dashboard" class="page-content active">
       <h2 class="text-2xl font-extrabold text-slate-800 mb-6 flex items-center gap-2"><i class="ri-dashboard-line"></i> 학습 대시보드</h2>
       
@@ -165,6 +180,7 @@
       </div>
     </div>
 
+    <!-- 2. 자료 변환 -->
     <div id="page-convert" class="page-content">
       <h2 class="text-2xl font-extrabold text-slate-800 mb-2 flex items-center gap-2"><i class="ri-robot-line"></i> AI 자료 변환</h2>
       <p class="text-sm text-gray-500 mb-6">문제지나 모범답안 PDF를 업로드하면 AI가 분석하여 모의고사용 문제나 플래시카드로 변환합니다.</p>
@@ -199,6 +215,7 @@
       </div>
     </div>
 
+    <!-- 3. 플래시카드 -->
     <div id="page-flashcard" class="page-content">
       <h2 class="text-2xl font-extrabold text-slate-800 mb-2 flex items-center gap-2"><i class="ri-stack-line"></i> 안키형 플래시카드</h2>
       <p class="text-sm text-gray-500 mb-6">빈칸이 있는 카드는 단어장 모드로, 일반 카드는 뒤집기 모드로 알아서 작동합니다.</p>
@@ -335,6 +352,7 @@
       </div>
     </div>
 
+    <!-- 4. 목차 빈칸 채우기 -->
     <div id="page-blank" class="page-content">
       <h2 class="text-2xl font-extrabold text-slate-800 mb-2 flex items-center gap-2"><i class="ri-edit-2-line"></i> 목차 빈칸 뚫기</h2>
       <p class="text-sm text-gray-500 mb-6">전체적인 구조 암기를 위해 목차의 빈칸을 채워보세요. 단어 풀(Word Bank)을 활용하여 쉽게 입력할 수 있습니다.</p>
@@ -416,6 +434,7 @@
       </div>
     </div>
 
+    <!-- 5. 판례 DB 검색 -->
     <div id="page-lawdb" class="page-content">
       <h2 class="text-2xl font-extrabold text-slate-800 mb-6 flex items-center gap-2"><i class="ri-book-read-line"></i> 판례·조문 DB 검색</h2>
       <div class="neo-card p-8">
@@ -427,6 +446,7 @@
       </div>
     </div>
 
+    <!-- 6. 실전 모의고사 -->
     <div id="page-exam" class="page-content">
       <h2 class="text-2xl font-extrabold text-slate-800 mb-2 flex items-center gap-2"><i class="ri-edit-box-line"></i> 실전 모의고사</h2>
       <p class="text-sm text-gray-500 mb-6">강사님의 채점평 PDF를 업로드하여 가장 깐깐하게 채점받아 보세요!</p>
@@ -535,6 +555,7 @@
       </div>
     </div>
 
+    <!-- 7. 결과 화면 -->
     <div id="page-result" class="page-content">
       <div class="max-w-3xl mx-auto space-y-6">
         <div class="neo-card p-10 text-center relative overflow-hidden bg-gradient-to-b from-white to-emerald-50/30">
@@ -576,6 +597,7 @@
       </div>
     </div>
 
+    <!-- 8. 설정 -->
     <div id="page-settings" class="page-content">
       <h2 class="text-2xl font-extrabold text-slate-800 mb-6 flex items-center gap-2"><i class="ri-settings-4-line"></i> 시스템 설정</h2>
       <div class="max-w-xl mx-auto space-y-6">
@@ -643,7 +665,7 @@
       };
     };
 
-    const LINES_PER_PAGE = 22; const MAX_CHARS_PER_LINE = 40; const MODEL_NAME = "gemini-2.5-flash";
+    const LINES_PER_PAGE = 22; const MAX_CHARS_PER_LINE = 40; const MODEL_NAME = "gemini-1.5-flash";
     let examState = { subject: '', question: '', rubric: '', time: 0, seconds: 0, totalPage: 5, currPage: 1, timer: null, answers: {}, uploadedRubricText: '' };
     let blankState = { outline: null, lines: [], answers: [], activeInput: null };
     let fcClozeState = { activeInput: null, answers: [] }; 
@@ -761,7 +783,6 @@
         if (db.lastStudyDate === yesterday) db.streak++; else db.streak = 1;
         db.lastStudyDate = today; 
       }
-      // 💡 일일 카드 학습량 기록
       db.studyLog = db.studyLog || {};
       db.studyLog[today] = (db.studyLog[today] || 0) + 1;
       saveDB();
@@ -789,15 +810,12 @@
         `).join('');
       }
 
-      // 💡 차트 그리기 로직 호출
       if (typeof Chart !== 'undefined') {
         drawDashboardCharts();
       }
     };
 
-    // 💡 Chart.js 를 이용한 그래프 그리기 함수
     function drawDashboardCharts() {
-      // 1. 주간 학습량 (Bar)
       const ctxWeekly = document.getElementById('chart-weekly');
       if(ctxWeekly) {
         const last7Days = Array.from({length: 7}, (_, i) => {
@@ -805,7 +823,7 @@
             return getLocalYYYYMMDD(d);
         });
         const weeklyData = last7Days.map(date => (db.studyLog && db.studyLog[date]) ? db.studyLog[date] : 0);
-        const labels = last7Days.map(date => date.slice(5).replace('-','/')); // MM/DD
+        const labels = last7Days.map(date => date.slice(5).replace('-','/')); 
 
         if(chartInstances['weekly']) chartInstances['weekly'].destroy();
         chartInstances['weekly'] = new Chart(ctxWeekly, {
@@ -813,9 +831,9 @@
             data: {
                 labels: labels,
                 datasets: [{
-                    label: '학습한 카드 수',
+                    label: '학습한 횟수',
                     data: weeklyData,
-                    backgroundColor: 'rgba(16, 185, 129, 0.8)', // emerald-500
+                    backgroundColor: 'rgba(16, 185, 129, 0.8)', 
                     borderRadius: 4,
                 }]
             },
@@ -827,7 +845,6 @@
         });
       }
 
-      // 2. 과목별 비율 (Doughnut)
       const ctxSub = document.getElementById('chart-subjects');
       if(ctxSub) {
         const subCounts = {};
@@ -854,7 +871,6 @@
         });
       }
 
-      // 3. 점수 추이 (Line)
       const ctxScore = document.getElementById('chart-scores');
       if(ctxScore) {
         const sortedHistory = [...db.history].sort((a,b) => a.id - b.id);
@@ -869,7 +885,7 @@
                 datasets: [{
                     label: '모의고사 점수',
                     data: scoreData.length ? scoreData : [0],
-                    borderColor: '#f43f5e', // rose-500
+                    borderColor: '#f43f5e', 
                     backgroundColor: 'rgba(244, 63, 94, 0.1)',
                     borderWidth: 2,
                     pointBackgroundColor: '#f43f5e',
