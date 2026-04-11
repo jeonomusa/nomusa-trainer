@@ -92,7 +92,7 @@
   <header class="fixed top-0 left-0 right-0 h-16 bg-[#0f172a] border-b border-slate-800 text-white flex items-center justify-between px-4 lg:px-6 z-50 shadow-md">
     <div class="flex items-center gap-2 cursor-pointer shrink-0" onclick="navigate('dashboard')">
       <i class="ri-scales-3-line text-emerald-400 text-2xl"></i>
-      <h1 class="text-lg font-extrabold tracking-tight">NOMUSA <span class="text-emerald-400">TRAINER</span></h1>
+      <h1 class="text-lg font-extrabold tracking-tight">CPLA <span class="text-emerald-400">TRAINER</span></h1>
     </div>
     
     <nav class="hidden md:flex flex-1 justify-center gap-1 mx-4 overflow-x-auto no-scrollbar">
@@ -843,7 +843,7 @@
                     y: { 
                         beginAtZero: true, 
                         ticks: { precision: 0 },
-                        suggestedMax: 150 /* 💡 하루 목표치 150개 세팅 완료! */
+                        suggestedMax: 100 /* 💡 하루 목표치 150개 세팅 완료! */
                     } 
                 }
             }
@@ -1125,11 +1125,12 @@
 
       if(filteredCards.length === 0) { container.innerHTML = '<p class="text-sm text-gray-400 py-4 text-center">등록된 카드가 없습니다.</p>'; return; }
       
-      container.innerHTML = filteredCards.map(c => `
+      container.innerHTML = filteredCards.map((c, index) => `
         <div class="flex justify-between items-center p-3 bg-gray-50 border border-gray-100 rounded-lg hover:border-emerald-300 transition-colors">
            <div class="flex items-center gap-3 flex-1 min-w-0 pr-4">
              <input type="checkbox" class="fc-item-checkbox rounded text-emerald-500 focus:ring-emerald-500 border-gray-300 w-4 h-4 cursor-pointer" value="${c.id}" onchange="updateSelectAllFcState()">
-             <div>
+             <span class="text-xs font-bold text-gray-400 w-5 text-center shrink-0">${index + 1}</span>
+             <div class="min-w-0">
                <span class="text-[10px] font-bold text-emerald-500 bg-emerald-50 px-2 py-0.5 rounded">${c.subject}</span>
                <p class="font-bold text-sm text-slate-800 mt-1 truncate">${c.front}</p>
              </div>
