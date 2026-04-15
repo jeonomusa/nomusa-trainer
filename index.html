@@ -122,12 +122,14 @@
           <div class="flex items-center justify-center gap-2 md:gap-4 mt-1 w-full">
             <div class="text-center flex-1">
               <span class="text-[9px] md:text-[10px] font-bold text-slate-500 block mb-1">현재</span>
-              <div><span class="text-xl md:text-2xl font-extrabold text-slate-800" id="streak-val">0</span><span class="text-sm font-bold text-slate-800">일</span></div>
+              <!-- '일' 텍스트 제거 및 깔끔하게 span만 남김 -->
+              <span class="text-xl md:text-2xl font-extrabold text-slate-800" id="streak-val">0</span>
             </div>
             <div class="w-px h-6 md:h-8 bg-gray-200"></div>
             <div class="text-center flex-1">
               <span class="text-[9px] md:text-[10px] font-bold text-rose-500 block mb-1">최대</span>
-              <div><span class="text-xl md:text-2xl font-extrabold text-rose-500" id="max-streak-val">0</span><span class="text-sm font-bold text-rose-500">일</span></div>
+              <!-- '일' 텍스트 제거 -->
+              <span class="text-xl md:text-2xl font-extrabold text-rose-500" id="max-streak-val">0</span>
             </div>
           </div>
         </div>
@@ -148,7 +150,8 @@
         </div>
         <div class="neo-card p-4 md:p-6 flex flex-col items-center justify-center text-center">
           <span class="text-[10px] font-bold text-gray-400 uppercase mb-2">누적 모의고사</span>
-          <div><span class="text-2xl md:text-3xl font-extrabold text-slate-800" id="total-exams-val">0</span><span class="text-sm font-bold text-slate-800">회</span></div>
+          <!-- '회' 텍스트 제거 -->
+          <span class="text-2xl md:text-3xl font-extrabold text-slate-800" id="total-exams-val">0</span>
         </div>
       </div>
 
@@ -655,6 +658,7 @@
     const LINES_PER_PAGE = 22; const MAX_CHARS_PER_LINE = 40; 
     let examState = { subject: '', question: '', rubric: '', time: 0, seconds: 0, totalPage: 5, currPage: 1, timer: null, answers: {}, uploadedRubricText: '' };
     let blankState = { outline: null, lines: [], answers: [], activeInput: null };
+    let fcClozeState = { answers: [], activeInput: null };
     let dueCards = []; let dueOutlines = []; let currentCard = null;
 
     function navigate(id) {
@@ -815,7 +819,7 @@
                     { type: 'bar', label: '카드 (장)', data: weeklyDataFc, backgroundColor: 'rgba(16, 185, 129, 0.8)', borderRadius: 4, order: 2 }
                 ]
             },
-            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: true, position: 'top', labels: { boxWidth: 10, font: { size: 10, family: 'Pretendard' } } } }, scales: { y: { beginAtZero: true, ticks: { precision: 0 }, suggestedMax: 100 } } }
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: true, position: 'top', labels: { boxWidth: 10, font: { size: 10, family: 'Pretendard' } } } }, scales: { y: { beginAtZero: true, ticks: { precision: 0 }, suggestedMax: 120 } } }
         });
       }
 
