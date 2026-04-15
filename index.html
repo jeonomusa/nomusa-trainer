@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>노무사 아웃풋 트레이너 - AI Master</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
@@ -28,6 +28,7 @@
         overflow-x: hidden; 
     }
     
+    /* 네비게이션 버튼 */
     .nav-btn { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 10px; color: #64748b; transition: all 0.2s; border-radius: 12px; flex-shrink: 0; }
     .nav-btn.active { color: #10b981; background: #ecfdf5; font-weight: 800; }
     .nav-btn:hover { color: #10b981; }
@@ -36,6 +37,7 @@
     .desktop-nav-btn:hover { color: #e2e8f0; background: rgba(255, 255, 255, 0.05); }
     .desktop-nav-btn.active { color: #10b981; font-weight: 800; }
     .desktop-nav-btn.active::after { content: ''; position: absolute; bottom: 2px; left: 50%; transform: translateX(-50%); width: 24px; height: 3px; background: #10b981; border-radius: 4px; box-shadow: 0 0 8px rgba(16, 185, 129, 0.4); }
+    
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
@@ -44,32 +46,44 @@
     .page-content.active { display: block; }
     @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     
+    /* 플래시카드 & 퀴즈 컨테이너 모바일 최적화 */
+    .fc-container { perspective: 1000px; height: 320px; width: 100%; max-width: 600px; margin: 0 auto; }
+    .fc-inner { position: relative; width: 100%; height: 100%; text-align: center; transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1); transform-style: preserve-3d; cursor: pointer; }
+    .fc-inner.flipped { transform: rotateY(180deg); }
+    .fc-front, .fc-back { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); background: white; border: 2px solid #f1f5f9; }
+    .fc-back { background: #0f172a; color: white; transform: rotateY(180deg); border: none; }
+    
+    @media (min-width: 768px) {
+        .fc-front, .fc-back { padding: 40px; }
+        .neo-card { padding: 32px; }
+    }
+
+    /* 하단 SM-2 버튼 모바일 2x2 배열 최적화 */
+    .fc-buttons-wrap { display: none; gap: 8px; max-width: 600px; width: 100%; margin: 0 auto; flex-wrap: wrap; justify-content: center; }
+    .fc-buttons-wrap.show { display: flex; }
+    .sm2-btn { flex: 1 1 45%; min-width: 70px; padding: 12px 8px; border-radius: 16px; font-weight: 800; color: white; text-align: center; transition: all 0.2s; cursor: pointer; }
+    .sm2-btn:active { transform: scale(0.95); }
+
+    /* 빈칸 모바일 너비 최적화 */
+    .blank-input { border: none; border-bottom: 2px solid #cbd5e1; background: transparent; text-align: center; font-size: 15px; font-weight: 700; color: #0f172a; outline: none; transition: all 0.2s; padding: 2px 4px; margin: 0 4px; box-sizing: border-box; max-width: 100%; }
+    .blank-input:focus { border-bottom-color: #10b981; background: #f0fdf4; }
+    .blank-input.correct { border-bottom-color: #10b981; color: #10b981; background: #ecfdf5; }
+    .blank-input.wrong { border-bottom-color: #ef4444; color: #ef4444; background: #fef2f2; }
+    
+    /* 워드 칩 텍스트 깨짐 방지 */
+    .word-chip { padding: 8px 16px; background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 20px; font-size: 14px; font-weight: 700; color: #475569; cursor: pointer; transition: all 0.2s; user-select: none; display: inline-block; margin: 4px; word-break: keep-all; white-space: nowrap; }
+    .word-chip:hover { background: #e2e8f0; color: #0f172a; }
+    .word-chip:active { transform: scale(0.95); }
+
+    /* 모의고사 답안지 */
     .answer-row { display: flex; border-bottom: 1px solid #e2e8f0; height: 44px; position: relative; }
-    .row-num { width: 44px; display: flex; align-items: center; justify-content: center; font-size: 12px; color: #94a3b8; font-weight: 700; border-right: 1px solid #e2e8f0; background: #f8fafc; }
-    .row-input-wrapper { flex: 1; position: relative; display: flex; align-items: center; background: white; }
+    .row-num { width: 44px; display: flex; align-items: center; justify-content: center; font-size: 12px; color: #94a3b8; font-weight: 700; border-right: 1px solid #e2e8f0; background: #f8fafc; flex-shrink: 0; }
+    .row-input-wrapper { flex: 1; position: relative; display: flex; align-items: center; background: white; min-width: 0; }
     .row-input { width: 100%; height: 100%; border: none; outline: none; padding: 0 16px; font-size: 15px; font-family: 'ZEN SERIF', 'Pretendard', monospace; letter-spacing: 1px; }
     .row-input:focus { background: #f0fdf4; }
     .char-indicator { position: absolute; right: 12px; font-size: 10px; font-weight: 800; color: #cbd5e1; pointer-events: none; transition: color 0.2s; }
     .row-input:focus + .char-indicator { color: #10b981; }
     .char-indicator.full { color: #ef4444; }
-    
-    .fc-container { perspective: 1000px; height: 320px; width: 100%; max-width: 600px; margin: 0 auto; }
-    .fc-inner { position: relative; width: 100%; height: 100%; text-align: center; transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1); transform-style: preserve-3d; cursor: pointer; }
-    .fc-inner.flipped { transform: rotateY(180deg); }
-    .fc-front, .fc-back { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); background: white; border: 2px solid #f1f5f9; }
-    .fc-back { background: #0f172a; color: white; transform: rotateY(180deg); border: none; }
-    .sm2-btn { flex: 1; padding: 12px 8px; border-radius: 16px; font-weight: 800; color: white; text-align: center; transition: all 0.2s; cursor: pointer; }
-    .sm2-btn:active { transform: scale(0.95); }
-    .fc-buttons-wrap { display: none; gap: 12px; max-width: 600px; width: 100%; margin: 0 auto; }
-    .fc-buttons-wrap.show { display: flex; }
-    
-    .blank-input { border: none; border-bottom: 2px solid #cbd5e1; background: transparent; min-width: 80px; max-width: 100%; text-align: center; font-size: 15px; font-weight: 700; color: #0f172a; outline: none; transition: all 0.2s; padding: 2px 8px; margin: 0 4px; }
-    .blank-input:focus { border-bottom-color: #10b981; background: #f0fdf4; }
-    .blank-input.correct { border-bottom-color: #10b981; color: #10b981; background: #ecfdf5; }
-    .blank-input.wrong { border-bottom-color: #ef4444; color: #ef4444; background: #fef2f2; }
-    .word-chip { padding: 8px 16px; background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 20px; font-size: 14px; font-weight: 700; color: #475569; cursor: pointer; transition: all 0.2s; user-select: none; display: inline-block; margin: 4px; }
-    .word-chip:hover { background: #e2e8f0; color: #0f172a; }
-    .word-chip:active { transform: scale(0.95); }
 
     #loading-overlay { position: fixed; inset: 0; background: rgba(255,255,255,0.9); z-index: 9999; display: none; flex-direction: column; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
     .spinner { width: 50px; height: 50px; border: 5px solid #ecfdf5; border-left-color: #10b981; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 20px; }
@@ -92,7 +106,7 @@
   <header class="fixed top-0 left-0 right-0 h-16 bg-[#0f172a] border-b border-slate-800 text-white flex items-center justify-between px-4 lg:px-6 z-50 shadow-md">
     <div class="flex items-center gap-2 cursor-pointer shrink-0" onclick="navigate('dashboard')">
       <i class="ri-scales-3-line text-emerald-400 text-2xl"></i>
-      <h1 class="text-lg font-extrabold tracking-tight">NOMUSA <span class="text-emerald-400">TRAINER</span></h1>
+      <h1 class="text-lg font-extrabold tracking-tight">CPLA <span class="text-emerald-400">TRAINER</span></h1>
     </div>
     
     <nav class="hidden md:flex flex-1 justify-center gap-1 mx-4 overflow-x-auto no-scrollbar">
@@ -110,79 +124,68 @@
     </div>
   </header>
 
-  <main class="pt-24 px-4 md:px-8 max-w-5xl mx-auto">
+  <main class="pt-20 px-4 md:pt-24 md:px-8 max-w-5xl mx-auto">
 
-    <!-- 1. 대시보드 -->
     <div id="page-dashboard" class="page-content active">
       <h2 class="text-2xl font-extrabold text-slate-800 mb-6 flex items-center gap-2"><i class="ri-dashboard-line"></i> 학습 대시보드</h2>
       
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        <div class="neo-card p-6 flex flex-col items-center text-center">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-6">
+        <div class="neo-card p-4 md:p-6 flex flex-col items-center text-center">
           <span class="text-[10px] font-bold text-gray-400 uppercase mb-2">시험 D-Day</span>
-          <span class="text-3xl font-extrabold text-emerald-500" id="d-day-val">D-?</span>
+          <span class="text-2xl md:text-3xl font-extrabold text-emerald-500" id="d-day-val">D-?</span>
         </div>
-        <div class="neo-card p-6 flex flex-col items-center text-center border-b-4 border-b-emerald-500">
+        <div class="neo-card p-4 md:p-6 flex flex-col items-center text-center border-b-4 border-b-emerald-500">
           <span class="text-[10px] font-bold text-gray-400 uppercase mb-2">연속 학습일</span>
-          <span class="text-3xl font-extrabold text-slate-800" id="streak-val">0일</span>
+          <span class="text-2xl md:text-3xl font-extrabold text-slate-800" id="streak-val">0일</span>
         </div>
         
-        <!-- 💡 수정됨: 오늘 남은 복습 (카드와 목차 분리 표시) -->
         <div class="neo-card p-4 flex flex-col items-center justify-center text-center">
           <span class="text-[10px] font-bold text-gray-400 uppercase mb-2">오늘 남은 복습</span>
-          <div class="flex items-center justify-center gap-4 mt-1 w-full">
+          <div class="flex items-center justify-center gap-2 md:gap-4 mt-1 w-full">
             <div class="text-center flex-1">
-              <span class="text-[10px] font-bold text-blue-400 block mb-1">카드</span>
-              <span class="text-2xl font-extrabold text-blue-500" id="due-fc-val">0</span>
+              <span class="text-[9px] md:text-[10px] font-bold text-blue-400 block mb-1">카드</span>
+              <span class="text-xl md:text-2xl font-extrabold text-blue-500" id="due-fc-val">0</span>
             </div>
-            <div class="w-px h-8 bg-gray-200"></div>
+            <div class="w-px h-6 md:h-8 bg-gray-200"></div>
             <div class="text-center flex-1">
-              <span class="text-[10px] font-bold text-amber-500 block mb-1">목차</span>
-              <span class="text-2xl font-extrabold text-amber-500" id="due-outline-val">0</span>
+              <span class="text-[9px] md:text-[10px] font-bold text-amber-500 block mb-1">목차</span>
+              <span class="text-xl md:text-2xl font-extrabold text-amber-500" id="due-outline-val">0</span>
             </div>
           </div>
         </div>
 
-        <div class="neo-card p-6 flex flex-col items-center text-center">
+        <div class="neo-card p-4 md:p-6 flex flex-col items-center text-center">
           <span class="text-[10px] font-bold text-gray-400 uppercase mb-2">누적 모의고사</span>
-          <span class="text-3xl font-extrabold text-slate-800" id="total-exams-val">0회</span>
+          <span class="text-2xl md:text-3xl font-extrabold text-slate-800" id="total-exams-val">0회</span>
         </div>
       </div>
 
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-        <div class="lg:col-span-2 neo-card p-6">
-          <h3 class="font-bold text-slate-800 mb-4 flex items-center gap-2"><i class="ri-bar-chart-box-line text-blue-500"></i> 최근 7일 학습량</h3>
-          <!-- 💡 수정됨: 혼합 차트가 들어갈 캔버스 영역 -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6 mb-6">
+        <div class="lg:col-span-2 neo-card p-4 md:p-6">
+          <h3 class="font-bold text-slate-800 mb-4 flex items-center gap-2 text-sm md:text-base"><i class="ri-bar-chart-box-line text-blue-500"></i> 최근 7일 학습량</h3>
           <div class="chart-wrapper"><canvas id="chart-weekly"></canvas></div>
         </div>
-        <div class="neo-card p-6">
-          <h3 class="font-bold text-slate-800 mb-4 flex items-center gap-2"><i class="ri-pie-chart-2-fill text-purple-500"></i> 모의고사 과목 비율</h3>
+        <div class="neo-card p-4 md:p-6">
+          <h3 class="font-bold text-slate-800 mb-4 flex items-center gap-2 text-sm md:text-base"><i class="ri-pie-chart-2-fill text-purple-500"></i> 모의고사 과목 비율</h3>
           <div class="chart-wrapper"><canvas id="chart-subjects"></canvas></div>
         </div>
       </div>
 
-      <div class="neo-card p-6 mb-6">
+      <div class="neo-card p-4 md:p-6 mb-6">
         <div class="flex justify-between items-center mb-4">
-          <h3 class="font-bold text-slate-800 flex items-center gap-2"><i class="ri-line-chart-line text-rose-500"></i> 모의고사 점 추이</h3>
+          <h3 class="font-bold text-slate-800 flex items-center gap-2 text-sm md:text-base"><i class="ri-line-chart-line text-rose-500"></i> 모의고사 점수 추이</h3>
         </div>
         <div class="chart-wrapper"><canvas id="chart-scores"></canvas></div>
       </div>
 
-      <div class="neo-card p-6 mb-8">
-        <div class="flex justify-between items-center">
-          <h3 class="font-bold text-slate-800 flex items-center gap-2"><i class="ri-brain-line text-purple-500"></i> AI 취약점 종합 진단</h3>
-          <button onclick="analyzeStudyHistory()" class="px-4 py-2 bg-purple-50 text-purple-600 border border-purple-200 text-xs font-bold rounded-lg hover:bg-purple-100 transition-all">진단 리포트 생성</button>
+      <div class="neo-card p-4 md:p-6 mb-8">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="font-bold text-slate-800 flex items-center gap-2 text-sm md:text-base"><i class="ri-history-line text-emerald-500"></i> 최근 모의고사 기록</h3>
         </div>
-        <div id="ai-analysis-box" class="hidden mt-4 p-4 bg-purple-50 rounded-xl border border-purple-100">
-          <p class="text-sm leading-relaxed text-slate-700" id="ai-analysis-content"></p>
-        </div>
-      </div>
-
-      <div class="neo-card p-8">
-        <h3 class="font-bold text-slate-800 mb-6 flex items-center gap-2"><i class="ri-history-line text-emerald-500"></i> 최근 모의고사 기록</h3>
         <div class="overflow-x-auto">
           <table class="w-full text-left">
             <thead>
-              <tr class="text-[11px] font-bold text-gray-400 uppercase border-b border-gray-100">
+              <tr class="text-[10px] md:text-[11px] font-bold text-gray-400 uppercase border-b border-gray-100">
                 <th class="pb-3 px-2">날짜</th><th class="pb-3 px-2">과목</th><th class="pb-3 px-2">점수</th><th class="pb-3 px-2 text-right">첨삭 결과</th>
               </tr>
             </thead>
@@ -192,336 +195,307 @@
       </div>
     </div>
 
-    <!-- 2. 자료 변환 -->
     <div id="page-convert" class="page-content">
       <h2 class="text-2xl font-extrabold text-slate-800 mb-2 flex items-center gap-2"><i class="ri-robot-line"></i> AI 자료 변환</h2>
       <p class="text-sm text-gray-500 mb-6">문제지나 모범답안 PDF를 업로드하면 AI가 분석하여 모의고사용 문제나 플래시카드로 변환합니다.</p>
-      <div class="neo-card p-8">
-        <div class="mb-8">
-          <label class="border-2 border-dashed border-gray-200 rounded-3xl p-12 flex flex-col items-center justify-center cursor-pointer hover:border-emerald-500 hover:bg-emerald-50 transition-all group">
+      <div class="neo-card p-4 md:p-8">
+        <div class="mb-6 md:mb-8">
+          <label class="border-2 border-dashed border-gray-200 rounded-2xl md:rounded-3xl p-8 md:p-12 flex flex-col items-center justify-center cursor-pointer hover:border-emerald-500 hover:bg-emerald-50 transition-all group">
             <input type="file" id="file-q" class="hidden" accept=".pdf" onchange="handleFileDisplay('q')">
             <div class="relative z-10 pointer-events-none flex flex-col items-center">
-              <i class="ri-file-pdf-line text-5xl text-gray-300 group-hover:text-emerald-500 mb-4"></i>
-              <span class="font-bold text-lg text-slate-700" id="file-q-name">문제/모범답안 PDF 업로드</span>
+              <i class="ri-file-pdf-line text-4xl md:text-5xl text-gray-300 group-hover:text-emerald-500 mb-3 md:mb-4"></i>
+              <span class="font-bold text-sm md:text-lg text-slate-700" id="file-q-name">PDF 업로드</span>
             </div>
           </label>
         </div>
-        <div class="grid grid-cols-2 gap-4 mb-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
           <div>
             <label class="text-xs font-bold text-gray-500 mb-2 block">과목 선택</label>
-            <select id="convert-subject" class="w-full p-4 bg-gray-50 rounded-xl font-bold border-none outline-none focus:ring-2 focus:ring-emerald-500">
+            <select id="convert-subject" class="w-full p-3 md:p-4 bg-gray-50 rounded-xl font-bold border-none outline-none focus:ring-2 focus:ring-emerald-500">
               <option>노동법</option><option>인사노무관리</option><option>행정쟁송법</option><option>민사소송법</option>
             </select>
           </div>
           <div>
             <label class="text-xs font-bold text-gray-500 mb-2 block">변환 유형</label>
-            <select id="convert-type" class="w-full p-4 bg-gray-50 rounded-xl font-bold border-none outline-none focus:ring-2 focus:ring-emerald-500">
+            <select id="convert-type" class="w-full p-3 md:p-4 bg-gray-50 rounded-xl font-bold border-none outline-none focus:ring-2 focus:ring-emerald-500">
               <option value="exam">📝 모의고사 문제 + 모범답안 추출</option>
               <option value="flashcard">🃏 핵심 쟁점 플래시카드</option>
             </select>
           </div>
         </div>
-        <button onclick="processAIConvert()" class="w-full py-4 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl font-bold text-lg shadow-lg active:scale-95 transition-all flex items-center justify-center gap-2">
+        <button onclick="processAIConvert()" class="w-full py-3 md:py-4 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl font-bold text-base md:text-lg shadow-lg active:scale-95 transition-all flex items-center justify-center gap-2">
           <i class="ri-magic-line"></i> AI 데이터 추출 시작
         </button>
       </div>
     </div>
 
-    <!-- 3. 플래시카드 -->
     <div id="page-flashcard" class="page-content">
       <h2 class="text-2xl font-extrabold text-slate-800 mb-2 flex items-center gap-2"><i class="ri-stack-line"></i> 안키형 플래시카드</h2>
       <p class="text-sm text-gray-500 mb-6">빈칸이 있는 카드는 단어장 모드로, 일반 카드는 뒤집기 모드로 알아서 작동합니다.</p>
 
-      <div class="mb-6 flex flex-wrap justify-end gap-2">
-        <button onclick="toggleCsvUploadForm()" class="px-4 py-2 bg-blue-50 border border-blue-200 text-blue-700 rounded-lg text-sm font-bold hover:bg-blue-100 transition-all flex items-center gap-1 shadow-sm"><i class="ri-file-excel-2-line"></i> CSV 일괄 등록</button>
-        <button onclick="toggleFcManager()" class="px-4 py-2 bg-white border border-gray-200 text-slate-700 rounded-lg text-sm font-bold hover:bg-gray-50 transition-all flex items-center gap-1 shadow-sm"><i class="ri-list-settings-line"></i> 카드 관리</button>
-        <button onclick="toggleManualCardForm()" class="px-4 py-2 bg-slate-800 text-white rounded-lg text-sm font-bold hover:bg-slate-700 transition-all flex items-center gap-1 shadow-sm"><i class="ri-add-line"></i> 직접 만들기</button>
+      <div class="mb-6 flex flex-wrap justify-start md:justify-end gap-2">
+        <button onclick="toggleCsvUploadForm()" class="flex-1 md:flex-none justify-center px-4 py-2 bg-blue-50 border border-blue-200 text-blue-700 rounded-lg text-xs md:text-sm font-bold hover:bg-blue-100 transition-all flex items-center gap-1"><i class="ri-file-excel-2-line"></i> CSV 등록</button>
+        <button onclick="toggleFcManager()" class="flex-1 md:flex-none justify-center px-4 py-2 bg-white border border-gray-200 text-slate-700 rounded-lg text-xs md:text-sm font-bold hover:bg-gray-50 transition-all flex items-center gap-1"><i class="ri-list-settings-line"></i> 관리</button>
+        <button onclick="toggleManualCardForm()" class="flex-1 md:flex-none justify-center px-4 py-2 bg-slate-800 text-white rounded-lg text-xs md:text-sm font-bold hover:bg-slate-700 transition-all flex items-center gap-1"><i class="ri-add-line"></i> 만들기</button>
       </div>
 
-      <div id="csv-upload-form" class="hidden neo-card p-6 mb-8 bg-slate-50 border-2 border-blue-200 shadow-lg">
-        <h3 class="font-bold text-slate-800 mb-4 text-lg flex items-center gap-2"><i class="ri-file-excel-2-line text-blue-500"></i> CSV 일괄 등록</h3>
-        <div class="mb-4 text-sm text-gray-600 bg-white p-4 rounded-xl border border-gray-200">
-          <p class="font-bold mb-2 text-slate-700">📌 CSV 파일 작성 규칙 (엑셀 등에서 작성 후 .csv로 저장)</p>
-          <ul class="list-disc pl-5 space-y-1 mb-3">
-            <li><strong>A열 (1번째 칸):</strong> 과목 (노동법, 인사노무관리, 행정쟁송법, 민사소송법)</li>
-            <li><strong>B열 (2번째 칸):</strong> 앞면 질문/키워드 (예: 경영상 해고 요건)</li>
-            <li><strong>C열 (3번째 칸):</strong> 뒷면 정답 및 [빈칸] 내용 (예: 긴박한 [경영상 필요성]...)</li>
-          </ul>
-        </div>
+      <div id="csv-upload-form" class="hidden neo-card p-4 md:p-6 mb-8 bg-slate-50 border-2 border-blue-200 shadow-lg">
+        <h3 class="font-bold text-slate-800 mb-4 text-sm md:text-lg flex items-center gap-2"><i class="ri-file-excel-2-line text-blue-500"></i> CSV 일괄 등록</h3>
         <div class="mb-4 flex flex-col gap-2">
           <input type="file" id="csv-file-input" accept=".csv" class="w-full p-2 bg-white rounded-xl border border-gray-200 text-sm cursor-pointer">
         </div>
         <div class="flex justify-end gap-2">
-          <button onclick="cancelCsvUpload()" class="px-5 py-2.5 bg-white border border-gray-200 text-gray-600 rounded-xl text-sm font-bold hover:bg-gray-50 transition-all">취소</button>
-          <button onclick="processCsvUpload()" class="px-6 py-2.5 bg-blue-500 text-white rounded-xl text-sm font-bold hover:bg-blue-600 shadow-md transition-all">일괄 등록하기</button>
+          <button onclick="cancelCsvUpload()" class="px-4 py-2 bg-white border border-gray-200 text-gray-600 rounded-xl text-xs md:text-sm font-bold hover:bg-gray-50">취소</button>
+          <button onclick="processCsvUpload()" class="px-4 py-2 bg-blue-500 text-white rounded-xl text-xs md:text-sm font-bold hover:bg-blue-600 shadow-md">일괄 등록하기</button>
         </div>
       </div>
 
-      <div id="fc-manager-view" class="hidden neo-card p-6 mb-8 bg-white border-2 border-slate-200">
+      <div id="fc-manager-view" class="hidden neo-card p-4 md:p-6 mb-8 bg-white border-2 border-slate-200">
         <div class="flex flex-col md:flex-row justify-between md:items-center mb-4 border-b border-gray-100 pb-3 gap-3">
-          <div class="flex items-center gap-3">
-            <h3 class="font-bold text-slate-800 text-lg flex items-center gap-2"><i class="ri-list-settings-line text-emerald-500"></i> 내 카드 목록</h3>
+          <div class="flex items-center gap-2 md:gap-3">
+            <h3 class="font-bold text-slate-800 text-base md:text-lg flex items-center gap-1"><i class="ri-list-settings-line text-emerald-500"></i> 내 카드</h3>
             <select id="fc-filter-subject" onchange="renderFcList()" class="p-1.5 bg-gray-50 border border-gray-200 rounded-lg text-xs font-bold outline-none focus:ring-2 focus:ring-emerald-500">
-              <option value="all">전체 과목</option>
-              <option value="노동법">노동법</option>
-              <option value="인사노무관리">인사노무관리</option>
-              <option value="행정쟁송법">행정쟁송법</option>
-              <option value="민사소송법">민사소송법</option>
+              <option value="all">전체 과목</option><option value="노동법">노동법</option><option value="인사노무관리">인사노무관리</option><option value="행정쟁송법">행정쟁송법</option><option value="민사소송법">민사소송법</option>
             </select>
           </div>
           <div class="flex flex-wrap items-center gap-2">
-            <label class="flex items-center gap-1 text-xs font-bold text-gray-600 cursor-pointer mr-2 bg-gray-50 px-2 py-1.5 rounded-lg border border-gray-200 hover:bg-gray-100">
+            <label class="flex items-center gap-1 text-[11px] font-bold text-gray-600 cursor-pointer bg-gray-50 px-2 py-1.5 rounded-lg border border-gray-200 hover:bg-gray-100">
               <input type="checkbox" id="fc-select-all" onchange="toggleSelectAllFc(this)" class="fc-item-checkbox rounded"> <span class="pt-0.5">전체 선택</span>
             </label>
-            <button onclick="removeBracketsFromSelected()" class="px-3 py-1.5 bg-indigo-50 text-indigo-600 text-xs font-bold rounded-lg hover:bg-indigo-100 transition-colors shadow-sm">선택 대괄호 제거</button>
-            <button onclick="deleteSelectedFc()" class="px-3 py-1.5 bg-rose-50 text-rose-500 text-xs font-bold rounded-lg hover:bg-rose-100 transition-colors shadow-sm">선택 삭제</button>
-            <button onclick="toggleFcManager()" class="ml-1 text-sm text-gray-400 hover:text-gray-800"><i class="ri-close-line text-xl"></i></button>
+            <button onclick="removeBracketsFromSelected()" class="px-2 py-1.5 bg-indigo-50 text-indigo-600 text-[11px] font-bold rounded-lg hover:bg-indigo-100">선택 괄호제거</button>
+            <button onclick="deleteSelectedFc()" class="px-2 py-1.5 bg-rose-50 text-rose-500 text-[11px] font-bold rounded-lg hover:bg-rose-100">선택 삭제</button>
           </div>
         </div>
-        <div id="fc-list" class="space-y-3 max-h-96 overflow-y-auto pr-2"></div>
+        <div id="fc-list" class="space-y-2 md:space-y-3 max-h-96 overflow-y-auto pr-1"></div>
       </div>
 
-      <div id="manual-card-form" class="hidden neo-card p-6 mb-8 bg-slate-50 border-2 border-emerald-200 shadow-lg">
-        <h3 id="manual-fc-title" class="font-bold text-slate-800 mb-4 text-lg flex items-center gap-2"><i class="ri-edit-circle-line text-emerald-500"></i> 새 플래시카드 입력</h3>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-          <div class="md:col-span-1">
-            <label class="text-xs font-bold text-gray-500 mb-2 block">과목</label>
-            <select id="manual-fc-subject" class="w-full p-3 bg-white rounded-xl font-bold border border-gray-200 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all">
-              <option>노동법</option><option>인사노무관리</option><option>행정쟁송법</option><option>민사소송법</option>
-            </select>
-          </div>
-          <div class="md:col-span-2">
-            <label class="text-xs font-bold text-gray-500 mb-2 block">앞면 (질문/키워드)</label>
-            <input type="text" id="manual-fc-front" class="w-full p-3 bg-white rounded-xl font-bold border border-gray-200 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all" placeholder="예: 경영상 해고의 4요건">
-          </div>
-        </div>
-        <div class="mb-4">
-          <label class="text-xs font-bold text-gray-500 mb-2 block">뒷면 (정답 및 빈칸 지정)</label>
-          <textarea id="manual-fc-back" class="w-full h-24 p-3 bg-white rounded-xl text-sm border border-gray-200 outline-none resize-none" placeholder="암기할 상세 내용을 적어주세요"></textarea>
+      <div id="manual-card-form" class="hidden neo-card p-4 md:p-6 mb-8 bg-slate-50 border-2 border-emerald-200 shadow-lg">
+        <h3 id="manual-fc-title" class="font-bold text-slate-800 mb-4 text-base md:text-lg flex items-center gap-2"><i class="ri-edit-circle-line text-emerald-500"></i> 새 플래시카드</h3>
+        <div class="grid grid-cols-1 gap-3 mb-4">
+          <div><select id="manual-fc-subject" class="w-full p-2.5 bg-white rounded-xl font-bold border border-gray-200 text-sm outline-none"><option>노동법</option><option>인사노무관리</option><option>행정쟁송법</option><option>민사소송법</option></select></div>
+          <div><input type="text" id="manual-fc-front" class="w-full p-2.5 bg-white rounded-xl font-bold border border-gray-200 text-sm outline-none" placeholder="앞면 (질문/키워드)"></div>
+          <div><textarea id="manual-fc-back" class="w-full h-20 p-2.5 bg-white rounded-xl text-sm border border-gray-200 outline-none resize-none" placeholder="뒷면 (정답) - 빈칸은 [대괄호]"></textarea></div>
         </div>
         <div class="flex justify-end gap-2">
-          <button onclick="cancelManualFlashcard()" class="px-5 py-2.5 bg-white border border-gray-200 text-gray-600 rounded-xl text-sm font-bold hover:bg-gray-50 transition-all">취소</button>
-          <button id="manual-fc-save-btn" onclick="addManualFlashcard()" class="px-6 py-2.5 bg-emerald-500 text-white rounded-xl text-sm font-bold hover:bg-emerald-600 shadow-md transition-all">추가하기</button>
+          <button onclick="cancelManualFlashcard()" class="px-4 py-2 bg-white border border-gray-200 text-gray-600 rounded-xl text-xs font-bold hover:bg-gray-50">취소</button>
+          <button id="manual-fc-save-btn" onclick="addManualFlashcard()" class="px-4 py-2 bg-emerald-500 text-white rounded-xl text-xs font-bold hover:bg-emerald-600 shadow-md">추가하기</button>
         </div>
       </div>
 
-      <div class="neo-card p-6 md:p-10 flex flex-col items-center min-h-[450px]">
-        <div class="text-sm font-bold text-gray-500 mb-6 bg-gray-100 px-4 py-2 rounded-full flex gap-2">
-          <span>카드 복습: <span class="text-blue-500" id="fc-due-display">0</span>장</span>
+      <div class="neo-card p-4 md:p-8 flex flex-col items-center min-h-[400px]">
+        <div class="text-xs font-bold text-gray-500 mb-4 md:mb-6 bg-gray-100 px-3 py-1.5 rounded-full">
+          카드 복습: <span class="text-blue-500" id="fc-due-display">0</span>장
         </div>
         
         <div id="fc-workspace" class="w-full hidden">
           <div class="fc-container mb-4 hidden" id="fc-flip-container">
             <div class="fc-inner" id="fc-card" onclick="flipCard()">
               <div class="fc-front">
-                <span class="absolute top-6 text-xs font-bold text-emerald-500 bg-emerald-50 px-3 py-1 rounded-full uppercase" id="fc-front-sub"></span>
-                <p class="text-xl font-extrabold text-slate-800 leading-relaxed" id="fc-front-text"></p>
-                <div class="absolute bottom-6 text-xs font-bold text-gray-300 flex items-center gap-1"><i class="ri-tap-line"></i> 클릭하여 정답 확인</div>
+                <span class="absolute top-4 md:top-6 text-[10px] md:text-xs font-bold text-emerald-500 bg-emerald-50 px-2 md:px-3 py-1 rounded-full" id="fc-front-sub"></span>
+                <p class="text-lg md:text-xl font-extrabold text-slate-800 leading-relaxed break-keep" id="fc-front-text"></p>
+                <div class="absolute bottom-4 md:bottom-6 text-[10px] md:text-xs font-bold text-gray-300 flex items-center gap-1"><i class="ri-tap-line"></i> 클릭하여 정답 확인</div>
               </div>
-              <div class="fc-back">
-                <p class="text-base font-semibold leading-relaxed" id="fc-back-text"></p>
+              <div class="fc-back overflow-y-auto no-scrollbar">
+                <p class="text-sm md:text-base font-semibold leading-relaxed break-keep" id="fc-back-text"></p>
               </div>
             </div>
           </div>
 
-          <div id="fc-cloze-container" class="hidden w-full text-left mb-4 border-2 border-emerald-100 bg-white rounded-2xl p-6 md:p-8 shadow-md">
-             <div class="text-xs font-bold text-emerald-500 mb-2 inline-block bg-emerald-50 px-2 py-1 rounded-full" id="fc-cloze-sub"></div>
-             <div class="text-xl font-extrabold text-slate-800 mb-6 pb-4 border-b border-gray-100" id="fc-cloze-front"></div>
-             <div class="text-[15px] leading-loose text-slate-700 font-medium mb-8" id="fc-cloze-back"></div>
-             <div class="text-center mt-4">
-               <button id="fc-cloze-check-btn" onclick="checkFcClozeAnswers()" class="px-6 py-2 bg-emerald-500 text-white rounded-xl font-bold hover:bg-emerald-600 shadow-sm transition-all active:scale-95">정답 확인하기</button>
+          <div id="fc-cloze-container" class="hidden w-full text-left mb-4 border-2 border-emerald-100 bg-white rounded-2xl p-5 md:p-8 shadow-md">
+             <div class="text-[10px] md:text-xs font-bold text-emerald-500 mb-2 inline-block bg-emerald-50 px-2 py-1 rounded-full" id="fc-cloze-sub"></div>
+             <div class="text-lg md:text-xl font-extrabold text-slate-800 mb-4 md:mb-6 pb-3 md:pb-4 border-b border-gray-100 break-keep" id="fc-cloze-front"></div>
+             <div class="text-[14px] md:text-[15px] leading-loose text-slate-700 font-medium mb-6 md:mb-8 break-keep" id="fc-cloze-back"></div>
+             <div class="text-center mt-2 md:mt-4">
+               <button id="fc-cloze-check-btn" onclick="checkFcClozeAnswers()" class="w-full md:w-auto px-6 py-2.5 bg-emerald-500 text-white rounded-xl text-sm font-bold hover:bg-emerald-600 shadow-sm active:scale-95">정답 확인</button>
              </div>
-             <div id="fc-cloze-word-bank-wrap" class="mt-6 pt-6 border-t border-gray-100">
-               <div id="fc-cloze-word-bank" class="flex flex-wrap gap-2 justify-center"></div>
+             <div id="fc-cloze-word-bank-wrap" class="mt-4 md:mt-6 pt-4 md:pt-6 border-t border-gray-100">
+               <div id="fc-cloze-word-bank" class="flex flex-wrap gap-1.5 md:gap-2 justify-center"></div>
              </div>
           </div>
 
-          <div id="fc-ai-tools" class="w-full max-w-[600px] mx-auto mt-4 mb-4">
-            <div class="flex justify-center gap-2 mb-3">
-              <button onclick="getFcHint()" class="px-4 py-1.5 bg-purple-50 border border-purple-100 text-purple-600 rounded-full text-[11px] font-bold hover:bg-purple-100 transition-colors shadow-sm">✨ AI 힌트</button>
-              <button onclick="getFcMnemonic()" class="px-4 py-1.5 bg-indigo-50 border border-indigo-100 text-indigo-600 rounded-full text-[11px] font-bold hover:bg-indigo-100 transition-colors shadow-sm">✨ AI 암기비법</button>
+          <div id="fc-ai-tools" class="w-full max-w-[600px] mx-auto mt-2 md:mt-4 mb-4">
+            <div class="flex justify-center gap-2 mb-2 md:mb-3">
+              <button onclick="getFcHint()" class="px-3 py-1.5 bg-purple-50 border border-purple-100 text-purple-600 rounded-full text-[10px] md:text-[11px] font-bold hover:bg-purple-100 shadow-sm">✨ AI 힌트</button>
+              <button onclick="getFcMnemonic()" class="px-3 py-1.5 bg-indigo-50 border border-indigo-100 text-indigo-600 rounded-full text-[10px] md:text-[11px] font-bold hover:bg-indigo-100 shadow-sm">✨ AI 암기비법</button>
             </div>
-            <div id="fc-ai-result" class="hidden p-4 bg-white border border-slate-200 rounded-xl text-[13px] shadow-inner"></div>
+            <div id="fc-ai-result" class="hidden p-3 md:p-4 bg-white border border-slate-200 rounded-xl text-xs md:text-[13px] shadow-inner break-keep"></div>
           </div>
 
           <div id="fc-buttons" class="fc-buttons-wrap">
-            <div class="sm2-btn bg-rose-500 hover:bg-rose-600" onclick="rateCard(1)">다시<div class="text-[10px] mt-1 opacity-90 font-medium">1분 후</div></div>
-            <div class="sm2-btn bg-orange-500 hover:bg-orange-600" onclick="rateCard(2)">어려움<div class="text-[10px] mt-1 opacity-90 font-medium">12시간 후</div></div>
-            <div class="sm2-btn bg-blue-500 hover:bg-blue-600" id="fc-btn-good" onclick="rateCard(3)">보통<div class="text-[10px] mt-1 opacity-90 font-medium">1일 후</div></div>
-            <div class="sm2-btn bg-emerald-500 hover:bg-emerald-600" id="fc-btn-easy" onclick="rateCard(4)">쉬움<div class="text-[10px] mt-1 opacity-90 font-medium">4일 후</div></div>
+            <div class="sm2-btn bg-rose-500 hover:bg-rose-600" id="btn-again" onclick="rateCard(1)">다시<div class="text-[9px] md:text-[10px] mt-0.5 opacity-90 font-medium">1분 후</div></div>
+            <div class="sm2-btn bg-orange-500 hover:bg-orange-600" id="btn-hard" onclick="rateCard(2)">어려움<div class="text-[9px] md:text-[10px] mt-0.5 opacity-90 font-medium">12시간 후</div></div>
+            <div class="sm2-btn bg-blue-500 hover:bg-blue-600" id="btn-good" onclick="rateCard(3)">보통<div class="text-[9px] md:text-[10px] mt-0.5 opacity-90 font-medium" id="fc-btn-good">1일 후</div></div>
+            <div class="sm2-btn bg-emerald-500 hover:bg-emerald-600" id="btn-easy" onclick="rateCard(4)">쉬움<div class="text-[9px] md:text-[10px] mt-0.5 opacity-90 font-medium" id="fc-btn-easy">4일 후</div></div>
           </div>
         </div>
 
-        <div id="fc-empty" class="py-20 text-center">
-          <i class="ri-checkbox-circle-fill text-6xl text-emerald-400 mb-4 inline-block"></i>
-          <h3 class="text-xl font-extrabold text-slate-800">모든 카드 복습을 완료했습니다!</h3>
+        <div id="fc-empty" class="py-16 md:py-20 text-center">
+          <i class="ri-checkbox-circle-fill text-5xl md:text-6xl text-emerald-400 mb-3 md:mb-4 inline-block"></i>
+          <h3 class="text-lg md:text-xl font-extrabold text-slate-800">카드 복습 완료!</h3>
         </div>
       </div>
     </div>
 
-    <!-- 4. 목차 빈칸 채우기 -->
     <div id="page-blank" class="page-content">
       <h2 class="text-2xl font-extrabold text-slate-800 mb-2 flex items-center gap-2"><i class="ri-edit-2-line"></i> 목차 빈칸 뚫기</h2>
       <p class="text-sm text-gray-500 mb-6">전체적인 구조 암기를 위해 목차의 빈칸을 채워보세요. 이제 목차도 알고리즘으로 관리됩니다.</p>
 
       <div id="blank-list-view">
-        <div class="flex justify-between items-center mb-4">
-          <div class="flex items-center gap-3">
-            <h3 class="font-bold text-slate-800">내 목차 리스트</h3>
-            <select id="outline-filter-subject" onchange="renderOutlineList()" class="p-1.5 bg-gray-50 border border-gray-200 rounded-lg text-xs font-bold outline-none focus:ring-2 focus:ring-emerald-500">
-              <option value="all">전체 과목</option>
-              <option value="노동법">노동법</option><option value="인사노무관리">인사노무관리</option><option value="행정쟁송법">행정쟁송법</option><option value="민사소송법">민사소송법</option>
+        <div class="flex flex-col md:flex-row justify-between md:items-center gap-3 mb-4">
+          <div class="flex items-center gap-2">
+            <h3 class="font-bold text-slate-800 text-sm md:text-base">목차 리스트</h3>
+            <select id="outline-filter-subject" onchange="renderOutlineList()" class="p-1 md:p-1.5 bg-gray-50 border border-gray-200 rounded-lg text-xs font-bold outline-none">
+              <option value="all">전체</option><option value="노동법">노동법</option><option value="인사노무관리">인사노무관리</option><option value="행정쟁송법">행정쟁송법</option><option value="민사소송법">민사소송법</option>
             </select>
           </div>
-          <button onclick="toggleOutlineAdder()" class="px-4 py-2 bg-slate-800 text-white rounded-lg text-sm font-bold hover:bg-slate-700 transition-all flex items-center gap-1 shadow-sm"><i class="ri-add-line"></i> 새 목차 등록</button>
+          <button onclick="toggleOutlineAdder()" class="w-full md:w-auto px-4 py-2 bg-slate-800 text-white rounded-lg text-xs md:text-sm font-bold hover:bg-slate-700 flex justify-center items-center gap-1 shadow-sm"><i class="ri-add-line"></i> 새 목차 등록</button>
         </div>
 
-        <div id="outline-adder" class="hidden neo-card p-6 mb-6 bg-slate-50 border-2 border-emerald-200 shadow-lg">
-          <h3 id="outline-adder-title" class="font-bold text-slate-800 mb-4 text-lg flex items-center gap-2"><i class="ri-file-list-line text-emerald-500"></i> 새 목차 구조 등록</h3>
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-            <div class="md:col-span-1">
-              <label class="text-xs font-bold text-gray-500 mb-2 block">과목</label>
-              <select id="outline-subject" class="w-full p-3 bg-white rounded-xl font-bold border border-gray-200 outline-none">
-                <option>노동법</option><option>인사노무관리</option><option>행정쟁송법</option><option>민사소송법</option>
-              </select>
-            </div>
-            <div class="md:col-span-2">
-              <label class="text-xs font-bold text-gray-500 mb-2 block">주제 (제목)</label>
-              <input type="text" id="outline-title" class="w-full p-3 bg-white rounded-xl font-bold border border-gray-200 outline-none">
-            </div>
+        <div id="outline-adder" class="hidden neo-card p-4 md:p-6 mb-6 bg-slate-50 border-2 border-emerald-200 shadow-lg">
+          <div class="grid grid-cols-1 gap-3 mb-3">
+            <select id="outline-subject" class="w-full p-2.5 bg-white rounded-xl font-bold border border-gray-200 text-sm outline-none"><option>민사소송법</option><option>노동법</option><option>인사노무관리</option><option>행정쟁송법</option></select>
+            <input type="text" id="outline-title" class="w-full p-2.5 bg-white rounded-xl font-bold border border-gray-200 text-sm outline-none" placeholder="주제 (제목)">
           </div>
-          <div class="mb-4">
-            <textarea id="outline-content" class="w-full h-40 p-3 bg-white rounded-xl text-sm border border-gray-200 outline-none resize-none font-mono" placeholder="목차를 입력하세요"></textarea>
+          <div class="mb-3">
+            <div class="flex justify-end mb-1"><button type="button" onclick="generateOutlineWithAI()" class="text-[9px] md:text-[10px] font-bold text-purple-600 bg-purple-50 border border-purple-100 px-2 py-1 rounded">✨ AI 목차 자동 생성</button></div>
+            <textarea id="outline-content" class="w-full h-32 md:h-40 p-3 bg-white rounded-xl text-xs md:text-sm border border-gray-200 outline-none resize-none font-mono" placeholder="I. 서설\n  1. 의의"></textarea>
           </div>
           <div class="flex justify-end gap-2">
-            <button onclick="cancelOutlineEdit()" class="px-5 py-2.5 bg-white border border-gray-200 text-gray-600 rounded-xl text-sm font-bold hover:bg-gray-50 transition-all">취소</button>
-            <button id="outline-save-btn" onclick="saveOutline()" class="px-6 py-2.5 bg-emerald-500 text-white rounded-xl text-sm font-bold hover:bg-emerald-600 shadow-md transition-all">등록하기</button>
+            <button onclick="cancelOutlineEdit()" class="px-4 py-2 bg-white border border-gray-200 text-gray-600 rounded-xl text-xs md:text-sm font-bold">취소</button>
+            <button id="outline-save-btn" onclick="saveOutline()" class="px-4 py-2 bg-emerald-500 text-white rounded-xl text-xs md:text-sm font-bold shadow-md">등록</button>
           </div>
         </div>
 
-        <div id="outline-list" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+        <div id="outline-list" class="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4"></div>
       </div>
 
       <div id="blank-quiz-view" class="hidden">
-        <button onclick="closeBlankQuiz()" class="text-sm font-bold text-gray-500 hover:text-gray-800 mb-4 flex items-center gap-1"><i class="ri-arrow-left-line"></i> 목록으로</button>
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          <div class="lg:col-span-8 neo-card p-8 mb-6">
-            <div class="flex justify-between items-end mb-6 border-b border-gray-100 pb-4">
+        <button onclick="closeBlankQuiz()" class="text-xs md:text-sm font-bold text-gray-500 hover:text-gray-800 mb-3 md:mb-4 flex items-center gap-1"><i class="ri-arrow-left-line"></i> 목록으로</button>
+        
+        <div class="flex flex-col lg:flex-row gap-4 md:gap-6">
+          
+          <div class="lg:w-2/3 neo-card p-4 md:p-8 order-2 lg:order-1">
+            <div class="flex flex-col md:flex-row justify-between md:items-end gap-3 mb-4 md:mb-6 border-b border-gray-100 pb-3 md:pb-4">
               <div>
-                <span class="text-[10px] font-bold text-emerald-500 bg-emerald-50 px-2 py-1 rounded-full mb-2 inline-block" id="quiz-subject">과목명</span>
-                <h3 class="text-2xl font-extrabold text-slate-800" id="quiz-title">주제명</h3>
+                <span class="text-[10px] font-bold text-emerald-500 bg-emerald-50 px-2 py-1 rounded-full mb-1 md:mb-2 inline-block" id="quiz-subject"></span>
+                <h3 class="text-lg md:text-2xl font-extrabold text-slate-800" id="quiz-title"></h3>
               </div>
               <div class="flex items-center gap-2">
-                <select id="quiz-level" class="p-2 border border-gray-200 rounded-lg text-sm font-bold text-slate-700 outline-none">
+                <select id="quiz-level" class="p-1.5 md:p-2 border border-gray-200 rounded-lg text-xs md:text-sm font-bold text-slate-700 outline-none">
                   <option value="50">무작위 50% 빈칸</option><option value="main">대목차만 빈칸 (I, 1 등)</option><option value="all">전체 빈칸</option>
                 </select>
-                <button onclick="generateBlankQuiz()" class="px-4 py-2 bg-slate-900 text-white rounded-lg text-sm font-bold hover:bg-slate-800 transition-all">적용</button>
+                <button onclick="generateBlankQuiz()" class="px-3 md:px-4 py-1.5 md:py-2 bg-slate-900 text-white rounded-lg text-xs md:text-sm font-bold hover:bg-slate-800 transition-all">적용</button>
               </div>
             </div>
-            <div id="quiz-lines" class="text-[15px] leading-loose text-slate-700 font-medium mb-8"></div>
             
-            <div id="quiz-control-area" class="text-center mt-8">
-              <button id="quiz-check-btn" onclick="checkBlankAnswers()" class="px-8 py-3 bg-emerald-500 text-white rounded-xl font-bold text-lg hover:bg-emerald-600 shadow-md transition-all active:scale-95"><i class="ri-check-double-line"></i> 정답 확인하기</button>
+            <div id="quiz-lines" class="text-[13px] md:text-[15px] leading-loose md:leading-loose text-slate-700 font-medium mb-6 md:mb-8 overflow-x-hidden"></div>
+            
+            <div id="quiz-control-area" class="text-center mt-6 md:mt-8">
+              <button id="quiz-check-btn" onclick="checkBlankAnswers()" class="w-full md:w-auto px-6 md:px-8 py-2.5 md:py-3 bg-emerald-500 text-white rounded-xl font-bold text-sm md:text-lg hover:bg-emerald-600 shadow-md active:scale-95"><i class="ri-check-double-line"></i> 정답 확인</button>
               
-              <div id="quiz-sm2-buttons" class="hidden flex gap-2 justify-center mt-4">
-                <div class="sm2-btn bg-rose-500 hover:bg-rose-600" onclick="rateOutline(1)">다시<div class="text-[10px] mt-1 opacity-90 font-medium">1분 후</div></div>
-                <div class="sm2-btn bg-orange-500 hover:bg-orange-600" onclick="rateOutline(2)">어려움<div class="text-[10px] mt-1 opacity-90 font-medium">12시간 후</div></div>
-                <div class="sm2-btn bg-blue-500 hover:bg-blue-600" onclick="rateOutline(3)">보통<div class="text-[10px] mt-1 opacity-90 font-medium">1일 후</div></div>
-                <div class="sm2-btn bg-emerald-500 hover:bg-emerald-600" onclick="rateOutline(4)">쉬움<div class="text-[10px] mt-1 opacity-90 font-medium">4일 후</div></div>
+              <div id="quiz-sm2-buttons" class="fc-buttons-wrap mt-2 md:mt-4">
+                <div class="sm2-btn bg-rose-500 hover:bg-rose-600" id="quiz-btn-again" onclick="rateOutline(1)">다시<div class="text-[9px] md:text-[10px] mt-0.5 opacity-90 font-medium">1분 후</div></div>
+                <div class="sm2-btn bg-orange-500 hover:bg-orange-600" id="quiz-btn-hard" onclick="rateOutline(2)">어려움<div class="text-[9px] md:text-[10px] mt-0.5 opacity-90 font-medium">12시간 후</div></div>
+                <div class="sm2-btn bg-blue-500 hover:bg-blue-600" id="quiz-btn-good" onclick="rateOutline(3)">보통<div class="text-[9px] md:text-[10px] mt-0.5 opacity-90 font-medium">1일 후</div></div>
+                <div class="sm2-btn bg-emerald-500 hover:bg-emerald-600" id="quiz-btn-easy" onclick="rateOutline(4)">쉬움<div class="text-[9px] md:text-[10px] mt-0.5 opacity-90 font-medium">4일 후</div></div>
               </div>
             </div>
           </div>
-          <div class="lg:col-span-4">
-            <div class="neo-card p-6 bg-slate-50 border-2 border-slate-200 sticky top-24 max-h-[calc(100vh-120px)] overflow-y-auto flex flex-col">
-              <h4 class="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3"><i class="ri-drag-drop-line"></i> Word Bank</h4>
-              <div id="quiz-word-bank" class="flex flex-wrap gap-2"></div>
+
+          <div class="lg:w-1/3 order-1 lg:order-2">
+            <div class="neo-card p-4 md:p-6 bg-slate-50 border-2 border-slate-200 sticky top-[80px] lg:top-24 z-30 max-h-[30vh] lg:max-h-[calc(100vh-120px)] overflow-y-auto flex flex-col">
+              <h4 class="text-[10px] md:text-xs font-bold text-gray-500 uppercase tracking-widest mb-2"><i class="ri-drag-drop-line"></i> Word Bank</h4>
+              <div id="quiz-word-bank" class="flex flex-wrap gap-1.5 md:gap-2"></div>
             </div>
           </div>
+
         </div>
       </div>
     </div>
 
-    <!-- 5. 판례 DB 검색 -->
     <div id="page-lawdb" class="page-content">
-      <h2 class="text-2xl font-extrabold text-slate-800 mb-6 flex items-center gap-2"><i class="ri-book-read-line"></i> 판례·조문 DB 검색</h2>
-      <div class="neo-card p-8">
-        <div class="flex gap-2 mb-6">
-          <input type="text" id="law-search-input" placeholder="키워드나 판례번호를 입력하세요" class="flex-1 bg-gray-50 p-4 rounded-xl border-none outline-none font-bold text-sm focus:ring-2 focus:ring-emerald-500">
-          <button onclick="searchLawDB()" class="px-6 bg-slate-900 text-white rounded-xl font-bold hover:bg-slate-800 transition-all"><i class="ri-search-line"></i> 검색</button>
+      <h2 class="text-2xl font-extrabold text-slate-800 mb-6 flex items-center gap-2"><i class="ri-book-read-line"></i> 판례·조문 DB</h2>
+      <div class="neo-card p-6 md:p-8">
+        <div class="flex gap-2 mb-4 md:mb-6">
+          <input type="text" id="law-search-input" placeholder="키워드/판례번호" class="flex-1 bg-gray-50 p-3 md:p-4 rounded-xl border-none outline-none font-bold text-sm focus:ring-2 focus:ring-emerald-500">
+          <button onclick="searchLawDB()" class="px-4 md:px-6 bg-slate-900 text-white rounded-xl text-sm font-bold hover:bg-slate-800 transition-all"><i class="ri-search-line"></i></button>
         </div>
-        <div id="law-search-result" class="p-6 bg-slate-50 rounded-xl text-sm leading-relaxed text-slate-700 hidden border border-gray-100"></div>
+        <div id="law-search-result" class="p-4 md:p-6 bg-slate-50 rounded-xl text-xs md:text-sm leading-relaxed text-slate-700 hidden border border-gray-100"></div>
       </div>
     </div>
     
-    <!-- 6. 실전 모의고사 -->
     <div id="page-exam" class="page-content">
       <h2 class="text-2xl font-extrabold text-slate-800 mb-2 flex items-center gap-2"><i class="ri-edit-box-line"></i> 실전 모의고사</h2>
-      <div id="exam-setup" class="neo-card p-8 max-w-2xl mx-auto">
-        <div class="space-y-6">
-          <div><label class="text-xs font-bold text-gray-500 block mb-2">과목</label>
-            <select id="exam-subject" onchange="updateExamQList()" class="w-full p-4 bg-gray-50 rounded-xl font-bold border-none outline-none focus:ring-2 focus:ring-emerald-500">
+      <p class="text-sm text-gray-500 mb-6">강사님의 채점평 PDF를 업로드하여 가장 깐깐하게 채점받아 보세요!</p>
+      <div id="exam-setup" class="neo-card p-6 md:p-8 max-w-2xl mx-auto">
+        <div class="space-y-4 md:space-y-6">
+          <div><label class="text-[11px] md:text-xs font-bold text-gray-500 block mb-2">과목</label>
+            <select id="exam-subject" onchange="updateExamQList()" class="w-full p-3 md:p-4 bg-gray-50 rounded-xl font-bold border-none outline-none">
               <option>노동법</option><option>인사노무관리</option><option>행정쟁송법</option><option>민사소송법</option>
             </select>
           </div>
-          <div><label class="text-xs font-bold text-gray-500 block mb-2">문제 선택</label>
-            <select id="exam-question-select" onchange="previewQuestion()" class="w-full p-4 bg-gray-50 rounded-xl font-bold border-none outline-none focus:ring-2 focus:ring-emerald-500">
+          <div>
+            <div class="flex justify-between items-center mb-2">
+              <label class="text-[11px] md:text-xs font-bold text-gray-500 block">문제 선택</label>
+              <button onclick="toggleExamManager()" class="text-[10px] md:text-xs font-bold text-blue-500 bg-blue-50 px-2 py-1 rounded hover:bg-blue-100"><i class="ri-edit-line"></i> 관리</button>
+            </div>
+            <select id="exam-question-select" onchange="previewQuestion()" class="w-full p-3 md:p-4 bg-gray-50 rounded-xl font-bold border-none outline-none">
               <option value="">직접 입력하기</option>
             </select>
           </div>
-          <div id="exam-manager-view" class="hidden p-5 bg-white border border-gray-200 shadow-lg rounded-xl mb-4">
-            <div class="flex justify-between items-center border-b border-gray-100 pb-3 mb-3">
-              <h4 class="font-bold text-slate-800 flex items-center gap-1"><i class="ri-list-check-2"></i> 문제 관리 목록</h4>
+          <div id="exam-manager-view" class="hidden p-4 bg-white border border-gray-200 shadow-lg rounded-xl">
+            <div class="flex justify-between items-center border-b border-gray-100 pb-2 mb-2">
+              <h4 class="font-bold text-sm text-slate-800 flex items-center gap-1"><i class="ri-list-check-2"></i> 문제 관리 목록</h4>
               <button onclick="toggleExamManager()" class="text-gray-400 hover:text-gray-800"><i class="ri-close-line text-lg"></i></button>
             </div>
-            <div id="exam-list" class="space-y-3 max-h-80 overflow-y-auto pr-2"></div>
-            <div id="exam-edit-form" class="hidden mt-4 p-4 bg-emerald-50/50 border border-emerald-200 rounded-lg">
-               <h5 class="text-sm font-bold text-emerald-700 mb-3"><i class="ri-edit-2-line"></i> 문제 내용 수정</h5>
-               <input type="text" id="edit-exam-subject" class="w-full p-2 mb-2 text-sm border rounded outline-none" placeholder="과목">
-               <textarea id="edit-exam-q" class="w-full p-2 mb-2 text-sm border rounded outline-none resize-none h-20" placeholder="문제 지문"></textarea>
-               <textarea id="edit-exam-rubric" class="w-full p-2 mb-3 text-sm border rounded outline-none resize-none h-20" placeholder="채점 기준"></textarea>
-               <div class="flex justify-end gap-2">
-                 <button onclick="cancelExamEdit()" class="px-3 py-1.5 bg-white border text-sm text-gray-600 rounded hover:bg-gray-50 font-bold">취소</button>
-                 <button onclick="saveExamEdit()" class="px-4 py-1.5 bg-emerald-500 text-white text-sm rounded hover:bg-emerald-600 font-bold">저장하기</button>
+            <div id="exam-list" class="space-y-2 max-h-60 overflow-y-auto pr-1"></div>
+            <div id="exam-edit-form" class="hidden mt-3 p-3 bg-emerald-50/50 border border-emerald-200 rounded-lg">
+               <input type="text" id="edit-exam-subject" class="w-full p-2 mb-2 text-xs border rounded outline-none" placeholder="과목">
+               <textarea id="edit-exam-q" class="w-full p-2 mb-2 text-xs border rounded outline-none resize-none h-16" placeholder="문제 지문"></textarea>
+               <textarea id="edit-exam-rubric" class="w-full p-2 mb-2 text-xs border rounded outline-none resize-none h-16" placeholder="채점 기준"></textarea>
+               <div class="flex justify-end gap-1">
+                 <button onclick="cancelExamEdit()" class="px-2 py-1 bg-white border text-xs text-gray-600 rounded">취소</button>
+                 <button onclick="saveExamEdit()" class="px-2 py-1 bg-emerald-500 text-white text-xs rounded">저장</button>
                </div>
             </div>
           </div>
-          <textarea id="exam-direct-q" class="w-full h-32 p-4 bg-gray-50 rounded-xl text-sm font-medium outline-none resize-none" placeholder="문제를 입력하세요."></textarea>
-          <div class="p-4 bg-emerald-50/50 rounded-xl border border-emerald-100">
-            <label class="text-xs font-bold text-emerald-700 mb-2 flex items-center gap-1"><i class="ri-file-text-line"></i> 강사 채점평/피드백 PDF 업로드 (선택)</label>
-            <label class="border-2 border-dashed border-emerald-200 rounded-lg p-3 flex flex-col items-center justify-center cursor-pointer hover:border-emerald-500 bg-white transition-all">
+          <textarea id="exam-direct-q" class="w-full h-24 md:h-32 p-3 md:p-4 bg-gray-50 rounded-xl text-xs md:text-sm font-medium outline-none resize-none" placeholder="문제를 입력하세요."></textarea>
+          <div class="p-3 md:p-4 bg-emerald-50/50 rounded-xl border border-emerald-100">
+            <label class="text-[10px] md:text-xs font-bold text-emerald-700 mb-2 flex items-center gap-1"><i class="ri-file-text-line"></i> 강사 채점평 첨부</label>
+            <label class="border-2 border-dashed border-emerald-200 rounded-lg p-3 flex flex-col items-center justify-center cursor-pointer hover:border-emerald-500 bg-white">
               <input type="file" id="exam-rubric-file" class="hidden" accept=".pdf" onchange="handleExamRubricUpload(event)">
-              <span class="font-bold text-sm text-emerald-600" id="exam-rubric-name"><i class="ri-upload-cloud-2-line mr-1"></i>여기를 눌러 PDF 첨부</span>
+              <span class="font-bold text-[11px] md:text-sm text-emerald-600" id="exam-rubric-name">여기를 눌러 PDF 첨부</span>
             </label>
           </div>
-          <div class="grid grid-cols-2 gap-4">
+          <div class="grid grid-cols-2 gap-3 md:gap-4">
             <div>
-              <label class="text-xs font-bold text-gray-500 mb-2 block">시험 시간</label>
-              <select id="exam-time" class="w-full p-4 bg-gray-50 rounded-xl font-bold border-none outline-none" onchange="document.getElementById('exam-pages').innerText = this.value / 5">
-                <option value="25">25분 (단문)</option><option value="50">50분 (사례)</option><option value="75">75분 (통합)</option><option value="100" selected>100분 (실전)</option>
+              <label class="text-[10px] md:text-xs font-bold text-gray-500 mb-1 md:mb-2 block">시험 시간</label>
+              <select id="exam-time" class="w-full p-3 md:p-4 bg-gray-50 rounded-xl text-xs md:text-sm font-bold border-none outline-none" onchange="document.getElementById('exam-pages').innerText = this.value / 5">
+                <option value="25">25분</option><option value="50">50분</option><option value="75">75분</option><option value="100" selected>100분</option>
               </select>
             </div>
             <div>
-              <label class="text-xs font-bold text-gray-500 mb-2 block">답안지 분량</label>
-              <div class="p-4 bg-emerald-50 text-emerald-600 font-extrabold rounded-xl text-center"><span id="exam-pages">20</span> 페이지</div>
+              <label class="text-[10px] md:text-xs font-bold text-gray-500 mb-1 md:mb-2 block">답안 분량</label>
+              <div class="p-3 md:p-4 bg-emerald-50 text-emerald-600 font-extrabold rounded-xl text-center text-xs md:text-sm"><span id="exam-pages">20</span> 페이지</div>
             </div>
           </div>
-          <button onclick="startExam()" class="w-full py-4 bg-slate-900 text-white rounded-xl font-bold text-lg hover:bg-slate-800 active:scale-95 transition-all">⏱️ 시험 시작</button>
+          <button onclick="startExam()" class="w-full py-3 md:py-4 bg-slate-900 text-white rounded-xl font-bold text-sm md:text-lg hover:bg-slate-800 active:scale-95">⏱️ 시험 시작</button>
         </div>
       </div>
       
       <div id="exam-room" class="hidden">
-        <div class="flex flex-col md:flex-row gap-4 mb-4 sticky top-[80px] z-40 bg-[#f8fafc] py-2">
-          <div class="flex-1 bg-white p-4 border border-gray-200 rounded-xl flex justify-between items-center shadow-sm">
+        <div class="flex flex-col md:flex-row gap-3 mb-4 sticky top-[70px] md:top-[80px] z-40 bg-[#f8fafc] py-2">
+          <div class="flex-1 bg-white p-3 md:p-4 border border-gray-200 rounded-xl flex justify-between items-center shadow-sm">
             <div>
-              <div class="text-xs font-bold text-emerald-500 mb-1" id="room-subject">과목명</div>
-              <div class="text-sm font-bold text-slate-800 truncate max-w-[200px] md:max-w-[400px]" id="room-q-preview">문제 내용...</div>
+              <div class="text-[10px] font-bold text-emerald-500 mb-0.5" id="room-subject">과목명</div>
+              <div class="text-xs md:text-sm font-bold text-slate-800 truncate max-w-[150px] md:max-w-[400px]" id="room-q-preview">문제 내용...</div>
             </div>
-            <div id="timer" class="text-3xl font-black text-slate-800 font-mono">100:00</div>
+            <div id="timer" class="text-2xl md:text-3xl font-black text-slate-800 font-mono">100:00</div>
           </div>
-          <div class="bg-white p-4 border border-gray-200 rounded-xl flex items-center justify-between gap-6 shadow-sm">
-            <div class="text-center"><p class="text-[10px] font-bold text-gray-400">총 글자수</p><p class="text-lg font-extrabold text-emerald-500" id="char-count">0</p></div>
-            <div class="text-center"><p class="text-[10px] font-bold text-gray-400">페이지</p><p class="text-lg font-extrabold text-slate-800"><span id="room-curr-page">1</span> / <span id="room-total-page">20</span></p></div>
-            <button onclick="submitExam()" class="px-6 py-3 bg-rose-500 hover:bg-rose-600 text-white font-bold text-sm rounded-lg active:scale-95 transition-all">답안 제출</button>
+          <div class="bg-white p-3 border border-gray-200 rounded-xl flex items-center justify-between gap-4 md:gap-6 shadow-sm">
+            <div class="text-center"><p class="text-[9px] md:text-[10px] font-bold text-gray-400">총 글자수</p><p class="text-base md:text-lg font-extrabold text-emerald-500" id="char-count">0</p></div>
+            <div class="text-center"><p class="text-[9px] md:text-[10px] font-bold text-gray-400">페이지</p><p class="text-base md:text-lg font-extrabold text-slate-800"><span id="room-curr-page">1</span> / <span id="room-total-page">20</span></p></div>
+            <button onclick="submitExam()" class="px-4 md:px-6 py-2 md:py-3 bg-rose-500 hover:bg-rose-600 text-white font-bold text-xs md:text-sm rounded-lg active:scale-95">제출</button>
           </div>
         </div>
 
@@ -534,11 +508,11 @@
           </div>
           <div class="lg:col-span-8">
             <div class="bg-white border-2 border-slate-300 rounded-xl overflow-hidden shadow-sm">
-              <div class="bg-slate-100 p-2 text-center text-[11px] font-bold text-slate-500 tracking-widest border-b border-slate-300">노무사 2차 답안지 (줄당 40자 제한)</div>
+              <div class="bg-slate-100 p-2 text-center text-[10px] md:text-[11px] font-bold text-slate-500 tracking-widest border-b border-slate-300">노무사 2차 답안지</div>
               <div id="answer-lines" class="bg-white"></div>
-              <div class="p-4 bg-gray-50 flex justify-between border-t border-gray-200">
-                <button onclick="changePage(-1)" class="px-4 py-2 bg-white border border-gray-200 rounded-lg text-xs font-bold hover:bg-gray-100">◀ 이전 장</button>
-                <button onclick="changePage(1)" class="px-4 py-2 bg-white border border-gray-200 rounded-lg text-xs font-bold hover:bg-gray-100">다음 장 ▶</button>
+              <div class="p-3 md:p-4 bg-gray-50 flex justify-between border-t border-gray-200">
+                <button onclick="changePage(-1)" class="px-3 md:px-4 py-1.5 md:py-2 bg-white border border-gray-200 rounded-lg text-[11px] md:text-xs font-bold">◀ 이전 장</button>
+                <button onclick="changePage(1)" class="px-3 md:px-4 py-1.5 md:py-2 bg-white border border-gray-200 rounded-lg text-[11px] md:text-xs font-bold">다음 장 ▶</button>
               </div>
             </div>
           </div>
@@ -546,72 +520,66 @@
       </div>
     </div>
 
-    <!-- 7. 결과 화면 -->
     <div id="page-result" class="page-content">
-      <div class="max-w-3xl mx-auto space-y-6" id="result-container">
-        <div class="neo-card p-10 text-center relative overflow-hidden bg-gradient-to-b from-white to-emerald-50/30">
-          <h2 class="text-xl font-extrabold text-slate-800 mb-2">AI 정밀 채점 결과</h2>
-          <div class="text-7xl font-black text-emerald-500 my-6" id="res-score">0<span class="text-2xl text-gray-300">점</span></div>
-          <p class="text-sm font-bold text-slate-600 bg-white inline-block px-6 py-3 rounded-full border border-gray-100 shadow-sm" id="res-feedback"></p>
+      <div class="max-w-3xl mx-auto space-y-4 md:space-y-6" id="result-container">
+        <div class="neo-card p-6 md:p-10 text-center relative overflow-hidden bg-gradient-to-b from-white to-emerald-50/30">
+          <h2 class="text-lg md:text-xl font-extrabold text-slate-800 mb-2">AI 정밀 채점 결과</h2>
+          <div class="text-5xl md:text-7xl font-black text-emerald-500 my-4 md:my-6" id="res-score">0<span class="text-xl md:text-2xl text-gray-300">점</span></div>
+          <p class="text-xs md:text-sm font-bold text-slate-600 bg-white inline-block px-4 py-2 md:px-6 md:py-3 rounded-full border border-gray-100" id="res-feedback"></p>
         </div>
-        <div class="neo-card p-8">
-          <h3 class="font-bold text-slate-800 mb-6 border-b border-gray-100 pb-2">세부 평가 항목 (100점 만점)</h3>
-          <div class="space-y-4">
-            <div class="flex items-center"><span class="w-24 text-xs font-bold text-gray-500">쟁점 파악 (25)</span><div class="flex-1 h-3 bg-gray-100 rounded-full mx-4 overflow-hidden"><div class="h-full bg-blue-500" id="bar-issue"></div></div><span class="w-8 text-right font-bold text-sm" id="score-issue">0</span></div>
-            <div class="flex items-center"><span class="w-24 text-xs font-bold text-gray-500">법적 근거 (30)</span><div class="flex-1 h-3 bg-gray-100 rounded-full mx-4 overflow-hidden"><div class="h-full bg-emerald-500" id="bar-law"></div></div><span class="w-8 text-right font-bold text-sm" id="score-law">0</span></div>
-            <div class="flex items-center"><span class="w-24 text-xs font-bold text-gray-500">논리 전개 (25)</span><div class="flex-1 h-3 bg-gray-100 rounded-full mx-4 overflow-hidden"><div class="h-full bg-purple-500" id="bar-logic"></div></div><span class="w-8 text-right font-bold text-sm" id="score-logic">0</span></div>
-            <div class="flex items-center"><span class="w-24 text-xs font-bold text-gray-500">결론 명확 (10)</span><div class="flex-1 h-3 bg-gray-100 rounded-full mx-4 overflow-hidden"><div class="h-full bg-orange-500" id="bar-conc"></div></div><span class="w-8 text-right font-bold text-sm" id="score-conc">0</span></div>
-            <div class="flex items-center"><span class="w-24 text-xs font-bold text-gray-500">형식·구조 (10)</span><div class="flex-1 h-3 bg-gray-100 rounded-full mx-4 overflow-hidden"><div class="h-full bg-slate-500" id="bar-form"></div></div><span class="w-8 text-right font-bold text-sm" id="score-form">0</span></div>
+        <div class="neo-card p-4 md:p-8">
+          <h3 class="font-bold text-sm md:text-base text-slate-800 mb-4 md:mb-6 border-b border-gray-100 pb-2">세부 평가 항목</h3>
+          <div class="space-y-3 md:space-y-4">
+            <div class="flex items-center"><span class="w-20 md:w-24 text-[10px] md:text-xs font-bold text-gray-500">쟁점 파악</span><div class="flex-1 h-2 md:h-3 bg-gray-100 rounded-full mx-2 md:mx-4 overflow-hidden"><div class="h-full bg-blue-500" id="bar-issue"></div></div><span class="w-6 md:w-8 text-right font-bold text-xs md:text-sm" id="score-issue">0</span></div>
+            <div class="flex items-center"><span class="w-20 md:w-24 text-[10px] md:text-xs font-bold text-gray-500">법적 근거</span><div class="flex-1 h-2 md:h-3 bg-gray-100 rounded-full mx-2 md:mx-4 overflow-hidden"><div class="h-full bg-emerald-500" id="bar-law"></div></div><span class="w-6 md:w-8 text-right font-bold text-xs md:text-sm" id="score-law">0</span></div>
+            <div class="flex items-center"><span class="w-20 md:w-24 text-[10px] md:text-xs font-bold text-gray-500">논리 전개</span><div class="flex-1 h-2 md:h-3 bg-gray-100 rounded-full mx-2 md:mx-4 overflow-hidden"><div class="h-full bg-purple-500" id="bar-logic"></div></div><span class="w-6 md:w-8 text-right font-bold text-xs md:text-sm" id="score-logic">0</span></div>
+            <div class="flex items-center"><span class="w-20 md:w-24 text-[10px] md:text-xs font-bold text-gray-500">결론 명확</span><div class="flex-1 h-2 md:h-3 bg-gray-100 rounded-full mx-2 md:mx-4 overflow-hidden"><div class="h-full bg-orange-500" id="bar-conc"></div></div><span class="w-6 md:w-8 text-right font-bold text-xs md:text-sm" id="score-conc">0</span></div>
+            <div class="flex items-center"><span class="w-20 md:w-24 text-[10px] md:text-xs font-bold text-gray-500">형식·구조</span><div class="flex-1 h-2 md:h-3 bg-gray-100 rounded-full mx-2 md:mx-4 overflow-hidden"><div class="h-full bg-slate-500" id="bar-form"></div></div><span class="w-6 md:w-8 text-right font-bold text-xs md:text-sm" id="score-form">0</span></div>
           </div>
         </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div class="neo-card p-6 border-t-4 border-t-blue-500 bg-blue-50/10">
-            <h4 class="font-bold text-blue-600 mb-3 flex items-center gap-1"><i class="ri-thumb-up-fill"></i> 구체적으로 잘한 점</h4>
-            <p class="text-[13px] leading-relaxed text-slate-700" id="res-good"></p>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+          <div class="neo-card p-4 md:p-6 border-t-4 border-t-blue-500 bg-blue-50/10">
+            <h4 class="font-bold text-sm md:text-base text-blue-600 mb-2 md:mb-3 flex items-center gap-1"><i class="ri-thumb-up-fill"></i> 잘한 점</h4>
+            <p class="text-[11px] md:text-[13px] leading-relaxed text-slate-700" id="res-good"></p>
           </div>
-          <div class="neo-card p-6 border-t-4 border-t-rose-500 bg-rose-50/10">
-            <h4 class="font-bold text-rose-600 mb-3 flex items-center gap-1"><i class="ri-error-warning-fill"></i> 누락 및 부족한 점</h4>
-            <p class="text-[13px] leading-relaxed text-slate-700" id="res-miss"></p>
+          <div class="neo-card p-4 md:p-6 border-t-4 border-t-rose-500 bg-rose-50/10">
+            <h4 class="font-bold text-sm md:text-base text-rose-600 mb-2 md:mb-3 flex items-center gap-1"><i class="ri-error-warning-fill"></i> 부족한 점</h4>
+            <p class="text-[11px] md:text-[13px] leading-relaxed text-slate-700" id="res-miss"></p>
           </div>
         </div>
-        <div class="neo-card p-6 border-t-4 border-t-amber-500 bg-amber-50/10">
-          <h4 class="font-bold text-amber-600 mb-3 flex items-center gap-1"><i class="ri-lightbulb-flash-fill"></i> 다음 시험을 위한 3가지 조언</h4>
-          <ul class="text-[13px] leading-relaxed text-slate-700 pl-4 list-disc space-y-2" id="res-next"></ul>
+        <div class="neo-card p-4 md:p-6 border-t-4 border-t-amber-500 bg-amber-50/10">
+          <h4 class="font-bold text-sm md:text-base text-amber-600 mb-2 md:mb-3 flex items-center gap-1"><i class="ri-lightbulb-flash-fill"></i> 다음 시험 조언</h4>
+          <ul class="text-[11px] md:text-[13px] leading-relaxed text-slate-700 pl-4 list-disc space-y-1 md:space-y-2" id="res-next"></ul>
         </div>
-        <div class="neo-card p-6 border-t-4 border-t-slate-500 bg-slate-50">
-          <h4 class="font-bold text-slate-700 mb-3 flex items-center gap-1"><i class="ri-file-text-line"></i> 내가 작성한 답안</h4>
-          <div class="text-[13px] leading-relaxed text-slate-700 whitespace-pre-wrap bg-white p-4 rounded-lg border border-gray-200 max-h-60 overflow-y-auto" id="res-my-answer"></div>
-        </div>
-        <button onclick="navigate('dashboard')" class="w-full py-4 bg-slate-100 text-slate-600 font-bold rounded-xl hover:bg-slate-200 transition-all">대시보드로 돌아가기</button>
+        <button onclick="navigate('dashboard')" class="w-full py-3 md:py-4 bg-slate-100 text-slate-600 text-sm md:text-base font-bold rounded-xl hover:bg-slate-200">대시보드로 돌아가기</button>
       </div>
     </div>
 
-    <!-- 8. 설정 -->
     <div id="page-settings" class="page-content">
-      <h2 class="text-2xl font-extrabold text-slate-800 mb-6 flex items-center gap-2"><i class="ri-settings-4-line"></i> 시스템 설정</h2>
-      <div class="max-w-xl mx-auto space-y-6">
-        <div class="neo-card p-8 border-2 border-blue-100 bg-blue-50/30">
+      <h2 class="text-2xl font-extrabold text-slate-800 mb-6 flex items-center gap-2"><i class="ri-settings-4-line"></i> 설정</h2>
+      <div class="max-w-xl mx-auto space-y-4 md:space-y-6">
+        <div class="neo-card p-6 md:p-8 border-2 border-blue-100 bg-blue-50/30">
           <h3 class="font-bold text-blue-700 mb-2 flex items-center gap-2"><i class="ri-cloud-windy-line"></i> 클라우드 동기화</h3>
-          <p class="text-xs text-gray-500 mb-4 leading-relaxed">구글 계정으로 로그인하면 PC와 모바일 기기 간에 학습 데이터가 실시간으로 동기화됩니다.</p>
-          <div class="flex items-center justify-between mb-4 bg-white p-4 rounded-xl border border-blue-100">
+          <p class="text-[11px] md:text-xs text-gray-500 mb-4">구글 계정으로 로그인하면 PC와 모바일 기기 간에 학습 데이터가 동기화됩니다.</p>
+          <div class="flex items-center justify-between mb-4 bg-white p-3 md:p-4 rounded-xl border border-blue-100">
             <div class="flex items-center gap-3">
-              <div class="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center text-slate-500"><i class="ri-user-3-fill text-xl"></i></div>
-              <div><p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">현재 상태</p><p class="text-sm font-bold text-slate-800" id="auth-status">로컬 모드 (로그인 안됨)</p></div>
+              <div class="w-8 h-8 md:w-10 md:h-10 rounded-full bg-slate-200 flex items-center justify-center text-slate-500"><i class="ri-user-3-fill"></i></div>
+              <div><p class="text-[9px] md:text-[10px] font-bold text-gray-400 uppercase tracking-widest">현재 상태</p><p class="text-xs md:text-sm font-bold text-slate-800" id="auth-status">로컬 모드 (로그인 안됨)</p></div>
             </div>
           </div>
-          <button id="login-btn" onclick="window.loginWithGoogle()" class="w-full py-3 bg-white border border-gray-300 text-gray-700 font-bold rounded-xl hover:bg-gray-50 flex justify-center items-center gap-2 shadow-sm transition-all"><svg class="w-5 h-5" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/><path fill="none" d="M1 1h22v22H1z"/></svg>구글로 로그인</button>
-          <button id="logout-btn" onclick="window.logoutGoogle()" class="w-full py-3 bg-slate-100 text-slate-600 font-bold rounded-xl hover:bg-slate-200 flex justify-center items-center gap-2 shadow-sm transition-all hidden">로그아웃</button>
+          <button id="login-btn" onclick="window.loginWithGoogle()" class="w-full py-2.5 md:py-3 bg-white border border-gray-300 text-gray-700 text-sm font-bold rounded-xl hover:bg-gray-50 flex justify-center items-center gap-2"><svg class="w-4 h-4 md:w-5 md:h-5" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/><path fill="none" d="M1 1h22v22H1z"/></svg>구글로 로그인</button>
+          <button id="logout-btn" onclick="window.logoutGoogle()" class="w-full py-2.5 md:py-3 bg-slate-100 text-slate-600 font-bold rounded-xl hover:bg-slate-200 flex justify-center items-center gap-2 hidden">로그아웃</button>
         </div>
-        <div class="neo-card p-8 border-2 border-emerald-100 bg-emerald-50/30">
+        <div class="neo-card p-6 md:p-8 border-2 border-emerald-100 bg-emerald-50/30">
           <h3 class="font-bold text-emerald-700 mb-2 flex items-center gap-2"><i class="ri-key-2-line"></i> Gemini API 키 설정</h3>
-          <div class="flex gap-2"><input type="password" id="api-key-input" class="flex-1 bg-white p-3 rounded-xl border border-emerald-200 outline-none text-sm font-mono" placeholder="AIzaSy..."><button onclick="saveApiKey()" class="px-6 bg-emerald-500 text-white font-bold rounded-xl hover:bg-emerald-600">저장</button></div>
+          <div class="flex gap-2"><input type="password" id="api-key-input" class="flex-1 bg-white p-2.5 md:p-3 rounded-xl border border-emerald-200 outline-none text-xs md:text-sm font-mono" placeholder="AIzaSy..."><button onclick="saveApiKey()" class="px-4 md:px-6 bg-emerald-500 text-white font-bold text-xs md:text-sm rounded-xl hover:bg-emerald-600">저장</button></div>
         </div>
-        <div class="neo-card p-8">
-          <h3 class="font-bold text-slate-800 mb-4">학습 데이터 관리</h3>
-          <div class="space-y-3">
-            <button onclick="exportDB()" class="w-full p-4 bg-gray-50 rounded-xl text-left flex justify-between items-center font-bold text-sm text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-all">데이터 백업 (JSON 다운로드) <i class="ri-download-2-line"></i></button>
-            <button onclick="importDB()" class="w-full p-4 bg-gray-50 rounded-xl text-left flex justify-between items-center font-bold text-sm text-slate-600 hover:bg-amber-50 hover:text-amber-600 transition-all">데이터 복구 (JSON 업로드) <i class="ri-upload-2-line"></i></button>
-            <button onclick="resetDB()" class="w-full p-4 bg-gray-50 rounded-xl text-left flex justify-between items-center font-bold text-sm text-rose-500 hover:bg-rose-50 transition-all">모든 기록 초기화 <i class="ri-delete-bin-line"></i></button>
+        <div class="neo-card p-6 md:p-8">
+          <h3 class="font-bold text-slate-800 mb-4">데이터 관리</h3>
+          <div class="space-y-2 md:space-y-3">
+            <button onclick="exportDB()" class="w-full p-3 md:p-4 bg-gray-50 rounded-xl text-left flex justify-between items-center font-bold text-xs md:text-sm text-slate-600 hover:bg-blue-50">백업 다운로드 <i class="ri-download-2-line"></i></button>
+            <button onclick="importDB()" class="w-full p-3 md:p-4 bg-gray-50 rounded-xl text-left flex justify-between items-center font-bold text-xs md:text-sm text-slate-600 hover:bg-amber-50">복구 (업로드) <i class="ri-upload-2-line"></i></button>
+            <button onclick="resetDB()" class="w-full p-3 md:p-4 bg-gray-50 rounded-xl text-left flex justify-between items-center font-bold text-xs md:text-sm text-rose-500 hover:bg-rose-50">모든 기록 초기화 <i class="ri-delete-bin-line"></i></button>
           </div>
           <input type="file" id="import-file-input" class="hidden" accept=".json" onchange="doImportDB(event)">
         </div>
@@ -620,19 +588,20 @@
 
   </main>
 
-  <div class="fixed bottom-0 left-0 right-0 h-20 bg-white border-t border-gray-100 flex md:hidden items-center justify-start overflow-x-auto px-2 z-50">
-    <button class="nav-btn active" id="m-nav-dashboard" onclick="navigate('dashboard')"><i class="ri-dashboard-line text-xl"></i><span class="text-[10px]">홈</span></button>
-    <button class="nav-btn" id="m-nav-convert" onclick="navigate('convert')"><i class="ri-robot-line text-xl"></i><span class="text-[10px]">변환</span></button>
-    <button class="nav-btn" id="m-nav-flashcard" onclick="navigate('flashcard')"><i class="ri-stack-line text-xl"></i><span class="text-[10px]">카드</span></button>
-    <button class="nav-btn" id="m-nav-blank" onclick="navigate('blank')"><i class="ri-edit-2-line text-xl"></i><span class="text-[10px]">빈칸</span></button>
-    <button class="nav-btn" id="m-nav-lawdb" onclick="navigate('lawdb')"><i class="ri-book-read-line text-xl"></i><span class="text-[10px]">판례</span></button>
-    <button class="nav-btn" id="m-nav-exam" onclick="navigate('exam')"><i class="ri-edit-box-line text-xl"></i><span class="text-[10px]">시험</span></button>
-    <button class="nav-btn" id="m-nav-settings" onclick="navigate('settings')"><i class="ri-settings-4-line text-xl"></i><span class="text-[10px]">설정</span></button>
+  <!-- 하단 모바일 내비게이션 바 (정렬 최적화) -->
+  <div class="fixed bottom-0 left-0 right-0 h-16 md:h-20 bg-white border-t border-gray-100 flex md:hidden items-center justify-around px-2 z-50 shadow-[0_-4px_10px_rgba(0,0,0,0.05)] overflow-x-auto no-scrollbar">
+    <button class="nav-btn active flex-1 min-w-[50px]" id="m-nav-dashboard" onclick="navigate('dashboard')"><i class="ri-dashboard-line text-lg"></i><span class="text-[9px] whitespace-nowrap">홈</span></button>
+    <button class="nav-btn flex-1 min-w-[50px]" id="m-nav-convert" onclick="navigate('convert')"><i class="ri-robot-line text-lg"></i><span class="text-[9px] whitespace-nowrap">변환</span></button>
+    <button class="nav-btn flex-1 min-w-[50px]" id="m-nav-flashcard" onclick="navigate('flashcard')"><i class="ri-stack-line text-lg"></i><span class="text-[9px] whitespace-nowrap">카드</span></button>
+    <button class="nav-btn flex-1 min-w-[50px]" id="m-nav-blank" onclick="navigate('blank')"><i class="ri-edit-2-line text-lg"></i><span class="text-[9px] whitespace-nowrap">빈칸</span></button>
+    <button class="nav-btn flex-1 min-w-[50px]" id="m-nav-lawdb" onclick="navigate('lawdb')"><i class="ri-book-read-line text-lg"></i><span class="text-[9px] whitespace-nowrap">판례</span></button>
+    <button class="nav-btn flex-1 min-w-[50px]" id="m-nav-exam" onclick="navigate('exam')"><i class="ri-edit-box-line text-lg"></i><span class="text-[9px] whitespace-nowrap">시험</span></button>
+    <button class="nav-btn flex-1 min-w-[50px]" id="m-nav-settings" onclick="navigate('settings')"><i class="ri-settings-4-line text-lg"></i><span class="text-[9px] whitespace-nowrap">설정</span></button>
   </div>
 
   <script>
     // ==========================================
-    // 1. 단일화된 전체 스크립트 로직 (중복 제거)
+    // 1. 핵심 전역 상태 & DB 관리
     // ==========================================
     let db = { history: [], questions: [], flashcards: [], outlines: [], lastStudyDate: null, streak: 0, studyLog: {} };
     let editingFcId = null; let editingOutlineId = null; let editingExamId = null; let chartInstances = {};
@@ -650,7 +619,6 @@
         studyLog: newDB.studyLog || {} 
       };
 
-      // 💡 [마이그레이션] 예전 방식의 단순 숫자 로그를 {fc, outline} 객체 형식으로 안전하게 변환
       for (let date in db.studyLog) {
         if (typeof db.studyLog[date] === 'number') {
           db.studyLog[date] = { fc: db.studyLog[date], outline: 0, exam: 0 };
@@ -666,15 +634,26 @@
     let dueCards = []; let dueOutlines = []; let currentCard = null;
 
     window.onload = () => {
-      const saved = localStorage.getItem('nomusa_db_v4');
-      if (saved) { try { window.setAppDB(JSON.parse(saved)); } catch(e) {} }
-      const savedKey = localStorage.getItem('gemini_api_key');
-      if(savedKey) document.getElementById('api-key-input').value = savedKey;
+      try {
+        const saved = localStorage.getItem('nomusa_db_v4');
+        if (saved) { window.setAppDB(JSON.parse(saved)); }
+        const savedKey = localStorage.getItem('gemini_api_key');
+        if(savedKey) document.getElementById('api-key-input').value = savedKey;
+      } catch (error) {
+        console.warn("미리보기 환경이라 로컬 스토리지를 쓸 수 없습니다.");
+      }
       updateStreak(); 
       renderDashboard();
     };
 
-    function saveDB() { try { localStorage.setItem('nomusa_db_v4', JSON.stringify(db)); if (window.triggerCloudSave) window.triggerCloudSave(); } catch(e) {} }
+    function saveDB() { 
+      try { 
+        localStorage.setItem('nomusa_db_v4', JSON.stringify(db)); 
+      } catch(e) {
+        console.warn("미리보기 환경이라 데이터를 저장할 수 없습니다.");
+      }
+      if (window.triggerCloudSave) window.triggerCloudSave(); 
+    }
     
     function navigate(id) {
       document.querySelectorAll('.page-content').forEach(p => p.classList.remove('active'));
@@ -691,7 +670,7 @@
 
     function showLoading(msg) { document.getElementById('loading-text').textContent = msg; document.getElementById('loading-overlay').style.display = 'flex'; }
     function hideLoading() { document.getElementById('loading-overlay').style.display = 'none'; }
-    function showMsg(text) { const box = document.getElementById('message-box'); if (box) { box.textContent = text; box.style.display = 'block'; setTimeout(() => box.style.display = 'none', 3000); } else { alert(text); } }
+    function showMsg(text) { const box = document.getElementById('message-box'); if (box) { box.textContent = text; box.style.display = 'block'; setTimeout(() => box.style.display = 'none', 3000); } }
     
     function getLocalYYYYMMDD(d) {
         const year = d.getFullYear();
@@ -719,11 +698,19 @@
 
     function saveApiKey() {
       const val = document.getElementById('api-key-input').value.trim();
-      if(val) { localStorage.setItem('gemini_api_key', val); showMsg('API 키가 저장되었습니다.'); } else showMsg('키를 입력해주세요.');
+      if(val) { 
+        try { localStorage.setItem('gemini_api_key', val); } catch(e) {}
+        showMsg('API 키가 저장되었습니다.'); 
+      } else {
+        showMsg('키를 입력해주세요.');
+      }
     }
+    
     function getApiKey() {
-      const key = localStorage.getItem('gemini_api_key');
-      if(!key) { showMsg("설정 탭에서 Gemini API 키를 먼저 입력해주세요!"); throw new Error("No API Key"); } return key;
+      let key = '';
+      try { key = localStorage.getItem('gemini_api_key'); } catch(e) {}
+      if(!key) { showMsg("설정 탭에서 Gemini API 키를 먼저 입력해주세요!"); throw new Error("No API Key"); } 
+      return key;
     }
 
     async function callGemini(prompt, schema, images = []) {
@@ -765,7 +752,6 @@
       saveDB();
     }
 
-    // 💡 type을 받아서 카드(fc)와 목차(outline) 학습량을 각각 독립적으로 기록합니다.
     function markStudiedToday(type = 'fc') {
       const today = getToday();
       if (db.lastStudyDate !== today) {
@@ -789,7 +775,6 @@
       document.getElementById('d-day-val').textContent = `D-${diff}`;
       document.getElementById('streak-val').textContent = `${db.streak}일`;
       
-      // 💡 오늘 남은 복습 (카드와 목차를 분리하여 표시)
       dueCards = db.flashcards.filter(isDue);
       dueOutlines = db.outlines.filter(isDue);
       document.getElementById('due-fc-val').textContent = dueCards.length;
@@ -824,14 +809,12 @@
             return getLocalYYYYMMDD(d);
         });
         
-        // 💡 막대 그래프용 (플래시카드)
         const weeklyDataFc = last7Days.map(date => {
             if(!db.studyLog || !db.studyLog[date]) return 0;
             if(typeof db.studyLog[date] === 'number') return db.studyLog[date];
             return db.studyLog[date].fc || 0;
         });
         
-        // 💡 꺾은선 그래프용 (목차 퀴즈)
         const weeklyDataOutline = last7Days.map(date => {
             if(!db.studyLog || !db.studyLog[date]) return 0;
             if(typeof db.studyLog[date] === 'number') return 0;
@@ -847,21 +830,21 @@
                 datasets: [
                     {
                         type: 'line',
-                        label: '목차 빈칸 (회)',
+                        label: '목차 (회)',
                         data: weeklyDataOutline,
-                        borderColor: '#f59e0b', // amber-500
+                        borderColor: '#f59e0b', 
                         backgroundColor: '#f59e0b',
                         borderWidth: 2,
                         tension: 0.3,
                         fill: false,
                         pointBackgroundColor: '#f59e0b',
-                        order: 1 // 선이 막대 위에 그려지도록 설정
+                        order: 1 
                     },
                     {
                         type: 'bar',
-                        label: '플래시카드 (장)',
+                        label: '카드 (장)',
                         data: weeklyDataFc,
-                        backgroundColor: 'rgba(16, 185, 129, 0.8)', // emerald-500
+                        backgroundColor: 'rgba(16, 185, 129, 0.8)', 
                         borderRadius: 4,
                         order: 2
                     }
@@ -870,18 +853,10 @@
             options: {
                 responsive: true, maintainAspectRatio: false,
                 plugins: { 
-                    legend: { 
-                        display: true, 
-                        position: 'top', 
-                        labels: { boxWidth: 12, font: { size: 11, family: 'Pretendard' } } 
-                    } 
+                    legend: { display: true, position: 'top', labels: { boxWidth: 10, font: { size: 10, family: 'Pretendard' } } } 
                 },
                 scales: { 
-                    y: { 
-                        beginAtZero: true, 
-                        ticks: { precision: 0 },
-                        suggestedMax: 120 // 💡 하루 목표치 세팅
-                    } 
+                    y: { beginAtZero: true, ticks: { precision: 0 }, suggestedMax: 120 } 
                 }
             }
         });
@@ -907,7 +882,7 @@
             },
             options: {
                 responsive: true, maintainAspectRatio: false,
-                plugins: { legend: { position: 'right', labels: { boxWidth: 10, font: { size: 11, family: 'Pretendard' } } } },
+                plugins: { legend: { position: 'right', labels: { boxWidth: 10, font: { size: 10, family: 'Pretendard' } } } },
                 cutout: '70%'
             }
         });
@@ -1163,18 +1138,18 @@
       if(filteredCards.length === 0) { container.innerHTML = '<p class="text-sm text-gray-400 py-4 text-center">등록된 카드가 없습니다.</p>'; return; }
       
       container.innerHTML = filteredCards.map((c, index) => `
-        <div class="flex justify-between items-center p-3 bg-gray-50 border border-gray-100 rounded-lg hover:border-emerald-300 transition-colors">
-           <div class="flex items-center gap-3 flex-1 min-w-0 pr-4">
+        <div class="flex justify-between items-center p-2.5 md:p-3 bg-gray-50 border border-gray-100 rounded-lg hover:border-emerald-300 transition-colors">
+           <div class="flex items-center gap-2 md:gap-3 flex-1 min-w-0 pr-2">
              <input type="checkbox" class="fc-item-checkbox rounded text-emerald-500 focus:ring-emerald-500 border-gray-300 w-4 h-4 cursor-pointer" value="${c.id}" onchange="updateSelectAllFcState()">
-             <span class="text-xs font-bold text-gray-400 w-5 text-center shrink-0">${index + 1}</span>
+             <span class="text-[10px] md:text-xs font-bold text-gray-400 w-4 md:w-5 text-center shrink-0">${index + 1}</span>
              <div class="min-w-0">
-               <span class="text-[10px] font-bold text-emerald-500 bg-emerald-50 px-2 py-0.5 rounded">${c.subject}</span>
-               <p class="font-bold text-sm text-slate-800 mt-1 truncate">${c.front}</p>
+               <span class="text-[9px] md:text-[10px] font-bold text-emerald-500 bg-emerald-50 px-1.5 py-0.5 rounded">${c.subject}</span>
+               <p class="font-bold text-xs md:text-sm text-slate-800 mt-1 truncate">${c.front}</p>
              </div>
            </div>
-           <div class="flex gap-2 shrink-0">
-              <button onclick="editFc('${c.id}')" class="px-3 py-1.5 bg-white border border-gray-200 text-slate-600 rounded text-xs font-bold hover:bg-gray-100">수정</button>
-              <button onclick="deleteFc('${c.id}')" class="px-3 py-1.5 border border-red-100 text-red-500 rounded text-xs font-bold hover:bg-red-50">삭제</button>
+           <div class="flex gap-1 md:gap-2 shrink-0">
+              <button onclick="editFc('${c.id}')" class="px-2 py-1 md:px-3 md:py-1.5 bg-white border border-gray-200 text-slate-600 rounded text-[10px] md:text-xs font-bold hover:bg-gray-100">수정</button>
+              <button onclick="deleteFc('${c.id}')" class="px-2 py-1 md:px-3 md:py-1.5 border border-red-100 text-red-500 rounded text-[10px] md:text-xs font-bold hover:bg-red-50">삭제</button>
            </div>
         </div>
       `).join('');
@@ -1275,8 +1250,8 @@
       let nextGood = r === 0 ? 1 : (r === 1 ? 6 : Math.round(iv * e));
       let nextEasy = r === 0 ? 4 : Math.round(nextGood * 1.3);
 
-      document.getElementById('fc-btn-good').textContent = nextGood + "일 후";
-      document.getElementById('fc-btn-easy').textContent = nextEasy + "일 후";
+      document.getElementById('fc-btn-good').innerHTML = `보통<div class="text-[9px] md:text-[10px] mt-0.5 opacity-90 font-medium">${nextGood}일 후</div>`;
+      document.getElementById('fc-btn-easy').innerHTML = `쉬움<div class="text-[9px] md:text-[10px] mt-0.5 opacity-90 font-medium">${nextEasy}일 후</div>`;
 
       const hasCloze = /\[(.*?)\]/.test(currentCard.back);
       if (hasCloze) {
@@ -1299,7 +1274,8 @@
       let matches = []; let tempMatch; const tempRegex = /\[(.*?)\]/g;
       while ((tempMatch = tempRegex.exec(card.back)) !== null) { matches.push(tempMatch[1]); }
       const maxCharLen = matches.length > 0 ? Math.max(...matches.map(x => x.length)) : 10;
-      const uniformWidth = `calc(${Math.max(maxCharLen, 6)}ch + 32px)`;
+      
+      const uniformWidth = `clamp(60px, ${maxCharLen + 2}ch, 100%)`;
 
       while ((match = regex.exec(card.back)) !== null) {
         html += card.back.substring(lastIdx, match.index);
@@ -1383,7 +1359,7 @@
       if (idx > -1) db.flashcards[idx] = currentCard;
       
       saveDB(); 
-      markStudiedToday('fc'); // 💡 카드 학습량 카운트 
+      markStudiedToday('fc');
       dueCards.shift(); 
       if (rating === 1) dueCards.push(currentCard); 
       loadNextCard();
@@ -1445,18 +1421,18 @@
       container.innerHTML = filteredOutlines.map(o => {
         const isToday = isDue(o);
         return `
-        <div class="p-6 bg-white border ${isToday ? 'border-amber-400 bg-amber-50/10' : 'border-gray-200'} rounded-xl shadow-sm flex flex-col justify-between hover:shadow-md transition-all group">
+        <div class="p-4 md:p-6 bg-white border ${isToday ? 'border-amber-400 bg-amber-50/10' : 'border-gray-200'} rounded-xl shadow-sm flex flex-col justify-between hover:shadow-md transition-all group">
           <div>
             <div class="flex justify-between items-start">
-              <span class="text-[10px] font-bold text-amber-500 bg-amber-50 px-2 py-1 rounded-full">${o.subject}</span>
-              ${isToday ? '<span class="text-[10px] font-bold text-white bg-amber-500 px-2 py-1 rounded-full animate-pulse">오늘 복습</span>' : ''}
+              <span class="text-[9px] md:text-[10px] font-bold text-amber-500 bg-amber-50 px-2 py-1 rounded-full">${o.subject}</span>
+              ${isToday ? '<span class="text-[9px] md:text-[10px] font-bold text-white bg-amber-500 px-2 py-1 rounded-full animate-pulse">오늘 복습</span>' : ''}
             </div>
-            <h4 class="font-extrabold text-slate-800 text-lg mt-3 mb-2">${o.title}</h4>
+            <h4 class="font-extrabold text-slate-800 text-base md:text-lg mt-3 mb-2">${o.title}</h4>
           </div>
-          <div class="flex justify-end gap-2 mt-4">
-            <button onclick="editOutline('${o.id}')" class="px-3 py-1.5 border border-gray-200 text-slate-600 rounded-lg text-xs font-bold hover:bg-gray-100">수정</button>
-            <button onclick="deleteOutline('${o.id}')" class="px-3 py-1.5 border border-red-100 text-red-500 rounded-lg text-xs font-bold hover:bg-red-50">삭제</button>
-            <button onclick="startBlankQuiz('${o.id}')" class="px-4 py-1.5 bg-amber-500 text-white rounded-lg text-xs font-bold hover:bg-amber-600 shadow-sm">퀴즈 시작</button>
+          <div class="flex justify-end gap-1 md:gap-2 mt-4">
+            <button onclick="editOutline('${o.id}')" class="px-2 py-1.5 md:px-3 md:py-1.5 border border-gray-200 text-slate-600 rounded-lg text-xs font-bold hover:bg-gray-100">수정</button>
+            <button onclick="deleteOutline('${o.id}')" class="px-2 py-1.5 md:px-3 md:py-1.5 border border-red-100 text-red-500 rounded-lg text-xs font-bold hover:bg-red-50">삭제</button>
+            <button onclick="startBlankQuiz('${o.id}')" class="px-3 py-1.5 md:px-4 md:py-1.5 bg-amber-500 text-white rounded-lg text-xs font-bold hover:bg-amber-600 shadow-sm">퀴즈 시작</button>
           </div>
         </div>
       `}).join('');
@@ -1496,11 +1472,13 @@
     
     function renderBlankQuizRoom() {
       const container = document.getElementById('quiz-lines'); container.innerHTML = '';
-      const blankLines = blankState.lines.filter(l => l.isBlank); const maxCharLen = blankLines.length > 0 ? Math.max(...blankLines.map(l => l.content.length)) : 15; const uniformWidth = `calc(${Math.max(maxCharLen, 15)}ch + 32px)`;
+      const blankLines = blankState.lines.filter(l => l.isBlank); const maxCharLen = blankLines.length > 0 ? Math.max(...blankLines.map(l => l.content.length)) : 10; 
+      
+      const uniformWidth = `clamp(80px, ${maxCharLen + 2}ch, 100%)`;
 
       blankState.lines.forEach(line => {
-        const row = document.createElement('div'); row.className = "mb-3 whitespace-pre flex items-center"; 
-        const prefixSpan = document.createElement('span'); prefixSpan.textContent = line.prefix; prefixSpan.className = "font-bold text-slate-500 mr-2"; row.appendChild(prefixSpan);
+        const row = document.createElement('div'); row.className = "mb-3 flex items-center flex-wrap"; 
+        const prefixSpan = document.createElement('span'); prefixSpan.textContent = line.prefix; prefixSpan.className = "font-bold text-slate-500 mr-2 shrink-0"; row.appendChild(prefixSpan);
         if (line.isBlank) {
           const input = document.createElement('input'); input.type = "text"; input.className = "blank-input"; input.dataset.answer = line.content; input.style.width = uniformWidth;
           input.addEventListener('focus', (e) => { blankState.activeInput = e.target; e.target.classList.remove('correct', 'wrong'); });
@@ -1515,7 +1493,9 @@
       blankState.activeInput = null; const firstInput = document.querySelector('.blank-input'); if(firstInput) firstInput.focus();
       document.getElementById('quiz-check-btn').classList.remove('hidden');
       document.getElementById('quiz-sm2-buttons').classList.add('hidden');
+      document.getElementById('quiz-sm2-buttons').classList.remove('show');
     }
+    
     function fillWordChipOutline(word) {
       if (blankState.activeInput) {
         blankState.activeInput.value = word; blankState.activeInput.classList.remove('correct', 'wrong');
@@ -1533,15 +1513,26 @@
         else { input.classList.add('wrong'); input.classList.remove('correct'); if (!input.value) input.placeholder = "?"; }
       });
       
-      showMsg(`${inputs.length}개 중 ${correctCount}개 정답! 난이도를 선택해 복습 주기를 설정하세요.`);
+      const accuracy = inputs.length > 0 ? (correctCount / inputs.length) : 0;
+      document.querySelectorAll('#quiz-sm2-buttons .sm2-btn').forEach(btn => btn.classList.remove('ring-4', 'ring-offset-2', 'ring-rose-400', 'ring-orange-400', 'ring-blue-400', 'ring-emerald-400', 'animate-pulse'));
+
+      if (accuracy === 1) { document.getElementById('quiz-btn-easy').classList.add('ring-4', 'ring-offset-2', 'ring-emerald-400', 'animate-pulse'); showMsg("🎉 100% 완벽! '쉬움'을 추천합니다."); } 
+      else if (accuracy >= 0.75) { document.getElementById('quiz-btn-good').classList.add('ring-4', 'ring-offset-2', 'ring-blue-400', 'animate-pulse'); showMsg("👍 75% 이상 정답! '보통'을 추천합니다."); } 
+      else if (accuracy >= 0.25) { document.getElementById('quiz-btn-hard').classList.add('ring-4', 'ring-offset-2', 'ring-orange-400', 'animate-pulse'); showMsg("🔥 25%~75% 정답. '어려움'을 추천합니다."); } 
+      else { document.getElementById('quiz-btn-again').classList.add('ring-4', 'ring-offset-2', 'ring-rose-400', 'animate-pulse'); showMsg("💪 25% 미만 정답. 다시 한 번 확실히 외워봅시다!"); }
+      
       document.getElementById('quiz-check-btn').classList.add('hidden');
       document.getElementById('quiz-sm2-buttons').classList.remove('hidden');
+      document.getElementById('quiz-sm2-buttons').classList.add('show');
     }
 
     function rateOutline(rating) {
       let outline = blankState.outline;
       let q = rating === 1 ? 0 : rating === 2 ? 3 : rating === 3 ? 4 : 5;
       let r = outline.repetition || 0; let iv = outline.interval || 0; let e = outline.efactor || 2.5;
+
+      let nextGood = r === 0 ? 1 : (r === 1 ? 6 : Math.round(iv * e));
+      let nextEasy = r === 0 ? 4 : Math.round(nextGood * 1.3);
 
       if (rating >= 3) {
         if (r === 0) iv = 1; else if (r === 1) iv = 6; else iv = Math.round(iv * e);
@@ -1561,8 +1552,7 @@
       const idx = db.outlines.findIndex(o => o.id === outline.id);
       if (idx > -1) db.outlines[idx] = outline;
       saveDB(); 
-      
-      markStudiedToday('outline'); // 💡 목차 학습량 카운트
+      markStudiedToday('outline'); 
       closeBlankQuiz();
     }
 
@@ -1718,8 +1708,7 @@
         
         const record = { id: Date.now(), date: getToday(), subject: examState.subject, score: result.score, feedback: result, fullAnswer: fullAnswer };
         db.history.push(record); 
-        
-        markStudiedToday('exam'); // 💡 모의고사 기록도 함께
+        markStudiedToday('exam'); 
         saveDB();
         
         examState.uploadedRubricText = ''; 
@@ -1765,7 +1754,6 @@
     function resetDB() { if (confirm("정말로 모든 학습 기록을 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다!")) { localStorage.removeItem('nomusa_db_v4'); location.reload(); } }
   </script>
 
-  <!-- 💡 하나뿐인 깔끔한 Firebase 모듈 스크립트 -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
     import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
