@@ -8,9 +8,6 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
-  <script>
-    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-  </script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;800&display=swap');
     
@@ -58,10 +55,13 @@
         .neo-card { padding: 32px; }
     }
 
-    /* 하단 SM-2 버튼 모바일 2x2 배열 최적화 */
-    .fc-buttons-wrap { display: none; gap: 8px; max-width: 600px; width: 100%; margin: 0 auto; flex-wrap: wrap; justify-content: center; }
-    .fc-buttons-wrap.show { display: flex; }
-    .sm2-btn { flex: 1 1 45%; min-width: 70px; padding: 12px 8px; border-radius: 16px; font-weight: 800; color: white; text-align: center; transition: all 0.2s; cursor: pointer; }
+    /* 💡 SM-2 버튼 반응형 컨테이너 (모바일 2x2, PC 1x4) */
+    .sm2-buttons-container { display: none; gap: 12px; width: 100%; max-width: 600px; margin: 0 auto; }
+    .sm2-buttons-container.show { display: grid; grid-template-columns: repeat(2, 1fr); }
+    @media (min-width: 768px) {
+        .sm2-buttons-container.show { display: flex; flex-direction: row; }
+    }
+    .sm2-btn { flex: 1; padding: 12px 8px; border-radius: 16px; font-weight: 800; color: white; text-align: center; transition: all 0.2s; cursor: pointer; }
     .sm2-btn:active { transform: scale(0.95); }
 
     /* 빈칸 모바일 너비 최적화 */
@@ -100,15 +100,14 @@
     <div class="spinner"></div>
     <div id="loading-text" class="text-lg font-bold text-slate-700">처리 중입니다...</div>
   </div>
-
   <div id="message-box"></div>
 
+  <!-- 헤더 -->
   <header class="fixed top-0 left-0 right-0 h-16 bg-[#0f172a] border-b border-slate-800 text-white flex items-center justify-between px-4 lg:px-6 z-50 shadow-md">
     <div class="flex items-center gap-2 cursor-pointer shrink-0" onclick="navigate('dashboard')">
       <i class="ri-scales-3-line text-emerald-400 text-2xl"></i>
       <h1 class="text-lg font-extrabold tracking-tight">CPLA <span class="text-emerald-400">TRAINER</span></h1>
     </div>
-    
     <nav class="hidden md:flex flex-1 justify-center gap-1 mx-4 overflow-x-auto no-scrollbar">
       <button class="desktop-nav-btn active" id="d-nav-dashboard" onclick="navigate('dashboard')">대시보드</button>
       <button class="desktop-nav-btn" id="d-nav-convert" onclick="navigate('convert')">자료 변환</button>
@@ -118,17 +117,14 @@
       <button class="desktop-nav-btn" id="d-nav-exam" onclick="navigate('exam')">모의고사</button>
       <button class="desktop-nav-btn" id="d-nav-settings" onclick="navigate('settings')">설정</button>
     </nav>
-    
-    <div id="header-auth-status" class="shrink-0 text-[10px] font-bold text-slate-400 uppercase tracking-widest bg-slate-800 border border-slate-700 px-3 py-1.5 rounded-full hidden lg:block transition-colors">
-      Mode: Local Storage
-    </div>
+    <div id="header-auth-status" class="shrink-0 text-[10px] font-bold text-slate-400 uppercase tracking-widest bg-slate-800 border border-slate-700 px-3 py-1.5 rounded-full hidden lg:block transition-colors">Mode: Local Storage</div>
   </header>
 
   <main class="pt-20 px-4 md:pt-24 md:px-8 max-w-5xl mx-auto">
 
+    <!-- 1. 대시보드 -->
     <div id="page-dashboard" class="page-content active">
       <h2 class="text-2xl font-extrabold text-slate-800 mb-6 flex items-center gap-2"><i class="ri-dashboard-line"></i> 학습 대시보드</h2>
-      
       <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-6">
         <div class="neo-card p-4 md:p-6 flex flex-col items-center text-center">
           <span class="text-[10px] font-bold text-gray-400 uppercase mb-2">시험 D-Day</span>
@@ -138,7 +134,6 @@
           <span class="text-[10px] font-bold text-gray-400 uppercase mb-2">연속 학습일</span>
           <span class="text-2xl md:text-3xl font-extrabold text-slate-800" id="streak-val">0일</span>
         </div>
-        
         <div class="neo-card p-4 flex flex-col items-center justify-center text-center">
           <span class="text-[10px] font-bold text-gray-400 uppercase mb-2">오늘 남은 복습</span>
           <div class="flex items-center justify-center gap-2 md:gap-4 mt-1 w-full">
@@ -153,7 +148,6 @@
             </div>
           </div>
         </div>
-
         <div class="neo-card p-4 md:p-6 flex flex-col items-center text-center">
           <span class="text-[10px] font-bold text-gray-400 uppercase mb-2">누적 모의고사</span>
           <span class="text-2xl md:text-3xl font-extrabold text-slate-800" id="total-exams-val">0회</span>
@@ -171,17 +165,8 @@
         </div>
       </div>
 
-      <div class="neo-card p-4 md:p-6 mb-6">
-        <div class="flex justify-between items-center mb-4">
-          <h3 class="font-bold text-slate-800 flex items-center gap-2 text-sm md:text-base"><i class="ri-line-chart-line text-rose-500"></i> 모의고사 점수 추이</h3>
-        </div>
-        <div class="chart-wrapper"><canvas id="chart-scores"></canvas></div>
-      </div>
-
       <div class="neo-card p-4 md:p-6 mb-8">
-        <div class="flex justify-between items-center mb-4">
-          <h3 class="font-bold text-slate-800 flex items-center gap-2 text-sm md:text-base"><i class="ri-history-line text-emerald-500"></i> 최근 모의고사 기록</h3>
-        </div>
+        <h3 class="font-bold text-slate-800 mb-4 flex items-center gap-2 text-sm md:text-base"><i class="ri-history-line text-emerald-500"></i> 최근 모의고사 기록</h3>
         <div class="overflow-x-auto">
           <table class="w-full text-left">
             <thead>
@@ -195,6 +180,7 @@
       </div>
     </div>
 
+    <!-- 2. 자료 변환 -->
     <div id="page-convert" class="page-content">
       <h2 class="text-2xl font-extrabold text-slate-800 mb-2 flex items-center gap-2"><i class="ri-robot-line"></i> AI 자료 변환</h2>
       <p class="text-sm text-gray-500 mb-6">문제지나 모범답안 PDF를 업로드하면 AI가 분석하여 모의고사용 문제나 플래시카드로 변환합니다.</p>
@@ -229,6 +215,7 @@
       </div>
     </div>
 
+    <!-- 3. 플래시카드 -->
     <div id="page-flashcard" class="page-content">
       <h2 class="text-2xl font-extrabold text-slate-800 mb-2 flex items-center gap-2"><i class="ri-stack-line"></i> 안키형 플래시카드</h2>
       <p class="text-sm text-gray-500 mb-6">빈칸이 있는 카드는 단어장 모드로, 일반 카드는 뒤집기 모드로 알아서 작동합니다.</p>
@@ -239,14 +226,15 @@
         <button onclick="toggleManualCardForm()" class="flex-1 md:flex-none justify-center px-4 py-2 bg-slate-800 text-white rounded-lg text-xs md:text-sm font-bold hover:bg-slate-700 transition-all flex items-center gap-1"><i class="ri-add-line"></i> 만들기</button>
       </div>
 
+      <!-- 각종 관리창 생략 (기존 코드와 동일하게 유지) -->
       <div id="csv-upload-form" class="hidden neo-card p-4 md:p-6 mb-8 bg-slate-50 border-2 border-blue-200 shadow-lg">
         <h3 class="font-bold text-slate-800 mb-4 text-sm md:text-lg flex items-center gap-2"><i class="ri-file-excel-2-line text-blue-500"></i> CSV 일괄 등록</h3>
         <div class="mb-4 flex flex-col gap-2">
           <input type="file" id="csv-file-input" accept=".csv" class="w-full p-2 bg-white rounded-xl border border-gray-200 text-sm cursor-pointer">
         </div>
         <div class="flex justify-end gap-2">
-          <button onclick="cancelCsvUpload()" class="px-4 py-2 bg-white border border-gray-200 text-gray-600 rounded-xl text-xs md:text-sm font-bold hover:bg-gray-50">취소</button>
-          <button onclick="processCsvUpload()" class="px-4 py-2 bg-blue-500 text-white rounded-xl text-xs md:text-sm font-bold hover:bg-blue-600 shadow-md">일괄 등록하기</button>
+          <button onclick="cancelCsvUpload()" class="px-4 py-2 bg-white border border-gray-200 text-gray-600 rounded-xl text-xs md:text-sm font-bold">취소</button>
+          <button onclick="processCsvUpload()" class="px-4 py-2 bg-blue-500 text-white rounded-xl text-xs md:text-sm font-bold shadow-md">일괄 등록하기</button>
         </div>
       </div>
 
@@ -254,8 +242,8 @@
         <div class="flex flex-col md:flex-row justify-between md:items-center mb-4 border-b border-gray-100 pb-3 gap-3">
           <div class="flex items-center gap-2 md:gap-3">
             <h3 class="font-bold text-slate-800 text-base md:text-lg flex items-center gap-1"><i class="ri-list-settings-line text-emerald-500"></i> 내 카드</h3>
-            <select id="fc-filter-subject" onchange="renderFcList()" class="p-1.5 bg-gray-50 border border-gray-200 rounded-lg text-xs font-bold outline-none focus:ring-2 focus:ring-emerald-500">
-              <option value="all">전체 과목</option><option value="노동법">노동법</option><option value="인사노무관리">인사노무관리</option><option value="행정쟁송법">행정쟁송법</option><option value="민사소송법">민사소송법</option>
+            <select id="fc-filter-subject" onchange="renderFcList()" class="p-1.5 bg-gray-50 border border-gray-200 rounded-lg text-xs font-bold outline-none">
+              <option value="all">전체</option><option value="노동법">노동법</option><option value="인사노무관리">인사노무관리</option><option value="행정쟁송법">행정쟁송법</option><option value="민사소송법">민사소송법</option>
             </select>
           </div>
           <div class="flex flex-wrap items-center gap-2">
@@ -264,6 +252,7 @@
             </label>
             <button onclick="removeBracketsFromSelected()" class="px-2 py-1.5 bg-indigo-50 text-indigo-600 text-[11px] font-bold rounded-lg hover:bg-indigo-100">선택 괄호제거</button>
             <button onclick="deleteSelectedFc()" class="px-2 py-1.5 bg-rose-50 text-rose-500 text-[11px] font-bold rounded-lg hover:bg-rose-100">선택 삭제</button>
+            <button onclick="toggleFcManager()" class="ml-1 text-sm text-gray-400"><i class="ri-close-line text-xl"></i></button>
           </div>
         </div>
         <div id="fc-list" class="space-y-2 md:space-y-3 max-h-96 overflow-y-auto pr-1"></div>
@@ -278,10 +267,11 @@
         </div>
         <div class="flex justify-end gap-2">
           <button onclick="cancelManualFlashcard()" class="px-4 py-2 bg-white border border-gray-200 text-gray-600 rounded-xl text-xs font-bold hover:bg-gray-50">취소</button>
-          <button id="manual-fc-save-btn" onclick="addManualFlashcard()" class="px-4 py-2 bg-emerald-500 text-white rounded-xl text-xs font-bold hover:bg-emerald-600 shadow-md">추가하기</button>
+          <button id="manual-fc-save-btn" onclick="addManualFlashcard()" class="px-4 py-2 bg-emerald-500 text-white rounded-xl text-xs font-bold shadow-md">추가하기</button>
         </div>
       </div>
 
+      <!-- 플래시카드 플레이어 -->
       <div class="neo-card p-4 md:p-8 flex flex-col items-center min-h-[400px]">
         <div class="text-xs font-bold text-gray-500 mb-4 md:mb-6 bg-gray-100 px-3 py-1.5 rounded-full">
           카드 복습: <span class="text-blue-500" id="fc-due-display">0</span>장
@@ -291,7 +281,10 @@
           <div class="fc-container mb-4 hidden" id="fc-flip-container">
             <div class="fc-inner" id="fc-card" onclick="flipCard()">
               <div class="fc-front">
-                <span class="absolute top-4 md:top-6 text-[10px] md:text-xs font-bold text-emerald-500 bg-emerald-50 px-2 md:px-3 py-1 rounded-full" id="fc-front-sub"></span>
+                <div class="absolute top-4 md:top-6 flex items-center justify-center gap-2 w-full px-4">
+                  <span class="text-[10px] md:text-xs font-bold text-emerald-500 bg-emerald-50 px-2 md:px-3 py-1 rounded-full truncate max-w-[60%]" id="fc-front-sub"></span>
+                  <span class="text-[10px] md:text-xs font-bold px-2 md:px-3 py-1 rounded-full shrink-0" id="fc-front-status"></span>
+                </div>
                 <p class="text-lg md:text-xl font-extrabold text-slate-800 leading-relaxed break-keep" id="fc-front-text"></p>
                 <div class="absolute bottom-4 md:bottom-6 text-[10px] md:text-xs font-bold text-gray-300 flex items-center gap-1"><i class="ri-tap-line"></i> 클릭하여 정답 확인</div>
               </div>
@@ -302,11 +295,14 @@
           </div>
 
           <div id="fc-cloze-container" class="hidden w-full text-left mb-4 border-2 border-emerald-100 bg-white rounded-2xl p-5 md:p-8 shadow-md">
-             <div class="text-[10px] md:text-xs font-bold text-emerald-500 mb-2 inline-block bg-emerald-50 px-2 py-1 rounded-full" id="fc-cloze-sub"></div>
+             <div class="flex items-center gap-2 mb-2">
+               <div class="text-[10px] md:text-xs font-bold text-emerald-500 inline-block bg-emerald-50 px-2 py-1 rounded-full" id="fc-cloze-sub"></div>
+               <div class="text-[10px] md:text-xs font-bold inline-block px-2 py-1 rounded-full" id="fc-cloze-status"></div>
+             </div>
              <div class="text-lg md:text-xl font-extrabold text-slate-800 mb-4 md:mb-6 pb-3 md:pb-4 border-b border-gray-100 break-keep" id="fc-cloze-front"></div>
              <div class="text-[14px] md:text-[15px] leading-loose text-slate-700 font-medium mb-6 md:mb-8 break-keep" id="fc-cloze-back"></div>
              <div class="text-center mt-2 md:mt-4">
-               <button id="fc-cloze-check-btn" onclick="checkFcClozeAnswers()" class="w-full md:w-auto px-6 py-2.5 bg-emerald-500 text-white rounded-xl text-sm font-bold hover:bg-emerald-600 shadow-sm active:scale-95">정답 확인</button>
+               <button id="fc-cloze-check-btn" onclick="checkFcClozeAnswers()" class="w-full md:w-auto px-6 py-2.5 bg-emerald-500 text-white rounded-xl text-sm font-bold hover:bg-emerald-600 shadow-sm active:scale-95">정답 확인하기</button>
              </div>
              <div id="fc-cloze-word-bank-wrap" class="mt-4 md:mt-6 pt-4 md:pt-6 border-t border-gray-100">
                <div id="fc-cloze-word-bank" class="flex flex-wrap gap-1.5 md:gap-2 justify-center"></div>
@@ -321,11 +317,12 @@
             <div id="fc-ai-result" class="hidden p-3 md:p-4 bg-white border border-slate-200 rounded-xl text-xs md:text-[13px] shadow-inner break-keep"></div>
           </div>
 
-          <div id="fc-buttons" class="fc-buttons-wrap">
-            <div class="sm2-btn bg-rose-500 hover:bg-rose-600" id="btn-again" onclick="rateCard(1)">다시<div class="text-[9px] md:text-[10px] mt-0.5 opacity-90 font-medium">1분 후</div></div>
-            <div class="sm2-btn bg-orange-500 hover:bg-orange-600" id="btn-hard" onclick="rateCard(2)">어려움<div class="text-[9px] md:text-[10px] mt-0.5 opacity-90 font-medium">12시간 후</div></div>
-            <div class="sm2-btn bg-blue-500 hover:bg-blue-600" id="btn-good" onclick="rateCard(3)">보통<div class="text-[9px] md:text-[10px] mt-0.5 opacity-90 font-medium" id="fc-btn-good">1일 후</div></div>
-            <div class="sm2-btn bg-emerald-500 hover:bg-emerald-600" id="btn-easy" onclick="rateCard(4)">쉬움<div class="text-[9px] md:text-[10px] mt-0.5 opacity-90 font-medium" id="fc-btn-easy">4일 후</div></div>
+          <!-- 💡 텍스트 분리 및 반응형 클래스가 완벽하게 적용된 버튼 컨테이너 -->
+          <div id="fc-buttons" class="sm2-buttons-container mt-4 md:mt-6">
+            <div class="sm2-btn bg-rose-500 hover:bg-rose-600" id="fc-btn-again" onclick="rateCard(1)">다시<div class="text-[9px] md:text-[10px] mt-0.5 opacity-90 font-medium" id="fc-time-again">1분 후</div></div>
+            <div class="sm2-btn bg-orange-500 hover:bg-orange-600" id="fc-btn-hard" onclick="rateCard(2)">어려움<div class="text-[9px] md:text-[10px] mt-0.5 opacity-90 font-medium" id="fc-time-hard">12시간 후</div></div>
+            <div class="sm2-btn bg-blue-500 hover:bg-blue-600" id="fc-btn-good" onclick="rateCard(3)">보통<div class="text-[9px] md:text-[10px] mt-0.5 opacity-90 font-medium" id="fc-time-good">1일 후</div></div>
+            <div class="sm2-btn bg-emerald-500 hover:bg-emerald-600" id="fc-btn-easy" onclick="rateCard(4)">쉬움<div class="text-[9px] md:text-[10px] mt-0.5 opacity-90 font-medium" id="fc-time-easy">4일 후</div></div>
           </div>
         </div>
 
@@ -336,6 +333,7 @@
       </div>
     </div>
 
+    <!-- 4. 목차 빈칸 채우기 -->
     <div id="page-blank" class="page-content">
       <h2 class="text-2xl font-extrabold text-slate-800 mb-2 flex items-center gap-2"><i class="ri-edit-2-line"></i> 목차 빈칸 뚫기</h2>
       <p class="text-sm text-gray-500 mb-6">전체적인 구조 암기를 위해 목차의 빈칸을 채워보세요. 이제 목차도 알고리즘으로 관리됩니다.</p>
@@ -365,7 +363,6 @@
             <button id="outline-save-btn" onclick="saveOutline()" class="px-4 py-2 bg-emerald-500 text-white rounded-xl text-xs md:text-sm font-bold shadow-md">등록</button>
           </div>
         </div>
-
         <div id="outline-list" class="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4"></div>
       </div>
 
@@ -373,7 +370,6 @@
         <button onclick="closeBlankQuiz()" class="text-xs md:text-sm font-bold text-gray-500 hover:text-gray-800 mb-3 md:mb-4 flex items-center gap-1"><i class="ri-arrow-left-line"></i> 목록으로</button>
         
         <div class="flex flex-col lg:flex-row gap-4 md:gap-6">
-          
           <div class="lg:w-2/3 neo-card p-4 md:p-8 order-2 lg:order-1">
             <div class="flex flex-col md:flex-row justify-between md:items-end gap-3 mb-4 md:mb-6 border-b border-gray-100 pb-3 md:pb-4">
               <div>
@@ -382,7 +378,7 @@
               </div>
               <div class="flex items-center gap-2">
                 <select id="quiz-level" class="p-1.5 md:p-2 border border-gray-200 rounded-lg text-xs md:text-sm font-bold text-slate-700 outline-none">
-                  <option value="50">무작위 50% 빈칸</option><option value="main">대목차만 빈칸 (I, 1 등)</option><option value="all">전체 빈칸</option>
+                  <option value="50">무작위 50% 빈칸</option><option value="main">대목차만 빈칸</option><option value="all">전체 빈칸</option>
                 </select>
                 <button onclick="generateBlankQuiz()" class="px-3 md:px-4 py-1.5 md:py-2 bg-slate-900 text-white rounded-lg text-xs md:text-sm font-bold hover:bg-slate-800 transition-all">적용</button>
               </div>
@@ -393,11 +389,12 @@
             <div id="quiz-control-area" class="text-center mt-6 md:mt-8">
               <button id="quiz-check-btn" onclick="checkBlankAnswers()" class="w-full md:w-auto px-6 md:px-8 py-2.5 md:py-3 bg-emerald-500 text-white rounded-xl font-bold text-sm md:text-lg hover:bg-emerald-600 shadow-md active:scale-95"><i class="ri-check-double-line"></i> 정답 확인</button>
               
-              <div id="quiz-sm2-buttons" class="fc-buttons-wrap mt-2 md:mt-4">
-                <div class="sm2-btn bg-rose-500 hover:bg-rose-600" id="quiz-btn-again" onclick="rateOutline(1)">다시<div class="text-[9px] md:text-[10px] mt-0.5 opacity-90 font-medium">1분 후</div></div>
-                <div class="sm2-btn bg-orange-500 hover:bg-orange-600" id="quiz-btn-hard" onclick="rateOutline(2)">어려움<div class="text-[9px] md:text-[10px] mt-0.5 opacity-90 font-medium">12시간 후</div></div>
-                <div class="sm2-btn bg-blue-500 hover:bg-blue-600" id="quiz-btn-good" onclick="rateOutline(3)">보통<div class="text-[9px] md:text-[10px] mt-0.5 opacity-90 font-medium">1일 후</div></div>
-                <div class="sm2-btn bg-emerald-500 hover:bg-emerald-600" id="quiz-btn-easy" onclick="rateOutline(4)">쉬움<div class="text-[9px] md:text-[10px] mt-0.5 opacity-90 font-medium">4일 후</div></div>
+              <!-- 💡 텍스트 분리 및 반응형 클래스가 완벽하게 적용된 버튼 컨테이너 -->
+              <div id="quiz-sm2-buttons" class="sm2-buttons-container mt-4 md:mt-6">
+                <div class="sm2-btn bg-rose-500 hover:bg-rose-600" id="quiz-btn-again" onclick="rateOutline(1)">다시<div class="text-[9px] md:text-[10px] mt-0.5 opacity-90 font-medium" id="quiz-time-again">1분 후</div></div>
+                <div class="sm2-btn bg-orange-500 hover:bg-orange-600" id="quiz-btn-hard" onclick="rateOutline(2)">어려움<div class="text-[9px] md:text-[10px] mt-0.5 opacity-90 font-medium" id="quiz-time-hard">12시간 후</div></div>
+                <div class="sm2-btn bg-blue-500 hover:bg-blue-600" id="quiz-btn-good" onclick="rateOutline(3)">보통<div class="text-[9px] md:text-[10px] mt-0.5 opacity-90 font-medium" id="quiz-time-good">1일 후</div></div>
+                <div class="sm2-btn bg-emerald-500 hover:bg-emerald-600" id="quiz-btn-easy" onclick="rateOutline(4)">쉬움<div class="text-[9px] md:text-[10px] mt-0.5 opacity-90 font-medium" id="quiz-time-easy">4일 후</div></div>
               </div>
             </div>
           </div>
@@ -408,7 +405,6 @@
               <div id="quiz-word-bank" class="flex flex-wrap gap-1.5 md:gap-2"></div>
             </div>
           </div>
-
         </div>
       </div>
     </div>
@@ -588,7 +584,6 @@
 
   </main>
 
-  <!-- 하단 모바일 내비게이션 바 (정렬 최적화) -->
   <div class="fixed bottom-0 left-0 right-0 h-16 md:h-20 bg-white border-t border-gray-100 flex md:hidden items-center justify-around px-2 z-50 shadow-[0_-4px_10px_rgba(0,0,0,0.05)] overflow-x-auto no-scrollbar">
     <button class="nav-btn active flex-1 min-w-[50px]" id="m-nav-dashboard" onclick="navigate('dashboard')"><i class="ri-dashboard-line text-lg"></i><span class="text-[9px] whitespace-nowrap">홈</span></button>
     <button class="nav-btn flex-1 min-w-[50px]" id="m-nav-convert" onclick="navigate('convert')"><i class="ri-robot-line text-lg"></i><span class="text-[9px] whitespace-nowrap">변환</span></button>
@@ -606,8 +601,8 @@
     let db = { history: [], questions: [], flashcards: [], outlines: [], lastStudyDate: null, streak: 0, studyLog: {} };
     let editingFcId = null; let editingOutlineId = null; let editingExamId = null; let chartInstances = {};
 
-    window.getAppDB = () => db;
-    window.setAppDB = (newDB) => { 
+    function getAppDB() { return db; }
+    function setAppDB(newDB) { 
       if (!newDB) return;
       db = { 
         history: newDB.history || [], 
@@ -618,13 +613,12 @@
         streak: newDB.streak || 0,
         studyLog: newDB.studyLog || {} 
       };
-
       for (let date in db.studyLog) {
         if (typeof db.studyLog[date] === 'number') {
           db.studyLog[date] = { fc: db.studyLog[date], outline: 0, exam: 0 };
         }
       }
-    };
+    }
 
     const MODEL_NAME = "gemini-2.5-flash";
     const LINES_PER_PAGE = 22; const MAX_CHARS_PER_LINE = 40; 
@@ -633,25 +627,31 @@
     let fcClozeState = { activeInput: null, answers: [] }; 
     let dueCards = []; let dueOutlines = []; let currentCard = null;
 
-    window.onload = () => {
+    document.addEventListener('DOMContentLoaded', () => {
+      if (typeof pdfjsLib !== 'undefined') {
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+      }
       try {
         const saved = localStorage.getItem('nomusa_db_v4');
-        if (saved) { window.setAppDB(JSON.parse(saved)); }
+        if (saved) { setAppDB(JSON.parse(saved)); }
         const savedKey = localStorage.getItem('gemini_api_key');
-        if(savedKey) document.getElementById('api-key-input').value = savedKey;
+        if(savedKey) {
+            const apiEl = document.getElementById('api-key-input');
+            if(apiEl) apiEl.value = savedKey;
+        }
       } catch (error) {
-        console.warn("미리보기 환경이라 로컬 스토리지를 쓸 수 없습니다.");
+        console.warn("미리보기 환경(샌드박스) 제약으로 인해 로컬 스토리지를 사용할 수 없습니다.");
       }
-      updateStreak(); 
-      renderDashboard();
-    };
+      try {
+        updateStreak(); 
+        renderDashboard();
+      } catch(err) {
+        console.error("Dashboard Render Error:", err);
+      }
+    });
 
     function saveDB() { 
-      try { 
-        localStorage.setItem('nomusa_db_v4', JSON.stringify(db)); 
-      } catch(e) {
-        console.warn("미리보기 환경이라 데이터를 저장할 수 없습니다.");
-      }
+      try { localStorage.setItem('nomusa_db_v4', JSON.stringify(db)); } catch(e) {}
       if (window.triggerCloudSave) window.triggerCloudSave(); 
     }
     
@@ -670,7 +670,7 @@
 
     function showLoading(msg) { document.getElementById('loading-text').textContent = msg; document.getElementById('loading-overlay').style.display = 'flex'; }
     function hideLoading() { document.getElementById('loading-overlay').style.display = 'none'; }
-    function showMsg(text) { const box = document.getElementById('message-box'); if (box) { box.textContent = text; box.style.display = 'block'; setTimeout(() => box.style.display = 'none', 3000); } }
+    function showMsg(text) { const box = document.getElementById('message-box'); if (box) { box.textContent = text; box.style.display = 'block'; setTimeout(() => box.style.display = 'none', 3000); } else { alert(text); } }
     
     function getLocalYYYYMMDD(d) {
         const year = d.getFullYear();
@@ -701,9 +701,7 @@
       if(val) { 
         try { localStorage.setItem('gemini_api_key', val); } catch(e) {}
         showMsg('API 키가 저장되었습니다.'); 
-      } else {
-        showMsg('키를 입력해주세요.');
-      }
+      } else { showMsg('키를 입력해주세요.'); }
     }
     
     function getApiKey() {
@@ -759,29 +757,23 @@
         if (db.lastStudyDate === yesterday) db.streak++; else db.streak = 1;
         db.lastStudyDate = today; 
       }
-      
       db.studyLog = db.studyLog || {};
       if(typeof db.studyLog[today] === 'number') { db.studyLog[today] = { fc: db.studyLog[today], outline: 0, exam: 0 }; }
       if(!db.studyLog[today]) { db.studyLog[today] = { fc: 0, outline: 0, exam: 0 }; }
-      
       db.studyLog[today][type] = (db.studyLog[today][type] || 0) + 1;
-      
       saveDB();
-      if(document.getElementById('page-dashboard').classList.contains('active')) window.renderDashboard();
+      if(document.getElementById('page-dashboard').classList.contains('active')) renderDashboard();
     }
 
-    window.renderDashboard = function() {
+    function renderDashboard() {
       const target = new Date('2026-08-29'); const diff = Math.ceil((target - new Date().setHours(0,0,0,0)) / 86400000);
       document.getElementById('d-day-val').textContent = `D-${diff}`;
       document.getElementById('streak-val').textContent = `${db.streak}일`;
-      
       dueCards = db.flashcards.filter(isDue);
       dueOutlines = db.outlines.filter(isDue);
       document.getElementById('due-fc-val').textContent = dueCards.length;
       document.getElementById('due-outline-val').textContent = dueOutlines.length;
-      
       document.getElementById('total-exams-val').textContent = `${db.history.length}회`;
-      
       const tbody = document.getElementById('history-tbody');
       if (db.history.length === 0) { 
         tbody.innerHTML = '<tr><td colspan="4" class="py-10 text-center text-gray-400">기록이 없습니다.</td></tr>'; 
@@ -795,11 +787,8 @@
           </tr>
         `).join('');
       }
-
-      if (typeof Chart !== 'undefined') {
-        drawDashboardCharts();
-      }
-    };
+      if (typeof Chart !== 'undefined') drawDashboardCharts();
+    }
 
     function drawDashboardCharts() {
       const ctxWeekly = document.getElementById('chart-weekly');
@@ -808,19 +797,16 @@
             const d = new Date(); d.setDate(d.getDate() - (6 - i));
             return getLocalYYYYMMDD(d);
         });
-        
         const weeklyDataFc = last7Days.map(date => {
             if(!db.studyLog || !db.studyLog[date]) return 0;
             if(typeof db.studyLog[date] === 'number') return db.studyLog[date];
             return db.studyLog[date].fc || 0;
         });
-        
         const weeklyDataOutline = last7Days.map(date => {
             if(!db.studyLog || !db.studyLog[date]) return 0;
             if(typeof db.studyLog[date] === 'number') return 0;
             return db.studyLog[date].outline || 0;
         });
-        
         const labels = last7Days.map(date => date.slice(5).replace('-','/')); 
 
         if(chartInstances['weekly']) chartInstances['weekly'].destroy();
@@ -828,37 +814,11 @@
             data: {
                 labels: labels,
                 datasets: [
-                    {
-                        type: 'line',
-                        label: '목차 (회)',
-                        data: weeklyDataOutline,
-                        borderColor: '#f59e0b', 
-                        backgroundColor: '#f59e0b',
-                        borderWidth: 2,
-                        tension: 0.3,
-                        fill: false,
-                        pointBackgroundColor: '#f59e0b',
-                        order: 1 
-                    },
-                    {
-                        type: 'bar',
-                        label: '카드 (장)',
-                        data: weeklyDataFc,
-                        backgroundColor: 'rgba(16, 185, 129, 0.8)', 
-                        borderRadius: 4,
-                        order: 2
-                    }
+                    { type: 'line', label: '목차 (회)', data: weeklyDataOutline, borderColor: '#f59e0b', backgroundColor: '#f59e0b', borderWidth: 2, tension: 0.3, fill: false, pointBackgroundColor: '#f59e0b', order: 1 },
+                    { type: 'bar', label: '카드 (장)', data: weeklyDataFc, backgroundColor: 'rgba(16, 185, 129, 0.8)', borderRadius: 4, order: 2 }
                 ]
             },
-            options: {
-                responsive: true, maintainAspectRatio: false,
-                plugins: { 
-                    legend: { display: true, position: 'top', labels: { boxWidth: 10, font: { size: 10, family: 'Pretendard' } } } 
-                },
-                scales: { 
-                    y: { beginAtZero: true, ticks: { precision: 0 }, suggestedMax: 120 } 
-                }
-            }
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: true, position: 'top', labels: { boxWidth: 10, font: { size: 10, family: 'Pretendard' } } } }, scales: { y: { beginAtZero: true, ticks: { precision: 0 }, suggestedMax: 120 } } }
         });
       }
 
@@ -872,19 +832,8 @@
         if(chartInstances['subjects']) chartInstances['subjects'].destroy();
         chartInstances['subjects'] = new Chart(ctxSub, {
             type: 'doughnut',
-            data: {
-                labels: subLabels.length ? subLabels : ['기록 없음'],
-                datasets: [{
-                    data: subData.length ? subData : [1],
-                    backgroundColor: subData.length ? ['#3b82f6', '#10b981', '#8b5cf6', '#f59e0b'] : ['#e2e8f0'],
-                    borderWidth: 0
-                }]
-            },
-            options: {
-                responsive: true, maintainAspectRatio: false,
-                plugins: { legend: { position: 'right', labels: { boxWidth: 10, font: { size: 10, family: 'Pretendard' } } } },
-                cutout: '70%'
-            }
+            data: { labels: subLabels.length ? subLabels : ['기록 없음'], datasets: [{ data: subData.length ? subData : [1], backgroundColor: subData.length ? ['#3b82f6', '#10b981', '#8b5cf6', '#f59e0b'] : ['#e2e8f0'], borderWidth: 0 }] },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { boxWidth: 10, font: { size: 10, family: 'Pretendard' } } } }, cutout: '70%' }
         });
       }
 
@@ -897,24 +846,8 @@
         if(chartInstances['scores']) chartInstances['scores'].destroy();
         chartInstances['scores'] = new Chart(ctxScore, {
             type: 'line',
-            data: {
-                labels: scoreLabels.length ? scoreLabels : ['-'],
-                datasets: [{
-                    label: '모의고사 점수',
-                    data: scoreData.length ? scoreData : [0],
-                    borderColor: '#f43f5e', 
-                    backgroundColor: 'rgba(244, 63, 94, 0.1)',
-                    borderWidth: 2,
-                    pointBackgroundColor: '#f43f5e',
-                    fill: true,
-                    tension: 0.3
-                }]
-            },
-            options: {
-                responsive: true, maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
-                scales: { y: { min: 0, max: 100 } }
-            }
+            data: { labels: scoreLabels.length ? scoreLabels : ['-'], datasets: [{ label: '모의고사 점수', data: scoreData.length ? scoreData : [0], borderColor: '#f43f5e', backgroundColor: 'rgba(244, 63, 94, 0.1)', borderWidth: 2, pointBackgroundColor: '#f43f5e', fill: true, tension: 0.3 }] },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { min: 0, max: 100 } } }
         });
       }
     }
@@ -999,144 +932,79 @@
           row.push(value.trim()); value = "";
           if (row.length > 0 && row.some(v => v !== "")) result.push(row);
           row = [];
-        } 
-        else { value += char; }
+        } else { value += char; }
       }
       if (value || row.length > 0) { row.push(value.trim()); result.push(row); }
       return result;
     }
 
-    function toggleCsvUploadForm() {
-      editingFcId = null;
-      document.getElementById('fc-manager-view').classList.add('hidden');
-      document.getElementById('manual-card-form').classList.add('hidden');
-      document.getElementById('csv-upload-form').classList.toggle('hidden');
-    }
-
-    function cancelCsvUpload() {
-      document.getElementById('csv-upload-form').classList.add('hidden');
-    }
+    function toggleCsvUploadForm() { document.getElementById('fc-manager-view').classList.add('hidden'); document.getElementById('manual-card-form').classList.add('hidden'); document.getElementById('csv-upload-form').classList.toggle('hidden'); }
+    function cancelCsvUpload() { document.getElementById('csv-upload-form').classList.add('hidden'); }
 
     function processCsvUpload() {
-      const fileInput = document.getElementById('csv-file-input');
-      const file = fileInput.files[0];
+      const file = document.getElementById('csv-file-input').files[0];
       if (!file) { showMsg("CSV 파일을 선택해주세요."); return; }
-
       const reader = new FileReader();
       reader.onload = function(e) {
         let text = e.target.result;
         if (text.includes('')) {
           const readerEuc = new FileReader();
-          readerEuc.onload = function(e2) {
-            executeCsvParsing(e2.target.result);
-          };
+          readerEuc.onload = function(e2) { executeCsvParsing(e2.target.result); };
           readerEuc.readAsText(file, "EUC-KR");
-        } else {
-          executeCsvParsing(text);
-        }
+        } else { executeCsvParsing(text); }
       };
       reader.readAsText(file, "UTF-8");
     }
 
     function executeCsvParsing(text) {
-      const rows = parseCSV(text);
-      let addedCount = 0;
-
-      let startIndex = 0;
-      if (rows.length > 0 && rows[0][0] && (rows[0][0].includes("과목") || rows[0][1]?.includes("앞면"))) {
-        startIndex = 1; 
-      }
-
+      const rows = parseCSV(text); let addedCount = 0; let startIndex = 0;
+      if (rows.length > 0 && rows[0][0] && (rows[0][0].includes("과목") || rows[0][1]?.includes("앞면"))) startIndex = 1; 
       for (let i = startIndex; i < rows.length; i++) {
-        const row = rows[i];
-        if (row.length >= 3) {
-          let subject = row[0].trim();
-          let front = row[1].trim();
-          let back = row[2].trim();
-          
-          if(subject.includes('노동')) subject = '노동법';
-          else if(subject.includes('인사') || subject.includes('노무')) subject = '인사노무관리';
-          else if(subject.includes('행정') || subject.includes('쟁송')) subject = '행정쟁송법';
-          else if(subject.includes('민사') || subject.includes('민소')) subject = '민사소송법';
-
+        if (rows[i].length >= 3) {
+          let subject = rows[i][0].trim(); let front = rows[i][1].trim(); let back = rows[i][2].trim();
+          if(subject.includes('노동')) subject = '노동법'; else if(subject.includes('인사') || subject.includes('노무')) subject = '인사노무관리'; else if(subject.includes('행정') || subject.includes('쟁송')) subject = '행정쟁송법'; else if(subject.includes('민사') || subject.includes('민소')) subject = '민사소송법';
           if (front && back) {
-            db.flashcards.push({
-              id: Date.now().toString() + '-' + Math.floor(Math.random() * 1000000),
-              subject: subject,
-              front: front,
-              back: back,
-              repetition: 0, interval: 0, efactor: 2.5, nextReview: getLocalNow()
-            });
+            db.flashcards.push({ id: Date.now().toString() + '-' + Math.floor(Math.random() * 1000000), subject: subject, front: front, back: back, repetition: 0, interval: 0, efactor: 2.5, nextReview: getLocalNow() });
             addedCount++;
           }
         }
       }
-
       if (addedCount > 0) {
-        saveDB();
-        renderDueFlashcards();
-        if (!document.getElementById('fc-manager-view').classList.contains('hidden')) {
-          renderFcList();
-        }
-        showMsg(`✅ ${addedCount}개의 플래시카드가 일괄 등록되었습니다!`);
-        cancelCsvUpload();
-        document.getElementById('csv-file-input').value = "";
-      } else {
-        showMsg("등록할 수 있는 유효한 데이터가 없습니다. CSV 파일의 형식을 확인해주세요.");
-      }
+        saveDB(); renderDueFlashcards();
+        if (!document.getElementById('fc-manager-view').classList.contains('hidden')) renderFcList();
+        showMsg(`✅ ${addedCount}개의 플래시카드가 등록되었습니다!`); cancelCsvUpload(); document.getElementById('csv-file-input').value = "";
+      } else showMsg("유효한 데이터가 없습니다.");
     }
 
     async function getFcHint() {
       if (!currentCard) return;
-      const resEl = document.getElementById('fc-ai-result');
-      resEl.classList.remove('hidden');
-      resEl.innerHTML = '<div class="text-center text-purple-400 font-bold animate-pulse text-[11px] py-2">✨ AI가 힌트를 고민하고 있습니다...</div>';
-      
+      const resEl = document.getElementById('fc-ai-result'); resEl.classList.remove('hidden'); resEl.innerHTML = '<div class="text-center text-purple-400 font-bold animate-pulse text-[11px] py-2">✨ AI가 힌트를 고민하고 있습니다...</div>';
       try {
         const schema = { type: "OBJECT", properties: { hint: { type: "STRING" } } };
         const prompt = `과목: ${currentCard.subject}\n질문: ${currentCard.front}\n정답: ${currentCard.back}\n\n사용자가 정답을 떠올리지 못하고 있습니다. 정답에 포함된 직접적인 핵심 단어는 절대 노출하지 말고, 정답을 유추할 수 있도록 돕는 아주 결정적인 '힌트'나 '초성'을 1~2문장으로 제공해주세요.`;
         const res = await callGemini(prompt, schema);
         resEl.innerHTML = `<strong class="text-purple-600 block mb-1"><i class="ri-lightbulb-flash-line"></i> AI 힌트:</strong> ${res.hint}`;
-      } catch(e) {
-        resEl.innerHTML = `<span class="text-red-500">오류 발생: ${e.message}</span>`;
-      }
+      } catch(e) { resEl.innerHTML = `<span class="text-red-500">오류 발생: ${e.message}</span>`; }
     }
 
     async function getFcMnemonic() {
       if (!currentCard) return;
-      const resEl = document.getElementById('fc-ai-result');
-      resEl.classList.remove('hidden');
-      resEl.innerHTML = '<div class="text-center text-blue-400 font-bold animate-pulse text-[11px] py-2">✨ AI가 암기 비법을 만들고 있습니다...</div>';
-      
+      const resEl = document.getElementById('fc-ai-result'); resEl.classList.remove('hidden'); resEl.innerHTML = '<div class="text-center text-blue-400 font-bold animate-pulse text-[11px] py-2">✨ AI가 암기 비법을 만들고 있습니다...</div>';
       try {
         const schema = { type: "OBJECT", properties: { mnemonic: { type: "STRING" } } };
         const prompt = `과목: ${currentCard.subject}\n질문: ${currentCard.front}\n정답: ${currentCard.back}\n\n수험생이 위 내용을 쉽게 외울 수 있도록, 각 키워드의 앞글자를 딴 기발하고 재미있는 '두음문자 암기법(연상법)'을 만들어주세요. 1~2문장으로 짧고 강렬하게 설명해주세요.`;
         const res = await callGemini(prompt, schema);
         resEl.innerHTML = `<strong class="text-blue-600 block mb-1"><i class="ri-magic-line"></i> AI 암기비법:</strong> ${res.mnemonic}`;
-      } catch(e) {
-        resEl.innerHTML = `<span class="text-red-500">오류 발생: ${e.message}</span>`;
-      }
+      } catch(e) { resEl.innerHTML = `<span class="text-red-500">오류 발생: ${e.message}</span>`; }
     }
 
-    function toggleFcManager() {
-      const view = document.getElementById('fc-manager-view'); view.classList.toggle('hidden');
-      if (!view.classList.contains('hidden')) { renderFcList(); document.getElementById('manual-card-form').classList.add('hidden'); document.getElementById('csv-upload-form').classList.add('hidden'); }
-    }
+    function toggleFcManager() { const view = document.getElementById('fc-manager-view'); view.classList.toggle('hidden'); if (!view.classList.contains('hidden')) { renderFcList(); document.getElementById('manual-card-form').classList.add('hidden'); document.getElementById('csv-upload-form').classList.add('hidden'); } }
 
     function renderFcList() {
-      const container = document.getElementById('fc-list');
-      const filter = document.getElementById('fc-filter-subject').value;
-      
-      const selectAllCb = document.getElementById('fc-select-all');
-      if(selectAllCb) selectAllCb.checked = false;
-
-      let filteredCards = db.flashcards;
-      if (filter !== 'all') {
-        filteredCards = filteredCards.filter(c => c.subject === filter);
-      }
-
+      const container = document.getElementById('fc-list'); const filter = document.getElementById('fc-filter-subject').value;
+      const selectAllCb = document.getElementById('fc-select-all'); if(selectAllCb) selectAllCb.checked = false;
+      let filteredCards = filter === 'all' ? db.flashcards : db.flashcards.filter(c => c.subject === filter);
       if(filteredCards.length === 0) { container.innerHTML = '<p class="text-sm text-gray-400 py-4 text-center">등록된 카드가 없습니다.</p>'; return; }
-      
       container.innerHTML = filteredCards.map((c, index) => `
         <div class="flex justify-between items-center p-2.5 md:p-3 bg-gray-50 border border-gray-100 rounded-lg hover:border-emerald-300 transition-colors">
            <div class="flex items-center gap-2 md:gap-3 flex-1 min-w-0 pr-2">
@@ -1155,40 +1023,22 @@
       `).join('');
     }
 
-    window.toggleSelectAllFc = function(source) {
-      const checkboxes = document.querySelectorAll('.fc-item-checkbox');
-      checkboxes.forEach(cb => cb.checked = source.checked);
-    };
+    function toggleSelectAllFc(source) { document.querySelectorAll('.fc-item-checkbox').forEach(cb => cb.checked = source.checked); }
+    function updateSelectAllFcState() { const cbs = document.querySelectorAll('.fc-item-checkbox'); const allCb = document.getElementById('fc-select-all'); if (allCb && cbs.length > 0) allCb.checked = Array.from(cbs).every(cb => cb.checked); }
 
-    window.updateSelectAllFcState = function() {
-      const checkboxes = document.querySelectorAll('.fc-item-checkbox');
-      const selectAllCb = document.getElementById('fc-select-all');
-      if (!selectAllCb || checkboxes.length === 0) return;
-      const allChecked = Array.from(checkboxes).every(cb => cb.checked);
-      selectAllCb.checked = allChecked;
-    };
-
-    window.removeBracketsFromSelected = function() {
+    function removeBracketsFromSelected() {
       const selectedIds = Array.from(document.querySelectorAll('.fc-item-checkbox:checked')).map(cb => cb.value);
-      if (selectedIds.length === 0) { showMsg("대괄호를 제거할 카드를 먼저 선택해주세요."); return; }
-      if(!confirm(`선택한 ${selectedIds.length}개 카드의 대괄호 [ ] 를 싹 지워서 일반 카드로 변환하시겠습니까?`)) return;
-      
+      if (selectedIds.length === 0) { showMsg("선택된 카드가 없습니다."); return; }
+      if(!confirm(`선택한 ${selectedIds.length}개 카드의 대괄호를 지우시겠습니까?`)) return;
       let count = 0;
-      db.flashcards.forEach(c => {
-        if (selectedIds.includes(String(c.id))) {
-          if (c.back.includes('[') || c.back.includes(']')) {
-            c.back = c.back.replace(/\[/g, '').replace(/\]/g, '');
-            count++;
-          }
-        }
-      });
+      db.flashcards.forEach(c => { if (selectedIds.includes(String(c.id))) { if (c.back.includes('[') || c.back.includes(']')) { c.back = c.back.replace(/\[/g, '').replace(/\]/g, ''); count++; } } });
       if(count > 0) { saveDB(); renderFcList(); renderDueFlashcards(); showMsg(`✅ ${count}개의 카드가 변환되었습니다!`); }
     }
 
-    window.deleteSelectedFc = function() {
+    function deleteSelectedFc() {
       const selectedIds = Array.from(document.querySelectorAll('.fc-item-checkbox:checked')).map(cb => cb.value);
-      if (selectedIds.length === 0) { showMsg("삭제할 카드를 먼저 선택해주세요."); return; }
-      if(!confirm(`선택한 ${selectedIds.length}개의 카드를 정말로 삭제하시겠습니까?`)) return;
+      if (selectedIds.length === 0) { showMsg("선택된 카드가 없습니다."); return; }
+      if(!confirm(`선택한 ${selectedIds.length}개의 카드를 삭제하시겠습니까?`)) return;
       db.flashcards = db.flashcards.filter(c => !selectedIds.includes(String(c.id)));
       saveDB(); renderFcList(); renderDueFlashcards(); showMsg(`${selectedIds.length}개의 카드가 일괄 삭제되었습니다.`);
     }
@@ -1215,7 +1065,6 @@
       try {
         const subject = document.getElementById('manual-fc-subject').value; const front = document.getElementById('manual-fc-front').value.trim(); const back = document.getElementById('manual-fc-back').value.trim();
         if (!front || !back) { showMsg('⚠️ 앞면과 뒷면을 모두 입력해주세요.'); return; }
-
         if (editingFcId) {
           const idx = db.flashcards.findIndex(x => String(x.id) === String(editingFcId));
           if(idx > -1) { db.flashcards[idx].subject = subject; db.flashcards[idx].front = front; db.flashcards[idx].back = back; }
@@ -1228,30 +1077,41 @@
       } catch(e) { showMsg("카드 저장 오류: " + e.message); }
     }
 
-    window.renderDueFlashcards = function() {
+    function renderDueFlashcards() {
       dueCards = db.flashcards.filter(isDue);
       document.getElementById('fc-due-display').textContent = dueCards.length;
       if (dueCards.length > 0) { document.getElementById('fc-workspace').classList.remove('hidden'); document.getElementById('fc-empty').classList.add('hidden'); loadNextCard(); } 
       else { document.getElementById('fc-workspace').classList.add('hidden'); document.getElementById('fc-empty').classList.remove('hidden'); }
-    };
+    }
 
     function loadNextCard() {
       if (dueCards.length === 0) { renderDueFlashcards(); return; }
       currentCard = dueCards[0];
       
       document.getElementById('fc-buttons').classList.remove('show');
-      document.querySelectorAll('.sm2-btn').forEach(btn => btn.classList.remove('ring-4', 'ring-offset-2', 'ring-rose-400', 'ring-orange-400', 'ring-blue-400', 'ring-emerald-400', 'animate-pulse'));
+      document.querySelectorAll('#fc-buttons .sm2-btn').forEach(btn => btn.classList.remove('ring-4', 'ring-offset-2', 'ring-rose-400', 'ring-orange-400', 'ring-blue-400', 'ring-emerald-400', 'animate-pulse'));
       
       const aiResult = document.getElementById('fc-ai-result');
       if(aiResult) { aiResult.classList.add('hidden'); aiResult.innerHTML = ''; }
 
       let e = currentCard.efactor || 2.5; let r = currentCard.repetition || 0; let iv = currentCard.interval || 0;
-      
       let nextGood = r === 0 ? 1 : (r === 1 ? 6 : Math.round(iv * e));
       let nextEasy = r === 0 ? 4 : Math.round(nextGood * 1.3);
 
-      document.getElementById('fc-btn-good').innerHTML = `보통<div class="text-[9px] md:text-[10px] mt-0.5 opacity-90 font-medium">${nextGood}일 후</div>`;
-      document.getElementById('fc-btn-easy').innerHTML = `쉬움<div class="text-[9px] md:text-[10px] mt-0.5 opacity-90 font-medium">${nextEasy}일 후</div>`;
+      // 💡 텍스트 중복 방지를 위해 자식 엘리먼트 ID만 선택하여 변경
+      document.getElementById('fc-time-good').textContent = `${nextGood}일 후`;
+      document.getElementById('fc-time-easy').textContent = `${nextEasy}일 후`;
+
+      // 💡 카드 회독수(처음/N회독) 표시 로직 추가
+      let reviewCount = currentCard.reviews !== undefined ? currentCard.reviews : (currentCard.repetition || 0);
+      let statusHtml = reviewCount === 0 ? '🆕 처음' : `🔁 ${reviewCount}회독`;
+      let statusClassFlip = reviewCount === 0 ? 'text-indigo-600 bg-indigo-50' : 'text-slate-500 bg-slate-100';
+      let statusClassCloze = reviewCount === 0 ? 'text-indigo-600 bg-indigo-50' : 'text-slate-500 bg-slate-100';
+
+      document.getElementById('fc-front-status').textContent = statusHtml;
+      document.getElementById('fc-front-status').className = `text-[10px] md:text-xs font-bold px-2 md:px-3 py-1 rounded-full shrink-0 ${statusClassFlip}`;
+      document.getElementById('fc-cloze-status').textContent = statusHtml;
+      document.getElementById('fc-cloze-status').className = `text-[10px] md:text-xs font-bold px-2 py-1 rounded-full inline-block ${statusClassCloze}`;
 
       const hasCloze = /\[(.*?)\]/.test(currentCard.back);
       if (hasCloze) {
@@ -1274,7 +1134,6 @@
       let matches = []; let tempMatch; const tempRegex = /\[(.*?)\]/g;
       while ((tempMatch = tempRegex.exec(card.back)) !== null) { matches.push(tempMatch[1]); }
       const maxCharLen = matches.length > 0 ? Math.max(...matches.map(x => x.length)) : 10;
-      
       const uniformWidth = `clamp(60px, ${maxCharLen + 2}ch, 100%)`;
 
       while ((match = regex.exec(card.back)) !== null) {
@@ -1314,12 +1173,14 @@
 
       document.getElementById('fc-cloze-check-btn').classList.add('hidden'); document.getElementById('fc-buttons').classList.add('show');
       const accuracy = inputs.length > 0 ? (correctCount / inputs.length) : 0;
-      document.querySelectorAll('.sm2-btn').forEach(btn => btn.classList.remove('ring-4', 'ring-offset-2', 'ring-rose-400', 'ring-orange-400', 'ring-blue-400', 'ring-emerald-400', 'animate-pulse'));
+      
+      // 💡 반짝임 리셋 후 정확도에 따라 추천 버튼 강조
+      document.querySelectorAll('#fc-buttons .sm2-btn').forEach(btn => btn.classList.remove('ring-4', 'ring-offset-2', 'ring-rose-400', 'ring-orange-400', 'ring-blue-400', 'ring-emerald-400', 'animate-pulse'));
 
-      if (accuracy === 1) { document.getElementById('btn-easy').classList.add('ring-4', 'ring-offset-2', 'ring-emerald-400', 'animate-pulse'); showMsg("🎉 100% 완벽! '쉬움'을 추천합니다."); } 
-      else if (accuracy >= 0.75) { document.getElementById('btn-good').classList.add('ring-4', 'ring-offset-2', 'ring-blue-400', 'animate-pulse'); showMsg("👍 75% 이상 정답! '보통'을 추천합니다."); } 
-      else if (accuracy >= 0.25) { document.getElementById('btn-hard').classList.add('ring-4', 'ring-offset-2', 'ring-orange-400', 'animate-pulse'); showMsg("🔥 25%~75% 정답. '어려움'을 추천합니다."); } 
-      else { document.getElementById('btn-again').classList.add('ring-4', 'ring-offset-2', 'ring-rose-400', 'animate-pulse'); showMsg("💪 25% 미만 정답. 다시 한 번 확실히 외워봅시다!"); }
+      if (accuracy === 1) { document.getElementById('fc-btn-easy').classList.add('ring-4', 'ring-offset-2', 'ring-emerald-400', 'animate-pulse'); showMsg("🎉 100% 완벽! '쉬움'을 추천합니다."); } 
+      else if (accuracy >= 0.75) { document.getElementById('fc-btn-good').classList.add('ring-4', 'ring-offset-2', 'ring-blue-400', 'animate-pulse'); showMsg("👍 75% 이상 정답! '보통'을 추천합니다."); } 
+      else if (accuracy >= 0.25) { document.getElementById('fc-btn-hard').classList.add('ring-4', 'ring-offset-2', 'ring-orange-400', 'animate-pulse'); showMsg("🔥 25%~75% 정답. '어려움'을 추천합니다."); } 
+      else { document.getElementById('fc-btn-again').classList.add('ring-4', 'ring-offset-2', 'ring-rose-400', 'animate-pulse'); showMsg("💪 25% 미만 정답. 다시 한 번 확실히 외워봅시다!"); }
     }
 
     function flipCard() { document.getElementById('fc-card').classList.add('flipped'); document.getElementById('fc-buttons').classList.add('show'); }
@@ -1340,6 +1201,10 @@
 
       e = e + (0.1 - (5 - q) * (0.08 + (5 - q) * 0.02)); if (e < 1.3) e = 1.3;
       currentCard.repetition = r; currentCard.interval = iv; currentCard.efactor = e;
+      
+      // 💡 리뷰 횟수 카운트 1 증가
+      let currentReviewCount = currentCard.reviews !== undefined ? currentCard.reviews : (r === 0 ? 0 : r);
+      currentCard.reviews = currentReviewCount + 1;
 
       let nextDate = new Date();
       if (iv === 0) {
@@ -1368,7 +1233,6 @@
     async function generateOutlineWithAI() {
       const subject = document.getElementById('outline-subject').value;
       const title = document.getElementById('outline-title').value.trim();
-      
       if (!title) { showMsg("주제(제목)를 먼저 입력해주세요!"); return; }
       
       showLoading("AI가 표준 목차 구조를 작성 중입니다...");
@@ -1378,9 +1242,7 @@
         const res = await callGemini(prompt, schema);
         document.getElementById('outline-content').value = res.outline;
         showMsg("✨ AI 목차 자동 생성 완료!");
-      } catch(e) {
-        showMsg("목차 생성 실패: " + e.message);
-      } finally { hideLoading(); }
+      } catch(e) { showMsg("목차 생성 실패: " + e.message); } finally { hideLoading(); }
     }
 
     function toggleOutlineAdder() { 
@@ -1407,15 +1269,13 @@
       saveDB(); document.getElementById('outline-title').value = ''; document.getElementById('outline-content').value = ''; document.getElementById('outline-adder').classList.add('hidden'); renderOutlineList(); 
     }
     
-    window.renderOutlineList = function() {
+    function renderOutlineList() {
       const container = document.getElementById('outline-list');
       const filterEl = document.getElementById('outline-filter-subject');
       const filter = filterEl ? filterEl.value : 'all';
       
       let filteredOutlines = db.outlines || [];
-      if (filter !== 'all') {
-        filteredOutlines = filteredOutlines.filter(o => o.subject === filter);
-      }
+      if (filter !== 'all') { filteredOutlines = filteredOutlines.filter(o => o.subject === filter); }
 
       if (filteredOutlines.length === 0) { container.innerHTML = '<p class="col-span-2 text-center text-gray-400 py-10">등록된 목차가 없습니다.</p>'; return; }
       container.innerHTML = filteredOutlines.map(o => {
@@ -1436,7 +1296,7 @@
           </div>
         </div>
       `}).join('');
-    };
+    }
 
     function deleteOutline(id) { if(!confirm("해당 목차를 삭제하시겠습니까?")) return; db.outlines = db.outlines.filter(o => String(o.id) !== String(id)); saveDB(); renderOutlineList(); showMsg("삭제되었습니다."); }
     
@@ -1467,13 +1327,21 @@
       });
 
       parsedLines.sort((a,b) => a.id - b.id); blankState.lines = parsedLines; blankState.answers = parsedLines.filter(l => l.isBlank).map(l => l.content); blankState.answers.sort(() => Math.random() - 0.5); 
+      
+      // 💡 목차용 알고리즘 스케줄 계산 및 버튼 업데이트
+      let o = blankState.outline;
+      let e = o.efactor || 2.5; let r = o.repetition || 0; let iv = o.interval || 0;
+      let nextGood = r === 0 ? 1 : (r === 1 ? 6 : Math.round(iv * e));
+      let nextEasy = r === 0 ? 4 : Math.round(nextGood * 1.3);
+      document.getElementById('quiz-time-good').textContent = `${nextGood}일 후`;
+      document.getElementById('quiz-time-easy').textContent = `${nextEasy}일 후`;
+
       renderBlankQuizRoom();
     }
     
     function renderBlankQuizRoom() {
       const container = document.getElementById('quiz-lines'); container.innerHTML = '';
       const blankLines = blankState.lines.filter(l => l.isBlank); const maxCharLen = blankLines.length > 0 ? Math.max(...blankLines.map(l => l.content.length)) : 10; 
-      
       const uniformWidth = `clamp(80px, ${maxCharLen + 2}ch, 100%)`;
 
       blankState.lines.forEach(line => {
@@ -1531,9 +1399,6 @@
       let q = rating === 1 ? 0 : rating === 2 ? 3 : rating === 3 ? 4 : 5;
       let r = outline.repetition || 0; let iv = outline.interval || 0; let e = outline.efactor || 2.5;
 
-      let nextGood = r === 0 ? 1 : (r === 1 ? 6 : Math.round(iv * e));
-      let nextEasy = r === 0 ? 4 : Math.round(nextGood * 1.3);
-
       if (rating >= 3) {
         if (r === 0) iv = 1; else if (r === 1) iv = 6; else iv = Math.round(iv * e);
         r++;
@@ -1559,11 +1424,11 @@
     // ==========================================
     // 8. 실전 모의고사
     // ==========================================
-    window.updateExamQList = function() {
+    function updateExamQList() {
       const sub = document.getElementById('exam-subject').value; const sel = document.getElementById('exam-question-select'); sel.innerHTML = '<option value="">직접 입력하기</option>';
       db.questions.filter(q => q.subject === sub).forEach(q => { const opt = document.createElement('option'); opt.value = String(q.id); opt.textContent = `[추출] ${q.question.substring(0, 30)}...`; sel.appendChild(opt); });
       previewQuestion();
-    };
+    }
 
     function previewQuestion() {
       const id = document.getElementById('exam-question-select').value;
@@ -1752,6 +1617,13 @@
       reader.readAsText(file); event.target.value = '';
     }
     function resetDB() { if (confirm("정말로 모든 학습 기록을 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다!")) { localStorage.removeItem('nomusa_db_v4'); location.reload(); } }
+    
+    // 💡 HTML 인라인 이벤트에서 접근 가능하도록 window 객체에 명시적 바인딩
+    window.renderDashboard = renderDashboard;
+    window.renderDueFlashcards = renderDueFlashcards;
+    window.renderOutlineList = renderOutlineList;
+    window.updateExamQList = updateExamQList;
+    
   </script>
 
   <script type="module">
@@ -1768,73 +1640,84 @@
       appId: "1:361338496072:web:798c1a6695cbfab5a7647d"
     };
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const firestore = getFirestore(app);
-    let unsubSnapshot = null;
+    try {
+      const app = initializeApp(firebaseConfig);
+      const auth = getAuth(app);
+      const firestore = getFirestore(app);
+      let unsubSnapshot = null;
 
-    window.loginWithGoogle = () => {
-      const provider = new GoogleAuthProvider();
-      signInWithPopup(auth, provider).catch(error => {
-        console.error("Login Error:", error);
-        alert("로그인 중 오류가 발생했습니다: " + error.message);
-      });
-    };
-
-    window.logoutGoogle = () => { signOut(auth).then(() => { alert("로그아웃 되었습니다."); }); };
-
-    onAuthStateChanged(auth, (user) => {
-      window.currentUser = user;
-      const statusEl = document.getElementById('auth-status'); const headerStatus = document.getElementById('header-auth-status');
-      const loginBtn = document.getElementById('login-btn'); const logoutBtn = document.getElementById('logout-btn');
-
-      if (user) {
-        statusEl.textContent = user.displayName + " (연동됨)"; headerStatus.textContent = "Cloud Sync: ON"; headerStatus.classList.replace('text-slate-400', 'text-blue-400');
-        loginBtn.classList.add('hidden'); logoutBtn.classList.remove('hidden');
-
-        unsubSnapshot = onSnapshot(doc(firestore, 'users', user.uid), (docSnap) => {
-          if (docSnap.exists()) {
-            const cloudDB = docSnap.data().db;
-            if (cloudDB && window.setAppDB) {
-              window.setAppDB(cloudDB);
-              localStorage.setItem('nomusa_db_v4', JSON.stringify(cloudDB));
-              
-              if(document.getElementById('page-dashboard').classList.contains('active')) window.renderDashboard();
-              if(document.getElementById('page-flashcard').classList.contains('active')) window.renderDueFlashcards();
-              if(document.getElementById('page-exam').classList.contains('active')) window.updateExamQList();
-              if(document.getElementById('page-blank').classList.contains('active')) window.renderOutlineList();
-            }
-          } else { window.triggerCloudSave(); }
+      window.loginWithGoogle = () => {
+        const provider = new GoogleAuthProvider();
+        signInWithPopup(auth, provider).catch(error => {
+          console.error("Login Error:", error);
+          alert("로그인 중 오류가 발생했습니다: " + error.message);
         });
-      } else {
-        statusEl.textContent = "로컬 모드 (로그인 안됨)"; headerStatus.textContent = "Mode: Local Storage"; headerStatus.classList.replace('text-blue-400', 'text-slate-400');
-        loginBtn.classList.remove('hidden'); logoutBtn.classList.add('hidden');
-        if (unsubSnapshot) unsubSnapshot();
-      }
-    });
+      };
 
-    window.triggerCloudSave = () => {
-      if (window.currentUser && window.getAppDB) {
-        const currentDB = window.getAppDB();
-        if (!currentDB) return;
+      window.logoutGoogle = () => { signOut(auth).then(() => { alert("로그아웃 되었습니다."); }); };
 
-        const removeUndefined = (obj) => {
-          if (Array.isArray(obj)) return obj.map(removeUndefined);
-          if (obj !== null && typeof obj === 'object') {
-            return Object.keys(obj).reduce((acc, key) => {
-              if (obj[key] !== undefined) acc[key] = removeUndefined(obj[key]);
-              return acc;
-            }, {});
-          }
-          return obj;
-        };
+      onAuthStateChanged(auth, (user) => {
+        window.currentUser = user;
+        const statusEl = document.getElementById('auth-status'); const headerStatus = document.getElementById('header-auth-status');
+        const loginBtn = document.getElementById('login-btn'); const logoutBtn = document.getElementById('logout-btn');
 
-        const sanitizedDB = removeUndefined(currentDB);
-        setDoc(doc(firestore, 'users', window.currentUser.uid), { db: sanitizedDB }, { merge: true }).catch(err => {
-            console.error("Sync Error:", err);
+        if (user) {
+          if (statusEl) statusEl.textContent = user.displayName + " (연동됨)"; 
+          if (headerStatus) { headerStatus.textContent = "Cloud Sync: ON"; headerStatus.classList.replace('text-slate-400', 'text-blue-400'); }
+          if (loginBtn) loginBtn.classList.add('hidden'); 
+          if (logoutBtn) logoutBtn.classList.remove('hidden');
+
+          unsubSnapshot = onSnapshot(doc(firestore, 'users', user.uid), (docSnap) => {
+            if (docSnap.exists()) {
+              const cloudDB = docSnap.data().db;
+              if (cloudDB && window.setAppDB) {
+                window.setAppDB(cloudDB);
+                try { localStorage.setItem('nomusa_db_v4', JSON.stringify(cloudDB)); } catch(e){}
+                
+                if(document.getElementById('page-dashboard').classList.contains('active')) window.renderDashboard();
+                if(document.getElementById('page-flashcard').classList.contains('active')) window.renderDueFlashcards();
+                if(document.getElementById('page-exam').classList.contains('active')) window.updateExamQList();
+                if(document.getElementById('page-blank').classList.contains('active')) window.renderOutlineList();
+              }
+            } else { window.triggerCloudSave(); }
           });
-      }
-    };
+        } else {
+          if (statusEl) statusEl.textContent = "로컬 모드 (로그인 안됨)"; 
+          if (headerStatus) { headerStatus.textContent = "Mode: Local Storage"; headerStatus.classList.replace('text-blue-400', 'text-slate-400'); }
+          if (loginBtn) loginBtn.classList.remove('hidden'); 
+          if (logoutBtn) logoutBtn.classList.add('hidden');
+          if (unsubSnapshot) unsubSnapshot();
+        }
+      });
+
+      window.triggerCloudSave = () => {
+        if (window.currentUser && window.getAppDB) {
+          const currentDB = window.getAppDB();
+          if (!currentDB) return;
+
+          const removeUndefined = (obj) => {
+            if (Array.isArray(obj)) return obj.map(removeUndefined);
+            if (obj !== null && typeof obj === 'object') {
+              return Object.keys(obj).reduce((acc, key) => {
+                if (obj[key] !== undefined) acc[key] = removeUndefined(obj[key]);
+                return acc;
+              }, {});
+            }
+            return obj;
+          };
+
+          const sanitizedDB = removeUndefined(currentDB);
+          setDoc(doc(firestore, 'users', window.currentUser.uid), { db: sanitizedDB }, { merge: true }).catch(err => {
+              console.error("Sync Error:", err);
+            });
+        }
+      };
+    } catch(e) {
+      console.warn("미리보기 샌드박스 환경으로 인해 Firebase가 비활성화되었습니다.");
+      window.loginWithGoogle = () => alert("미리보기 화면에서는 로그인 기능을 사용할 수 없습니다. 깃허브 페이지에서 확인해주세요.");
+      window.logoutGoogle = () => {};
+      window.triggerCloudSave = () => {};
+    }
   </script>
 </body>
 </html>
