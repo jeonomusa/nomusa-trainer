@@ -8,6 +8,9 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+  <script>
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  </script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;800&display=swap');
     
@@ -25,7 +28,6 @@
         overflow-x: hidden; 
     }
     
-    /* 네비게이션 버튼 */
     .nav-btn { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 10px; color: #64748b; transition: all 0.2s; border-radius: 12px; flex-shrink: 0; }
     .nav-btn.active { color: #10b981; background: #ecfdf5; font-weight: 800; }
     .nav-btn:hover { color: #10b981; }
@@ -43,39 +45,25 @@
     .page-content.active { display: block; }
     @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     
-    /* 플래시카드 & 퀴즈 컨테이너 모바일 최적화 */
     .fc-container { perspective: 1000px; height: 320px; width: 100%; max-width: 600px; margin: 0 auto; }
     .fc-inner { position: relative; width: 100%; height: 100%; text-align: center; transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1); transform-style: preserve-3d; cursor: pointer; }
     .fc-inner.flipped { transform: rotateY(180deg); }
     .fc-front, .fc-back { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); background: white; border: 2px solid #f1f5f9; }
     .fc-back { background: #0f172a; color: white; transform: rotateY(180deg); border: none; }
-    
-    @media (min-width: 768px) {
-        .fc-front, .fc-back { padding: 40px; }
-        .neo-card { padding: 32px; }
-    }
+    @media (min-width: 768px) { .fc-front, .fc-back { padding: 40px; } .neo-card { padding: 32px; } }
 
-    /* 💡 SM-2 버튼 반응형 컨테이너 (모바일 2x2, PC 1x4) */
-    .sm2-buttons-container { display: none; gap: 12px; width: 100%; max-width: 600px; margin: 0 auto; }
-    .sm2-buttons-container.show { display: grid; grid-template-columns: repeat(2, 1fr); }
-    @media (min-width: 768px) {
-        .sm2-buttons-container.show { display: flex; flex-direction: row; }
-    }
-    .sm2-btn { flex: 1; padding: 12px 8px; border-radius: 16px; font-weight: 800; color: white; text-align: center; transition: all 0.2s; cursor: pointer; }
+    .sm2-btn { padding: 12px 8px; border-radius: 16px; font-weight: 800; color: white; text-align: center; transition: all 0.2s; cursor: pointer; display: flex; flex-direction: column; justify-content: center; align-items: center; }
     .sm2-btn:active { transform: scale(0.95); }
 
-    /* 빈칸 모바일 너비 최적화 */
     .blank-input { border: none; border-bottom: 2px solid #cbd5e1; background: transparent; text-align: center; font-size: 15px; font-weight: 700; color: #0f172a; outline: none; transition: all 0.2s; padding: 2px 4px; margin: 0 4px; box-sizing: border-box; max-width: 100%; }
     .blank-input:focus { border-bottom-color: #10b981; background: #f0fdf4; }
     .blank-input.correct { border-bottom-color: #10b981; color: #10b981; background: #ecfdf5; }
     .blank-input.wrong { border-bottom-color: #ef4444; color: #ef4444; background: #fef2f2; }
     
-    /* 워드 칩 텍스트 깨짐 방지 */
     .word-chip { padding: 8px 16px; background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 20px; font-size: 14px; font-weight: 700; color: #475569; cursor: pointer; transition: all 0.2s; user-select: none; display: inline-block; margin: 4px; word-break: keep-all; white-space: nowrap; }
     .word-chip:hover { background: #e2e8f0; color: #0f172a; }
     .word-chip:active { transform: scale(0.95); }
 
-    /* 모의고사 답안지 */
     .answer-row { display: flex; border-bottom: 1px solid #e2e8f0; height: 44px; position: relative; }
     .row-num { width: 44px; display: flex; align-items: center; justify-content: center; font-size: 12px; color: #94a3b8; font-weight: 700; border-right: 1px solid #e2e8f0; background: #f8fafc; flex-shrink: 0; }
     .row-input-wrapper { flex: 1; position: relative; display: flex; align-items: center; background: white; min-width: 0; }
@@ -102,7 +90,6 @@
   </div>
   <div id="message-box"></div>
 
-  <!-- 헤더 -->
   <header class="fixed top-0 left-0 right-0 h-16 bg-[#0f172a] border-b border-slate-800 text-white flex items-center justify-between px-4 lg:px-6 z-50 shadow-md">
     <div class="flex items-center gap-2 cursor-pointer shrink-0" onclick="navigate('dashboard')">
       <i class="ri-scales-3-line text-emerald-400 text-2xl"></i>
@@ -122,7 +109,6 @@
 
   <main class="pt-20 px-4 md:pt-24 md:px-8 max-w-5xl mx-auto">
 
-    <!-- 1. 대시보드 -->
     <div id="page-dashboard" class="page-content active">
       <h2 class="text-2xl font-extrabold text-slate-800 mb-6 flex items-center gap-2"><i class="ri-dashboard-line"></i> 학습 대시보드</h2>
       <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-6">
@@ -130,9 +116,13 @@
           <span class="text-[10px] font-bold text-gray-400 uppercase mb-2">시험 D-Day</span>
           <span class="text-2xl md:text-3xl font-extrabold text-emerald-500" id="d-day-val">D-?</span>
         </div>
-        <div class="neo-card p-4 md:p-6 flex flex-col items-center text-center border-b-4 border-b-emerald-500">
-          <span class="text-[10px] font-bold text-gray-400 uppercase mb-2">연속 학습일</span>
-          <span class="text-2xl md:text-3xl font-extrabold text-slate-800" id="streak-val">0일</span>
+        <!-- 💡 수정됨: 역대 최고 연속 학습일(Max Streak) 표시 추가 -->
+        <div class="neo-card p-4 md:p-6 flex flex-col items-center text-center border-b-4 border-b-emerald-500 justify-center">
+          <span class="text-[10px] font-bold text-gray-400 uppercase mb-1">연속 학습일</span>
+          <div class="flex items-baseline gap-1 mt-1">
+            <span class="text-2xl md:text-3xl font-extrabold text-slate-800" id="streak-val">0일</span>
+            <span class="text-[10px] md:text-xs font-bold text-gray-400" id="max-streak-val">(최대 0일)</span>
+          </div>
         </div>
         <div class="neo-card p-4 flex flex-col items-center justify-center text-center">
           <span class="text-[10px] font-bold text-gray-400 uppercase mb-2">오늘 남은 복습</span>
@@ -165,6 +155,13 @@
         </div>
       </div>
 
+      <div class="neo-card p-4 md:p-6 mb-6">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="font-bold text-slate-800 flex items-center gap-2 text-sm md:text-base"><i class="ri-line-chart-line text-rose-500"></i> 모의고사 점수 추이</h3>
+        </div>
+        <div class="chart-wrapper"><canvas id="chart-scores"></canvas></div>
+      </div>
+
       <div class="neo-card p-4 md:p-6 mb-8">
         <h3 class="font-bold text-slate-800 mb-4 flex items-center gap-2 text-sm md:text-base"><i class="ri-history-line text-emerald-500"></i> 최근 모의고사 기록</h3>
         <div class="overflow-x-auto">
@@ -180,7 +177,6 @@
       </div>
     </div>
 
-    <!-- 2. 자료 변환 -->
     <div id="page-convert" class="page-content">
       <h2 class="text-2xl font-extrabold text-slate-800 mb-2 flex items-center gap-2"><i class="ri-robot-line"></i> AI 자료 변환</h2>
       <p class="text-sm text-gray-500 mb-6">문제지나 모범답안 PDF를 업로드하면 AI가 분석하여 모의고사용 문제나 플래시카드로 변환합니다.</p>
@@ -215,7 +211,6 @@
       </div>
     </div>
 
-    <!-- 3. 플래시카드 -->
     <div id="page-flashcard" class="page-content">
       <h2 class="text-2xl font-extrabold text-slate-800 mb-2 flex items-center gap-2"><i class="ri-stack-line"></i> 안키형 플래시카드</h2>
       <p class="text-sm text-gray-500 mb-6">빈칸이 있는 카드는 단어장 모드로, 일반 카드는 뒤집기 모드로 알아서 작동합니다.</p>
@@ -226,7 +221,6 @@
         <button onclick="toggleManualCardForm()" class="flex-1 md:flex-none justify-center px-4 py-2 bg-slate-800 text-white rounded-lg text-xs md:text-sm font-bold hover:bg-slate-700 transition-all flex items-center gap-1"><i class="ri-add-line"></i> 만들기</button>
       </div>
 
-      <!-- 각종 관리창 생략 (기존 코드와 동일하게 유지) -->
       <div id="csv-upload-form" class="hidden neo-card p-4 md:p-6 mb-8 bg-slate-50 border-2 border-blue-200 shadow-lg">
         <h3 class="font-bold text-slate-800 mb-4 text-sm md:text-lg flex items-center gap-2"><i class="ri-file-excel-2-line text-blue-500"></i> CSV 일괄 등록</h3>
         <div class="mb-4 flex flex-col gap-2">
@@ -271,7 +265,6 @@
         </div>
       </div>
 
-      <!-- 플래시카드 플레이어 -->
       <div class="neo-card p-4 md:p-8 flex flex-col items-center min-h-[400px]">
         <div class="text-xs font-bold text-gray-500 mb-4 md:mb-6 bg-gray-100 px-3 py-1.5 rounded-full">
           카드 복습: <span class="text-blue-500" id="fc-due-display">0</span>장
@@ -317,12 +310,24 @@
             <div id="fc-ai-result" class="hidden p-3 md:p-4 bg-white border border-slate-200 rounded-xl text-xs md:text-[13px] shadow-inner break-keep"></div>
           </div>
 
-          <!-- 💡 텍스트 분리 및 반응형 클래스가 완벽하게 적용된 버튼 컨테이너 -->
-          <div id="fc-buttons" class="sm2-buttons-container mt-4 md:mt-6">
-            <div class="sm2-btn bg-rose-500 hover:bg-rose-600" id="fc-btn-again" onclick="rateCard(1)">다시<div class="text-[9px] md:text-[10px] mt-0.5 opacity-90 font-medium" id="fc-time-again">1분 후</div></div>
-            <div class="sm2-btn bg-orange-500 hover:bg-orange-600" id="fc-btn-hard" onclick="rateCard(2)">어려움<div class="text-[9px] md:text-[10px] mt-0.5 opacity-90 font-medium" id="fc-time-hard">12시간 후</div></div>
-            <div class="sm2-btn bg-blue-500 hover:bg-blue-600" id="fc-btn-good" onclick="rateCard(3)">보통<div class="text-[9px] md:text-[10px] mt-0.5 opacity-90 font-medium" id="fc-time-good">1일 후</div></div>
-            <div class="sm2-btn bg-emerald-500 hover:bg-emerald-600" id="fc-btn-easy" onclick="rateCard(4)">쉬움<div class="text-[9px] md:text-[10px] mt-0.5 opacity-90 font-medium" id="fc-time-easy">4일 후</div></div>
+          <!-- 💡 수정됨: Tailwind grid를 활용하여 모바일 2x2, PC 1x4 완벽 대응 -->
+          <div id="fc-buttons" style="display: none;" class="w-full max-w-[600px] mx-auto mt-4 md:mt-6 grid-cols-2 md:grid-cols-4 gap-2 md:gap-3">
+            <div class="sm2-btn bg-rose-500 hover:bg-rose-600" id="fc-btn-again" onclick="rateCard(1)">
+                <span>다시</span>
+                <span class="block text-[9px] md:text-[10px] mt-0.5 opacity-90 font-medium" id="fc-time-again">1분 후</span>
+            </div>
+            <div class="sm2-btn bg-orange-500 hover:bg-orange-600" id="fc-btn-hard" onclick="rateCard(2)">
+                <span>어려움</span>
+                <span class="block text-[9px] md:text-[10px] mt-0.5 opacity-90 font-medium" id="fc-time-hard">12시간 후</span>
+            </div>
+            <div class="sm2-btn bg-blue-500 hover:bg-blue-600" id="fc-btn-good" onclick="rateCard(3)">
+                <span>보통</span>
+                <span class="block text-[9px] md:text-[10px] mt-0.5 opacity-90 font-medium" id="fc-time-good">1일 후</span>
+            </div>
+            <div class="sm2-btn bg-emerald-500 hover:bg-emerald-600" id="fc-btn-easy" onclick="rateCard(4)">
+                <span>쉬움</span>
+                <span class="block text-[9px] md:text-[10px] mt-0.5 opacity-90 font-medium" id="fc-time-easy">4일 후</span>
+            </div>
           </div>
         </div>
 
@@ -333,9 +338,8 @@
       </div>
     </div>
 
-    <!-- 4. 목차 빈칸 채우기 -->
     <div id="page-blank" class="page-content">
-      <h2 class="text-2xl font-extrabold text-slate-800 mb-2 flex items-center gap-2"><i class="ri-edit-2-line"></i> 목차 빈칸 뚫기</h2>
+      <h2 class="text-2xl font-extrabold text-slate-800 mb-2 flex items-center gap-2"><i class="ri-edit-2-line"></i> 목차 빈칸 채우기</h2>
       <p class="text-sm text-gray-500 mb-6">전체적인 구조 암기를 위해 목차의 빈칸을 채워보세요. 이제 목차도 알고리즘으로 관리됩니다.</p>
 
       <div id="blank-list-view">
@@ -389,12 +393,24 @@
             <div id="quiz-control-area" class="text-center mt-6 md:mt-8">
               <button id="quiz-check-btn" onclick="checkBlankAnswers()" class="w-full md:w-auto px-6 md:px-8 py-2.5 md:py-3 bg-emerald-500 text-white rounded-xl font-bold text-sm md:text-lg hover:bg-emerald-600 shadow-md active:scale-95"><i class="ri-check-double-line"></i> 정답 확인</button>
               
-              <!-- 💡 텍스트 분리 및 반응형 클래스가 완벽하게 적용된 버튼 컨테이너 -->
-              <div id="quiz-sm2-buttons" class="sm2-buttons-container mt-4 md:mt-6">
-                <div class="sm2-btn bg-rose-500 hover:bg-rose-600" id="quiz-btn-again" onclick="rateOutline(1)">다시<div class="text-[9px] md:text-[10px] mt-0.5 opacity-90 font-medium" id="quiz-time-again">1분 후</div></div>
-                <div class="sm2-btn bg-orange-500 hover:bg-orange-600" id="quiz-btn-hard" onclick="rateOutline(2)">어려움<div class="text-[9px] md:text-[10px] mt-0.5 opacity-90 font-medium" id="quiz-time-hard">12시간 후</div></div>
-                <div class="sm2-btn bg-blue-500 hover:bg-blue-600" id="quiz-btn-good" onclick="rateOutline(3)">보통<div class="text-[9px] md:text-[10px] mt-0.5 opacity-90 font-medium" id="quiz-time-good">1일 후</div></div>
-                <div class="sm2-btn bg-emerald-500 hover:bg-emerald-600" id="quiz-btn-easy" onclick="rateOutline(4)">쉬움<div class="text-[9px] md:text-[10px] mt-0.5 opacity-90 font-medium" id="quiz-time-easy">4일 후</div></div>
+              <!-- 💡 텍스트 중복 방지 및 그리드 레이아웃 적용된 목차 버튼 -->
+              <div id="quiz-sm2-buttons" style="display: none;" class="w-full max-w-[600px] mx-auto mt-4 md:mt-6 grid-cols-2 md:grid-cols-4 gap-2 md:gap-3">
+                <div class="sm2-btn bg-rose-500 hover:bg-rose-600" id="quiz-btn-again" onclick="rateOutline(1)">
+                    <span>다시</span>
+                    <span class="block text-[9px] md:text-[10px] mt-0.5 opacity-90 font-medium" id="quiz-time-again">1분 후</span>
+                </div>
+                <div class="sm2-btn bg-orange-500 hover:bg-orange-600" id="quiz-btn-hard" onclick="rateOutline(2)">
+                    <span>어려움</span>
+                    <span class="block text-[9px] md:text-[10px] mt-0.5 opacity-90 font-medium" id="quiz-time-hard">12시간 후</span>
+                </div>
+                <div class="sm2-btn bg-blue-500 hover:bg-blue-600" id="quiz-btn-good" onclick="rateOutline(3)">
+                    <span>보통</span>
+                    <span class="block text-[9px] md:text-[10px] mt-0.5 opacity-90 font-medium" id="quiz-time-good">1일 후</span>
+                </div>
+                <div class="sm2-btn bg-emerald-500 hover:bg-emerald-600" id="quiz-btn-easy" onclick="rateOutline(4)">
+                    <span>쉬움</span>
+                    <span class="block text-[9px] md:text-[10px] mt-0.5 opacity-90 font-medium" id="quiz-time-easy">4일 후</span>
+                </div>
               </div>
             </div>
           </div>
@@ -595,29 +611,28 @@
   </div>
 
   <script>
-    // ==========================================
-    // 1. 핵심 전역 상태 & DB 관리
-    // ==========================================
-    let db = { history: [], questions: [], flashcards: [], outlines: [], lastStudyDate: null, streak: 0, studyLog: {} };
+    let db = { history: [], questions: [], flashcards: [], outlines: [], lastStudyDate: null, streak: 0, maxStreak: 0, studyLog: {} };
     let editingFcId = null; let editingOutlineId = null; let editingExamId = null; let chartInstances = {};
 
-    function getAppDB() { return db; }
-    function setAppDB(newDB) { 
-      if (!newDB) return;
-      db = { 
-        history: newDB.history || [], 
-        questions: newDB.questions || [], 
-        flashcards: newDB.flashcards || [], 
-        outlines: newDB.outlines || [], 
-        lastStudyDate: newDB.lastStudyDate || null, 
-        streak: newDB.streak || 0,
-        studyLog: newDB.studyLog || {} 
-      };
-      for (let date in db.studyLog) {
-        if (typeof db.studyLog[date] === 'number') {
-          db.studyLog[date] = { fc: db.studyLog[date], outline: 0, exam: 0 };
+    window.onload = () => {
+      const saved = localStorage.getItem('nomusa_db_v4');
+      if (saved) { 
+        const parsed = JSON.parse(saved);
+        db = { ...db, ...parsed };
+        if (!db.maxStreak) db.maxStreak = db.streak || 0;
+        for (let date in db.studyLog) {
+          if (typeof db.studyLog[date] === 'number') {
+            db.studyLog[date] = { fc: db.studyLog[date], outline: 0, exam: 0 };
+          }
         }
       }
+      const savedKey = localStorage.getItem('gemini_api_key');
+      if(savedKey) document.getElementById('api-key-input').value = savedKey;
+      updateStreak(); renderDashboard();
+    };
+
+    function saveDB() { 
+      try { localStorage.setItem('nomusa_db_v4', JSON.stringify(db)); if (window.triggerCloudSave) window.triggerCloudSave(); } catch(e) {} 
     }
 
     const MODEL_NAME = "gemini-2.5-flash";
@@ -627,34 +642,6 @@
     let fcClozeState = { activeInput: null, answers: [] }; 
     let dueCards = []; let dueOutlines = []; let currentCard = null;
 
-    document.addEventListener('DOMContentLoaded', () => {
-      if (typeof pdfjsLib !== 'undefined') {
-        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-      }
-      try {
-        const saved = localStorage.getItem('nomusa_db_v4');
-        if (saved) { setAppDB(JSON.parse(saved)); }
-        const savedKey = localStorage.getItem('gemini_api_key');
-        if(savedKey) {
-            const apiEl = document.getElementById('api-key-input');
-            if(apiEl) apiEl.value = savedKey;
-        }
-      } catch (error) {
-        console.warn("미리보기 환경(샌드박스) 제약으로 인해 로컬 스토리지를 사용할 수 없습니다.");
-      }
-      try {
-        updateStreak(); 
-        renderDashboard();
-      } catch(err) {
-        console.error("Dashboard Render Error:", err);
-      }
-    });
-
-    function saveDB() { 
-      try { localStorage.setItem('nomusa_db_v4', JSON.stringify(db)); } catch(e) {}
-      if (window.triggerCloudSave) window.triggerCloudSave(); 
-    }
-    
     function navigate(id) {
       document.querySelectorAll('.page-content').forEach(p => p.classList.remove('active'));
       const target = document.getElementById('page-' + id); if(target) target.classList.add('active');
@@ -673,21 +660,12 @@
     function showMsg(text) { const box = document.getElementById('message-box'); if (box) { box.textContent = text; box.style.display = 'block'; setTimeout(() => box.style.display = 'none', 3000); } else { alert(text); } }
     
     function getLocalYYYYMMDD(d) {
-        const year = d.getFullYear();
-        const month = String(d.getMonth() + 1).padStart(2, '0');
-        const day = String(d.getDate()).padStart(2, '0');
+        const year = d.getFullYear(); const month = String(d.getMonth() + 1).padStart(2, '0'); const day = String(d.getDate()).padStart(2, '0');
         return `${year}-${month}-${day}`;
     }
     function getToday() { return getLocalYYYYMMDD(new Date()); }
-    function getYesterday() {
-        const d = new Date(); d.setDate(d.getDate() - 1);
-        return getLocalYYYYMMDD(d);
-    }
-    function getLocalNow() {
-      const now = new Date();
-      const tzOffset = now.getTimezoneOffset() * 60000;
-      return (new Date(now.getTime() - tzOffset)).toISOString().slice(0, 19);
-    }
+    function getYesterday() { const d = new Date(); d.setDate(d.getDate() - 1); return getLocalYYYYMMDD(d); }
+    function getLocalNow() { const now = new Date(); const tzOffset = now.getTimezoneOffset() * 60000; return (new Date(now.getTime() - tzOffset)).toISOString().slice(0, 19); }
     
     function isDue(item) {
       let rev = item.nextReview || "";
@@ -698,17 +676,11 @@
 
     function saveApiKey() {
       const val = document.getElementById('api-key-input').value.trim();
-      if(val) { 
-        try { localStorage.setItem('gemini_api_key', val); } catch(e) {}
-        showMsg('API 키가 저장되었습니다.'); 
-      } else { showMsg('키를 입력해주세요.'); }
+      if(val) { localStorage.setItem('gemini_api_key', val); showMsg('API 키가 저장되었습니다.'); } else showMsg('키를 입력해주세요.');
     }
-    
     function getApiKey() {
-      let key = '';
-      try { key = localStorage.getItem('gemini_api_key'); } catch(e) {}
-      if(!key) { showMsg("설정 탭에서 Gemini API 키를 먼저 입력해주세요!"); throw new Error("No API Key"); } 
-      return key;
+      const key = localStorage.getItem('gemini_api_key');
+      if(!key) { showMsg("설정 탭에서 Gemini API 키를 먼저 입력해주세요!"); throw new Error("No API Key"); } return key;
     }
 
     async function callGemini(prompt, schema, images = []) {
@@ -747,6 +719,8 @@
       const yesterday = getYesterday();
       if (db.lastStudyDate === today || db.lastStudyDate === yesterday) { /* 유지 */ } 
       else if (db.lastStudyDate !== null) db.streak = 0;
+      
+      if (db.streak > (db.maxStreak || 0)) db.maxStreak = db.streak;
       saveDB();
     }
 
@@ -757,6 +731,9 @@
         if (db.lastStudyDate === yesterday) db.streak++; else db.streak = 1;
         db.lastStudyDate = today; 
       }
+      
+      if (db.streak > (db.maxStreak || 0)) db.maxStreak = db.streak;
+
       db.studyLog = db.studyLog || {};
       if(typeof db.studyLog[today] === 'number') { db.studyLog[today] = { fc: db.studyLog[today], outline: 0, exam: 0 }; }
       if(!db.studyLog[today]) { db.studyLog[today] = { fc: 0, outline: 0, exam: 0 }; }
@@ -768,12 +745,17 @@
     function renderDashboard() {
       const target = new Date('2026-08-29'); const diff = Math.ceil((target - new Date().setHours(0,0,0,0)) / 86400000);
       document.getElementById('d-day-val').textContent = `D-${diff}`;
+      
+      // 💡 연속 학습일 및 최대 기록 표시
       document.getElementById('streak-val').textContent = `${db.streak}일`;
+      document.getElementById('max-streak-val').textContent = `(최대 ${db.maxStreak || db.streak || 0}일)`;
+      
       dueCards = db.flashcards.filter(isDue);
       dueOutlines = db.outlines.filter(isDue);
       document.getElementById('due-fc-val').textContent = dueCards.length;
       document.getElementById('due-outline-val').textContent = dueOutlines.length;
       document.getElementById('total-exams-val').textContent = `${db.history.length}회`;
+      
       const tbody = document.getElementById('history-tbody');
       if (db.history.length === 0) { 
         tbody.innerHTML = '<tr><td colspan="4" class="py-10 text-center text-gray-400">기록이 없습니다.</td></tr>'; 
@@ -787,6 +769,7 @@
           </tr>
         `).join('');
       }
+
       if (typeof Chart !== 'undefined') drawDashboardCharts();
     }
 
@@ -1080,15 +1063,21 @@
     function renderDueFlashcards() {
       dueCards = db.flashcards.filter(isDue);
       document.getElementById('fc-due-display').textContent = dueCards.length;
-      if (dueCards.length > 0) { document.getElementById('fc-workspace').classList.remove('hidden'); document.getElementById('fc-empty').classList.add('hidden'); loadNextCard(); } 
-      else { document.getElementById('fc-workspace').classList.add('hidden'); document.getElementById('fc-empty').classList.remove('hidden'); }
+      if (dueCards.length > 0) { 
+        document.getElementById('fc-workspace').classList.remove('hidden'); 
+        document.getElementById('fc-empty').classList.add('hidden'); 
+        loadNextCard(); 
+      } else { 
+        document.getElementById('fc-workspace').classList.add('hidden'); 
+        document.getElementById('fc-empty').classList.remove('hidden'); 
+      }
     }
 
     function loadNextCard() {
       if (dueCards.length === 0) { renderDueFlashcards(); return; }
       currentCard = dueCards[0];
       
-      document.getElementById('fc-buttons').classList.remove('show');
+      document.getElementById('fc-buttons').style.display = 'none';
       document.querySelectorAll('#fc-buttons .sm2-btn').forEach(btn => btn.classList.remove('ring-4', 'ring-offset-2', 'ring-rose-400', 'ring-orange-400', 'ring-blue-400', 'ring-emerald-400', 'animate-pulse'));
       
       const aiResult = document.getElementById('fc-ai-result');
@@ -1098,11 +1087,9 @@
       let nextGood = r === 0 ? 1 : (r === 1 ? 6 : Math.round(iv * e));
       let nextEasy = r === 0 ? 4 : Math.round(nextGood * 1.3);
 
-      // 💡 텍스트 중복 방지를 위해 자식 엘리먼트 ID만 선택하여 변경
       document.getElementById('fc-time-good').textContent = `${nextGood}일 후`;
       document.getElementById('fc-time-easy').textContent = `${nextEasy}일 후`;
 
-      // 💡 카드 회독수(처음/N회독) 표시 로직 추가
       let reviewCount = currentCard.reviews !== undefined ? currentCard.reviews : (currentCard.repetition || 0);
       let statusHtml = reviewCount === 0 ? '🆕 처음' : `🔁 ${reviewCount}회독`;
       let statusClassFlip = reviewCount === 0 ? 'text-indigo-600 bg-indigo-50' : 'text-slate-500 bg-slate-100';
@@ -1171,10 +1158,11 @@
         else { input.classList.add('wrong'); input.classList.remove('correct'); if (!input.value) input.placeholder = "?"; }
       });
 
-      document.getElementById('fc-cloze-check-btn').classList.add('hidden'); document.getElementById('fc-buttons').classList.add('show');
-      const accuracy = inputs.length > 0 ? (correctCount / inputs.length) : 0;
+      document.getElementById('fc-cloze-check-btn').classList.add('hidden'); 
+      // 💡 2x2 및 1x4 레이아웃이 적용된 그리드 컨테이너 보이기
+      document.getElementById('fc-buttons').className = "grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3 w-full max-w-[600px] mx-auto mt-4 md:mt-6";
       
-      // 💡 반짝임 리셋 후 정확도에 따라 추천 버튼 강조
+      const accuracy = inputs.length > 0 ? (correctCount / inputs.length) : 0;
       document.querySelectorAll('#fc-buttons .sm2-btn').forEach(btn => btn.classList.remove('ring-4', 'ring-offset-2', 'ring-rose-400', 'ring-orange-400', 'ring-blue-400', 'ring-emerald-400', 'animate-pulse'));
 
       if (accuracy === 1) { document.getElementById('fc-btn-easy').classList.add('ring-4', 'ring-offset-2', 'ring-emerald-400', 'animate-pulse'); showMsg("🎉 100% 완벽! '쉬움'을 추천합니다."); } 
@@ -1183,7 +1171,10 @@
       else { document.getElementById('fc-btn-again').classList.add('ring-4', 'ring-offset-2', 'ring-rose-400', 'animate-pulse'); showMsg("💪 25% 미만 정답. 다시 한 번 확실히 외워봅시다!"); }
     }
 
-    function flipCard() { document.getElementById('fc-card').classList.add('flipped'); document.getElementById('fc-buttons').classList.add('show'); }
+    function flipCard() { 
+      document.getElementById('fc-card').classList.add('flipped'); 
+      document.getElementById('fc-buttons').className = "grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3 w-full max-w-[600px] mx-auto mt-4 md:mt-6";
+    }
 
     function rateCard(rating) {
       let q = rating === 1 ? 0 : rating === 2 ? 3 : rating === 3 ? 4 : 5;
@@ -1202,7 +1193,6 @@
       e = e + (0.1 - (5 - q) * (0.08 + (5 - q) * 0.02)); if (e < 1.3) e = 1.3;
       currentCard.repetition = r; currentCard.interval = iv; currentCard.efactor = e;
       
-      // 💡 리뷰 횟수 카운트 1 증가
       let currentReviewCount = currentCard.reviews !== undefined ? currentCard.reviews : (r === 0 ? 0 : r);
       currentCard.reviews = currentReviewCount + 1;
 
@@ -1328,7 +1318,6 @@
 
       parsedLines.sort((a,b) => a.id - b.id); blankState.lines = parsedLines; blankState.answers = parsedLines.filter(l => l.isBlank).map(l => l.content); blankState.answers.sort(() => Math.random() - 0.5); 
       
-      // 💡 목차용 알고리즘 스케줄 계산 및 버튼 업데이트
       let o = blankState.outline;
       let e = o.efactor || 2.5; let r = o.repetition || 0; let iv = o.interval || 0;
       let nextGood = r === 0 ? 1 : (r === 1 ? 6 : Math.round(iv * e));
@@ -1360,8 +1349,7 @@
       });
       blankState.activeInput = null; const firstInput = document.querySelector('.blank-input'); if(firstInput) firstInput.focus();
       document.getElementById('quiz-check-btn').classList.remove('hidden');
-      document.getElementById('quiz-sm2-buttons').classList.add('hidden');
-      document.getElementById('quiz-sm2-buttons').classList.remove('show');
+      document.getElementById('quiz-sm2-buttons').style.display = 'none';
     }
     
     function fillWordChipOutline(word) {
@@ -1390,8 +1378,7 @@
       else { document.getElementById('quiz-btn-again').classList.add('ring-4', 'ring-offset-2', 'ring-rose-400', 'animate-pulse'); showMsg("💪 25% 미만 정답. 다시 한 번 확실히 외워봅시다!"); }
       
       document.getElementById('quiz-check-btn').classList.add('hidden');
-      document.getElementById('quiz-sm2-buttons').classList.remove('hidden');
-      document.getElementById('quiz-sm2-buttons').classList.add('show');
+      document.getElementById('quiz-sm2-buttons').className = "grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3 w-full max-w-[600px] mx-auto mt-4 md:mt-6";
     }
 
     function rateOutline(rating) {
@@ -1611,19 +1598,12 @@
         try {
           const imported = JSON.parse(e.target.result);
           if (!imported.history || !imported.flashcards) { showMsg("❌ 올바른 백업 파일이 아닙니다."); return; }
-          if (confirm(`백업 데이터를 복구하시겠습니까?\n(현재 데이터는 덮어씌워집니다)`)) { window.setAppDB(imported); saveDB(); renderDashboard(); showMsg("✅ 데이터가 복구되었습니다!"); }
+          if (confirm(`백업 데이터를 복구하시겠습니까?\n(현재 데이터는 덮어씌워집니다)`)) { setAppDB(imported); saveDB(); renderDashboard(); showMsg("✅ 데이터가 복구되었습니다!"); }
         } catch(err) { showMsg("❌ 파일 파싱 오류: " + err.message); }
       };
       reader.readAsText(file); event.target.value = '';
     }
     function resetDB() { if (confirm("정말로 모든 학습 기록을 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다!")) { localStorage.removeItem('nomusa_db_v4'); location.reload(); } }
-    
-    // 💡 HTML 인라인 이벤트에서 접근 가능하도록 window 객체에 명시적 바인딩
-    window.renderDashboard = renderDashboard;
-    window.renderDueFlashcards = renderDueFlashcards;
-    window.renderOutlineList = renderOutlineList;
-    window.updateExamQList = updateExamQList;
-    
   </script>
 
   <script type="module">
@@ -1670,14 +1650,14 @@
           unsubSnapshot = onSnapshot(doc(firestore, 'users', user.uid), (docSnap) => {
             if (docSnap.exists()) {
               const cloudDB = docSnap.data().db;
-              if (cloudDB && window.setAppDB) {
+              if (cloudDB) {
                 window.setAppDB(cloudDB);
                 try { localStorage.setItem('nomusa_db_v4', JSON.stringify(cloudDB)); } catch(e){}
                 
-                if(document.getElementById('page-dashboard').classList.contains('active')) window.renderDashboard();
-                if(document.getElementById('page-flashcard').classList.contains('active')) window.renderDueFlashcards();
-                if(document.getElementById('page-exam').classList.contains('active')) window.updateExamQList();
-                if(document.getElementById('page-blank').classList.contains('active')) window.renderOutlineList();
+                if(document.getElementById('page-dashboard').classList.contains('active')) renderDashboard();
+                if(document.getElementById('page-flashcard').classList.contains('active')) renderDueFlashcards();
+                if(document.getElementById('page-exam').classList.contains('active')) updateExamQList();
+                if(document.getElementById('page-blank').classList.contains('active')) renderOutlineList();
               }
             } else { window.triggerCloudSave(); }
           });
@@ -1713,7 +1693,6 @@
         }
       };
     } catch(e) {
-      console.warn("미리보기 샌드박스 환경으로 인해 Firebase가 비활성화되었습니다.");
       window.loginWithGoogle = () => alert("미리보기 화면에서는 로그인 기능을 사용할 수 없습니다. 깃허브 페이지에서 확인해주세요.");
       window.logoutGoogle = () => {};
       window.triggerCloudSave = () => {};
