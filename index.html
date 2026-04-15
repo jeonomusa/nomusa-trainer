@@ -366,6 +366,7 @@
         </div>
 
         <div id="outline-adder" class="hidden neo-card p-4 md:p-6 mb-6 bg-slate-50 border-2 border-emerald-200 shadow-lg">
+          <h3 id="outline-adder-title" class="font-bold text-slate-800 mb-4 text-base md:text-lg flex items-center gap-2"><i class="ri-file-list-line text-emerald-500"></i> 새 목차 구조 등록</h3>
           <div class="grid grid-cols-1 gap-3 mb-3">
             <select id="outline-subject" class="w-full p-2.5 bg-white rounded-xl font-bold border border-gray-200 text-sm outline-none"><option>민사소송법</option><option>노동법</option><option>인사노무관리</option><option>행정쟁송법</option></select>
             <input type="text" id="outline-title" class="w-full p-2.5 bg-white rounded-xl font-bold border border-gray-200 text-sm outline-none" placeholder="주제 (제목)">
@@ -1684,7 +1685,7 @@
       };
       reader.readAsText(file); event.target.value = '';
     }
-    function resetDB() { if (confirm("정말로 모든 학습 기록을 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다!")) { localStorage.removeItem('nomusa_db_v4'); location.reload(); } }
+    function resetDB() { if (confirm("정말로 모든 학습 기록을 삭제하시겠습니까?\n이 작업은 되돌릴 수 정 없습니다!")) { localStorage.removeItem('nomusa_db_v4'); location.reload(); } }
     
     window.navigate = navigate;
     window.toggleCsvUploadForm = toggleCsvUploadForm;
