@@ -303,7 +303,7 @@
              <div class="text-lg md:text-xl font-extrabold text-slate-800 mb-4 md:mb-6 pb-3 md:pb-4 border-b border-gray-100 break-keep" id="fc-cloze-front"></div>
              <div class="text-[14px] md:text-[15px] leading-loose text-slate-700 font-medium mb-6 md:mb-8 break-keep" id="fc-cloze-back"></div>
              <div class="text-center mt-2 md:mt-4">
-               <button id="fc-cloze-check-btn" onclick="checkFcClozeAnswers()" class="w-full md:w-auto px-6 py-2.5 bg-emerald-500 text-white rounded-xl text-sm font-bold hover:bg-emerald-600 shadow-sm active:scale-95">정답 확인</button>
+               <button id="fc-cloze-check-btn" onclick="checkFcClozeAnswers()" class="w-full md:w-auto px-6 py-2.5 bg-emerald-500 text-white rounded-xl text-sm font-bold hover:bg-emerald-600 shadow-sm active:scale-95">정답 확인하기</button>
              </div>
              <div id="fc-cloze-word-bank-wrap" class="mt-4 md:mt-6 pt-4 md:pt-6 border-t border-gray-100">
                <div id="fc-cloze-word-bank" class="flex flex-wrap gap-1.5 md:gap-2 justify-center"></div>
@@ -318,7 +318,8 @@
             <div id="fc-ai-result" class="hidden p-3 md:p-4 bg-white border border-slate-200 rounded-xl text-xs md:text-[13px] shadow-inner break-keep"></div>
           </div>
 
-          <div id="fc-buttons" style="display: none;" class="w-full max-w-[600px] mx-auto mt-4 md:mt-6 grid-cols-2 md:grid-cols-4 gap-2 md:gap-3">
+          <!-- 💡 Hidden 클래스로 완전히 숨겼다 나타나게 제어 -->
+          <div id="fc-buttons" class="hidden w-full max-w-[600px] mx-auto mt-4 md:mt-6 grid-cols-2 md:grid-cols-4 gap-2 md:gap-3">
             <div class="sm2-btn bg-rose-500 hover:bg-rose-600" id="fc-btn-again" onclick="rateCard(1)">
                 <span>다시</span>
                 <span class="block text-[9px] md:text-[10px] mt-0.5 opacity-90 font-medium" id="fc-time-again">1분 후</span>
@@ -385,6 +386,7 @@
           <div class="lg:w-2/3 neo-card p-4 md:p-8 order-2 lg:order-1">
             <div class="flex flex-col md:flex-row justify-between md:items-end gap-3 mb-4 md:mb-6 border-b border-gray-100 pb-3 md:pb-4">
               <div>
+                <!-- 💡 목차 퀴즈에도 상단에 회독수 뱃지 추가 -->
                 <div class="flex items-center gap-2 mb-1 md:mb-2">
                   <span class="text-[10px] font-bold text-emerald-500 bg-emerald-50 px-2 py-1 rounded-full inline-block" id="quiz-subject"></span>
                   <span class="text-[10px] md:text-xs font-bold px-2 py-1 rounded-full inline-block shrink-0" id="quiz-status"></span>
@@ -404,7 +406,8 @@
             <div id="quiz-control-area" class="text-center mt-6 md:mt-8">
               <button id="quiz-check-btn" onclick="checkBlankAnswers()" class="w-full md:w-auto px-6 md:px-8 py-2.5 md:py-3 bg-emerald-500 text-white rounded-xl font-bold text-sm md:text-lg hover:bg-emerald-600 shadow-md active:scale-95"><i class="ri-check-double-line"></i> 정답 확인</button>
               
-              <div id="quiz-sm2-buttons" style="display: none;" class="w-full max-w-[600px] mx-auto mt-4 md:mt-6 grid-cols-2 md:grid-cols-4 gap-2 md:gap-3">
+              <!-- 💡 숨김 방식을 class 토글(hidden/grid)로 변경 -->
+              <div id="quiz-sm2-buttons" class="hidden w-full max-w-[600px] mx-auto mt-4 md:mt-6 grid-cols-2 md:grid-cols-4 gap-2 md:gap-3">
                 <div class="sm2-btn bg-rose-500 hover:bg-rose-600" id="quiz-btn-again" onclick="rateOutline(1)">
                     <span>다시</span>
                     <span class="block text-[9px] md:text-[10px] mt-0.5 opacity-90 font-medium" id="quiz-time-again">1분 후</span>
@@ -589,9 +592,8 @@
               <div><p class="text-[9px] md:text-[10px] font-bold text-gray-400 uppercase tracking-widest">현재 상태</p><p class="text-xs md:text-sm font-bold text-slate-800" id="auth-status">로컬 모드 (로그인 안됨)</p></div>
             </div>
           </div>
-          <!-- 💡 onclick에 있는 더미 로직 대신 전역 함수 호출 -->
-          <button id="login-btn" onclick="if(window.loginWithGoogle) window.loginWithGoogle(); else alert('로그인 모듈 로딩 중입니다. 잠시 후 다시 시도해주세요.');" class="w-full py-2.5 md:py-3 bg-white border border-gray-300 text-gray-700 text-sm font-bold rounded-xl hover:bg-gray-50 flex justify-center items-center gap-2"><svg class="w-4 h-4 md:w-5 md:h-5" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/><path fill="none" d="M1 1h22v22H1z"/></svg>구글로 로그인</button>
-          <button id="logout-btn" onclick="if(window.logoutGoogle) window.logoutGoogle();" class="w-full py-2.5 md:py-3 bg-slate-100 text-slate-600 font-bold rounded-xl hover:bg-slate-200 flex justify-center items-center gap-2 hidden">로그아웃</button>
+          <button id="login-btn" onclick="window.loginWithGoogle()" class="w-full py-2.5 md:py-3 bg-white border border-gray-300 text-gray-700 text-sm font-bold rounded-xl hover:bg-gray-50 flex justify-center items-center gap-2"><svg class="w-4 h-4 md:w-5 md:h-5" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/><path fill="none" d="M1 1h22v22H1z"/></svg>구글로 로그인</button>
+          <button id="logout-btn" onclick="window.logoutGoogle()" class="w-full py-2.5 md:py-3 bg-slate-100 text-slate-600 font-bold rounded-xl hover:bg-slate-200 flex justify-center items-center gap-2 hidden">로그아웃</button>
         </div>
         <div class="neo-card p-6 md:p-8 border-2 border-emerald-100 bg-emerald-50/30">
           <h3 class="font-bold text-emerald-700 mb-2 flex items-center gap-2"><i class="ri-key-2-line"></i> Gemini API 키 설정</h3>
@@ -621,8 +623,1131 @@
     <button class="nav-btn flex-1 min-w-[50px]" id="m-nav-settings" onclick="navigate('settings')"><i class="ri-settings-4-line text-lg"></i><span class="text-[9px] whitespace-nowrap">설정</span></button>
   </div>
 
+  <script>
+    let db = { history: [], questions: [], flashcards: [], outlines: [], lastStudyDate: null, streak: 0, maxStreak: 0, studyLog: {} };
+    let editingFcId = null; let editingOutlineId = null; let editingExamId = null; let chartInstances = {};
+
+    window.onload = () => {
+      try {
+        const saved = localStorage.getItem('nomusa_db_v4');
+        if (saved) { 
+          const parsed = JSON.parse(saved);
+          db = { ...db, ...parsed };
+          if (!db.maxStreak) db.maxStreak = db.streak || 0;
+          for (let date in db.studyLog) {
+            if (typeof db.studyLog[date] === 'number') {
+              db.studyLog[date] = { fc: db.studyLog[date], outline: 0, exam: 0 };
+            }
+          }
+        }
+        const savedKey = localStorage.getItem('gemini_api_key');
+        if(savedKey) document.getElementById('api-key-input').value = savedKey;
+      } catch(e) {}
+      updateStreak(); renderDashboard();
+    };
+
+    function saveDB() { 
+      try { localStorage.setItem('nomusa_db_v4', JSON.stringify(db)); } catch(e) {} 
+      if (window.triggerCloudSave) window.triggerCloudSave(); 
+    }
+
+    const MODEL_NAME = "gemini-2.5-flash";
+    const LINES_PER_PAGE = 22; const MAX_CHARS_PER_LINE = 40; 
+    let examState = { subject: '', question: '', rubric: '', time: 0, seconds: 0, totalPage: 5, currPage: 1, timer: null, answers: {}, uploadedRubricText: '' };
+    let blankState = { outline: null, lines: [], answers: [], activeInput: null };
+    let dueCards = []; let dueOutlines = []; let currentCard = null;
+
+    function navigate(id) {
+      document.querySelectorAll('.page-content').forEach(p => p.classList.remove('active'));
+      const target = document.getElementById('page-' + id); if(target) target.classList.add('active');
+      document.querySelectorAll('.nav-btn, .desktop-nav-btn').forEach(a => a.classList.remove('active'));
+      const dBtn = document.getElementById('d-nav-' + id); const mBtn = document.getElementById('m-nav-' + id);
+      if(dBtn) dBtn.classList.add('active'); if(mBtn) mBtn.classList.add('active');
+
+      if (id === 'dashboard') renderDashboard();
+      if (id === 'flashcard') renderDueFlashcards();
+      if (id === 'exam') updateExamQList();
+      if (id === 'blank') { document.getElementById('blank-list-view').classList.remove('hidden'); document.getElementById('blank-quiz-view').classList.add('hidden'); renderOutlineList(); }
+    }
+
+    function showLoading(msg) { document.getElementById('loading-text').textContent = msg; document.getElementById('loading-overlay').style.display = 'flex'; }
+    function hideLoading() { document.getElementById('loading-overlay').style.display = 'none'; }
+    function showMsg(text) { const box = document.getElementById('message-box'); if (box) { box.textContent = text; box.style.display = 'block'; setTimeout(() => box.style.display = 'none', 3000); } else { alert(text); } }
+    
+    function getLocalYYYYMMDD(d) {
+        const year = d.getFullYear(); const month = String(d.getMonth() + 1).padStart(2, '0'); const day = String(d.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    }
+    function getToday() { return getLocalYYYYMMDD(new Date()); }
+    function getYesterday() { const d = new Date(); d.setDate(d.getDate() - 1); return getLocalYYYYMMDD(d); }
+    function getLocalNow() { const now = new Date(); const tzOffset = now.getTimezoneOffset() * 60000; return (new Date(now.getTime() - tzOffset)).toISOString().slice(0, 19); }
+    
+    function isDue(item) {
+      let rev = item.nextReview || "";
+      if (rev.length === 10) rev += "T00:00:00";
+      if (!rev) return true;
+      return rev <= getLocalNow();
+    }
+
+    function saveApiKey() {
+      const val = document.getElementById('api-key-input').value.trim();
+      if(val) { try { localStorage.setItem('gemini_api_key', val); } catch(e){} showMsg('API 키가 저장되었습니다.'); } else showMsg('키를 입력해주세요.');
+    }
+    function getApiKey() {
+      let key = ''; try { key = localStorage.getItem('gemini_api_key'); } catch(e){}
+      if(!key) { showMsg("설정 탭에서 Gemini API 키를 먼저 입력해주세요!"); throw new Error("No API Key"); } return key;
+    }
+
+    async function callGemini(prompt, schema, images = []) {
+      const key = getApiKey(); const url = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${key}`;
+      let parts = [{ text: prompt }];
+      if (images && images.length > 0) { images.slice(0, 3).forEach(imgData => { parts.push({ inlineData: { mimeType: "image/jpeg", data: imgData } }); }); }
+      const payload = { contents: [{ parts: parts }], generationConfig: { responseMimeType: "application/json", responseSchema: schema } };
+
+      for (let i = 0; i <= 3; i++) {
+        try {
+          const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+          if (!res.ok) {
+            if (res.status === 429) throw new Error("무료 API 호출 한도를 초과했습니다. 잠시 후 시도해주세요.");
+            if (res.status === 404) throw new Error("모델을 찾을 수 없습니다.");
+            throw new Error(`HTTP ${res.status}`);
+          }
+          const data = await res.json(); return parseJSON(data.candidates[0].content.parts[0].text);
+        } catch (err) {
+          if (i === 3 || err.message.includes('429')) throw err;
+          await new Promise(r => setTimeout(r, 1000 * Math.pow(2, i)));
+        }
+      }
+    }
+
+    function parseJSON(text) {
+      try {
+        const cleanText = text.replace(/```json/g, '').replace(/```/g, '').trim();
+        const jsonMatch = cleanText.match(/\{[\s\S]*\}|\[[\s\S]*\]/);
+        if (!jsonMatch) throw new Error("JSON format not found");
+        return JSON.parse(jsonMatch[0]);
+      } catch (e) { throw new Error("AI 응답 해석 실패"); }
+    }
+
+    function updateStreak() {
+      const today = getToday();
+      const yesterday = getYesterday();
+      if (db.lastStudyDate === today || db.lastStudyDate === yesterday) { /* 유지 */ } 
+      else if (db.lastStudyDate !== null) db.streak = 0;
+      
+      if (db.streak > (db.maxStreak || 0)) db.maxStreak = db.streak;
+      saveDB();
+    }
+
+    function markStudiedToday(type = 'fc') {
+      const today = getToday();
+      if (db.lastStudyDate !== today) {
+        const yesterday = getYesterday();
+        if (db.lastStudyDate === yesterday) db.streak++; else db.streak = 1;
+        db.lastStudyDate = today; 
+      }
+      
+      if (db.streak > (db.maxStreak || 0)) db.maxStreak = db.streak;
+
+      db.studyLog = db.studyLog || {};
+      if(typeof db.studyLog[today] === 'number') { db.studyLog[today] = { fc: db.studyLog[today], outline: 0, exam: 0 }; }
+      if(!db.studyLog[today]) { db.studyLog[today] = { fc: 0, outline: 0, exam: 0 }; }
+      db.studyLog[today][type] = (db.studyLog[today][type] || 0) + 1;
+      saveDB();
+      if(document.getElementById('page-dashboard').classList.contains('active')) renderDashboard();
+    }
+
+    function renderDashboard() {
+      const target = new Date('2026-08-29'); const diff = Math.ceil((target - new Date().setHours(0,0,0,0)) / 86400000);
+      document.getElementById('d-day-val').textContent = `D-${diff}`;
+      
+      document.getElementById('streak-val').textContent = db.streak || 0;
+      document.getElementById('max-streak-val').textContent = db.maxStreak || db.streak || 0;
+      
+      dueCards = db.flashcards.filter(isDue);
+      dueOutlines = db.outlines.filter(isDue);
+      document.getElementById('due-fc-val').textContent = dueCards.length;
+      document.getElementById('due-outline-val').textContent = dueOutlines.length;
+      document.getElementById('total-exams-val').textContent = db.history.length;
+      
+      const tbody = document.getElementById('history-tbody');
+      if (db.history.length === 0) { 
+        tbody.innerHTML = '<tr><td colspan="4" class="py-10 text-center text-gray-400">기록이 없습니다.</td></tr>'; 
+      } else {
+        tbody.innerHTML = db.history.slice(-5).reverse().map(h => `
+          <tr class="border-b border-gray-50 hover:bg-gray-50 group">
+            <td class="py-3 px-2 text-[12px] text-gray-500">${h.date}</td>
+            <td class="py-3 px-2 font-bold text-slate-700 text-[13px]">${h.subject}</td>
+            <td class="py-3 px-2 text-emerald-600 font-extrabold">${h.score}점</td>
+            <td class="py-3 px-2 text-right"><button onclick="viewHistory(${h.id})" class="px-3 py-1 bg-emerald-50 text-emerald-600 text-[10px] font-bold rounded hover:bg-emerald-500 hover:text-white transition-all">결과 보기</button></td>
+          </tr>
+        `).join('');
+      }
+
+      if (typeof Chart !== 'undefined') drawDashboardCharts();
+    }
+
+    function drawDashboardCharts() {
+      const ctxWeekly = document.getElementById('chart-weekly');
+      if(ctxWeekly) {
+        const last7Days = Array.from({length: 7}, (_, i) => {
+            const d = new Date(); d.setDate(d.getDate() - (6 - i));
+            return getLocalYYYYMMDD(d);
+        });
+        const weeklyDataFc = last7Days.map(date => {
+            if(!db.studyLog || !db.studyLog[date]) return 0;
+            if(typeof db.studyLog[date] === 'number') return db.studyLog[date];
+            return db.studyLog[date].fc || 0;
+        });
+        const weeklyDataOutline = last7Days.map(date => {
+            if(!db.studyLog || !db.studyLog[date]) return 0;
+            if(typeof db.studyLog[date] === 'number') return 0;
+            return db.studyLog[date].outline || 0;
+        });
+        const labels = last7Days.map(date => date.slice(5).replace('-','/')); 
+
+        if(chartInstances['weekly']) chartInstances['weekly'].destroy();
+        chartInstances['weekly'] = new Chart(ctxWeekly, {
+            data: {
+                labels: labels,
+                datasets: [
+                    { type: 'line', label: '목차 (회)', data: weeklyDataOutline, borderColor: '#f59e0b', backgroundColor: '#f59e0b', borderWidth: 2, tension: 0.3, fill: false, pointBackgroundColor: '#f59e0b', order: 1 },
+                    { type: 'bar', label: '카드 (장)', data: weeklyDataFc, backgroundColor: 'rgba(16, 185, 129, 0.8)', borderRadius: 4, order: 2 }
+                ]
+            },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: true, position: 'top', labels: { boxWidth: 10, font: { size: 10, family: 'Pretendard' } } } }, scales: { y: { beginAtZero: true, ticks: { precision: 0 }, suggestedMax: 100 } } }
+        });
+      }
+
+      const ctxSub = document.getElementById('chart-subjects');
+      if(ctxSub) {
+        const subCounts = {};
+        db.history.forEach(h => { subCounts[h.subject] = (subCounts[h.subject] || 0) + 1; });
+        const subLabels = Object.keys(subCounts);
+        const subData = Object.values(subCounts);
+        
+        if(chartInstances['subjects']) chartInstances['subjects'].destroy();
+        chartInstances['subjects'] = new Chart(ctxSub, {
+            type: 'doughnut',
+            data: { labels: subLabels.length ? subLabels : ['기록 없음'], datasets: [{ data: subData.length ? subData : [1], backgroundColor: subData.length ? ['#3b82f6', '#10b981', '#8b5cf6', '#f59e0b'] : ['#e2e8f0'], borderWidth: 0 }] },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { boxWidth: 10, font: { size: 10, family: 'Pretendard' } } } }, cutout: '70%' }
+        });
+      }
+
+      const ctxScore = document.getElementById('chart-scores');
+      if(ctxScore) {
+        const sortedHistory = [...db.history].sort((a,b) => a.id - b.id);
+        const scoreLabels = sortedHistory.map((h, i) => `${i+1}회차`);
+        const scoreData = sortedHistory.map(h => h.score);
+
+        if(chartInstances['scores']) chartInstances['scores'].destroy();
+        chartInstances['scores'] = new Chart(ctxScore, {
+            type: 'line',
+            data: { labels: scoreLabels.length ? scoreLabels : ['-'], datasets: [{ label: '모의고사 점수', data: scoreData.length ? scoreData : [0], borderColor: '#f43f5e', backgroundColor: 'rgba(244, 63, 94, 0.1)', borderWidth: 2, pointBackgroundColor: '#f43f5e', fill: true, tension: 0.3 }] },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { min: 0, max: 100 } } }
+        });
+      }
+    }
+
+    function viewHistory(id) { const record = db.history.find(h => String(h.id) === String(id)); if(record) { renderExamResult(record); navigate('result'); } }
+
+    async function analyzeStudyHistory() {
+      if(db.history.length === 0) { showMsg("기록이 없습니다."); return; }
+      showLoading("취약점 스캔 중...");
+      const hist = db.history.slice(-5).map(h => `[${h.subject}] ${h.score}점 - ${h.feedback.missing}`).join('\n');
+      const schema = { type: "OBJECT", properties: { analysis: { type: "STRING" } } };
+      try {
+        const res = await callGemini(`학생의 최근 모의고사 기록과 단점입니다.\n${hist}\n취약점을 진단하고 개선 공부법을 3문장으로 요약하세요.`, schema);
+        document.getElementById('ai-analysis-box').classList.remove('hidden'); document.getElementById('ai-analysis-content').textContent = res.analysis;
+      } catch(e) { showMsg(e.message); } finally { hideLoading(); }
+    }
+
+    async function searchLawDB() {
+      const kw = document.getElementById('law-search-input').value; if(!kw) return;
+      const resEl = document.getElementById('law-search-result'); resEl.style.display = 'block'; resEl.innerHTML = '<div class="spinner w-6 h-6 mx-auto"></div>';
+      try {
+        const schema = { type: "OBJECT", properties: { content: { type: "STRING" } } };
+        const res = await callGemini(`노무사 수험생이 [${kw}]를 검색했습니다. 핵심 판례 요지 또는 관련 법조문을 노무사 2차 답안지에 쓸 수 있는 정제된 문장으로 3~4줄 요약해서 알려주세요.`, schema);
+        resEl.textContent = res.content;
+      } catch(e) { resEl.textContent = e.message; }
+    }
+
+    function handleFileDisplay(type) {
+      const file = document.getElementById('file-'+type).files[0];
+      if(file) document.getElementById('file-'+type+'-name').innerHTML = `<span class="text-emerald-500 font-bold">✅ ${file.name}</span>`;
+    }
+
+    async function processAIConvert() {
+      const fileQ = document.getElementById('file-q').files[0];
+      if (!fileQ) { showMsg('문제 또는 모범답안 PDF를 업로드해주세요.'); return; }
+      showLoading('AI가 PDF 정밀 분석 중입니다...');
+      const type = document.getElementById('convert-type').value;
+      const subject = document.getElementById('convert-subject').value;
+
+      try {
+        const bufQ = await fileQ.arrayBuffer(); const pdfQ = await pdfjsLib.getDocument(bufQ).promise;
+        let textQ = ''; let images = [];
+        for (let i=1; i<=pdfQ.numPages; i++) {
+          const page = await pdfQ.getPage(i); const content = await page.getTextContent();
+          const pText = content.items.map(it => it.str).join(' '); textQ += pText + '\n';
+          if (pText.trim().length < 50 && images.length < 3) {
+            const vp = page.getViewport({scale: 1.5}); const canvas = document.createElement('canvas'); const ctx = canvas.getContext('2d');
+            canvas.height = vp.height; canvas.width = vp.width; await page.render({canvasContext: ctx, viewport: vp}).promise;
+            images.push(canvas.toDataURL('image/jpeg').split(',')[1]);
+          }
+        }
+
+        let basePrompt = `과목: ${subject}\n\n[학습 자료]\n${textQ.substring(0,3000)}`;
+
+        if (type === 'exam') {
+          const schema = { type: "ARRAY", items: { type: "OBJECT", properties: { subject: { type: "STRING" }, question: { type: "STRING" }, rubric: { type: "STRING" } }, required: ["subject", "question", "rubric"] } };
+          const res = await callGemini(basePrompt + `\n\n위 자료를 바탕으로 노무사 2차 시험 '문제'와 '모범답안' 1세트를 추출하세요. 특히 rubric 필드에는 단순 요약이 아닌, 목차와 배점, 핵심 키워드가 포함된 상세한 모범답안을 최대한 원본에 가깝게 작성해주세요.`, schema, images);
+          res.forEach(q => { q.id = Date.now().toString() + '-' + Math.floor(Math.random() * 1000000); db.questions.push(q); });
+          saveDB(); updateExamQList(); showMsg(`✅ 모의고사 문제 ${res.length}개 저장!`);
+        } else {
+          const schema = { type: "ARRAY", items: { type: "OBJECT", properties: { front: { type: "STRING" }, back: { type: "STRING" } }, required: ["front", "back"] } };
+          const res = await callGemini(basePrompt + `\n\n위 자료에서 암기해야 할 핵심 쟁점이나 판례를 안키형 플래시카드(앞면/뒷면) 5~10개로 만들어주세요.\n중요: 뒷면 내용 중 반드시 암기해야 할 핵심 키워드나 문구는 양쪽에 [대괄호]로 묶어주세요. (예: 근로기준법상 [근로자]란...)`, schema, images);
+          res.forEach(card => {
+            card.id = Date.now().toString() + '-' + Math.floor(Math.random() * 1000000); card.subject = subject;
+            card.repetition = 0; card.interval = 0; card.efactor = 2.5; card.nextReview = getLocalNow();
+            db.flashcards.push(card);
+          });
+          saveDB(); showMsg(`✅ 암기 카드 ${res.length}장 생성!`);
+        }
+      } catch(e) { showMsg(e.message); } finally { hideLoading(); }
+    }
+
+    function parseCSV(text) {
+      let result = []; let row = []; let inQuotes = false; let value = "";
+      for (let i = 0; i < text.length; i++) {
+        let char = text[i]; let nextChar = text[i + 1];
+        if (char === '"' && inQuotes && nextChar === '"') { value += '"'; i++; } 
+        else if (char === '"') { inQuotes = !inQuotes; } 
+        else if (char === ',' && !inQuotes) { row.push(value.trim()); value = ""; } 
+        else if ((char === '\n' || char === '\r') && !inQuotes) {
+          if (char === '\r' && nextChar === '\n') i++;
+          row.push(value.trim()); value = "";
+          if (row.length > 0 && row.some(v => v !== "")) result.push(row);
+          row = [];
+        } else { value += char; }
+      }
+      if (value || row.length > 0) { row.push(value.trim()); result.push(row); }
+      return result;
+    }
+
+    function toggleCsvUploadForm() { document.getElementById('fc-manager-view').classList.add('hidden'); document.getElementById('manual-card-form').classList.add('hidden'); document.getElementById('csv-upload-form').classList.toggle('hidden'); }
+    function cancelCsvUpload() { document.getElementById('csv-upload-form').classList.add('hidden'); }
+
+    function processCsvUpload() {
+      const file = document.getElementById('csv-file-input').files[0];
+      if (!file) { showMsg("CSV 파일을 선택해주세요."); return; }
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        let text = e.target.result;
+        if (text.includes('')) {
+          const readerEuc = new FileReader();
+          readerEuc.onload = function(e2) { executeCsvParsing(e2.target.result); };
+          readerEuc.readAsText(file, "EUC-KR");
+        } else { executeCsvParsing(text); }
+      };
+      reader.readAsText(file, "UTF-8");
+    }
+
+    function executeCsvParsing(text) {
+      const rows = parseCSV(text); let addedCount = 0; let startIndex = 0;
+      if (rows.length > 0 && rows[0][0] && (rows[0][0].includes("과목") || rows[0][1]?.includes("앞면"))) startIndex = 1; 
+      for (let i = startIndex; i < rows.length; i++) {
+        if (rows[i].length >= 3) {
+          let subject = rows[i][0].trim(); let front = rows[i][1].trim(); let back = rows[i][2].trim();
+          if(subject.includes('노동')) subject = '노동법'; else if(subject.includes('인사') || subject.includes('노무')) subject = '인사노무관리'; else if(subject.includes('행정') || subject.includes('쟁송')) subject = '행정쟁송법'; else if(subject.includes('민사') || subject.includes('민소')) subject = '민사소송법';
+          if (front && back) {
+            db.flashcards.push({ id: Date.now().toString() + '-' + Math.floor(Math.random() * 1000000), subject: subject, front: front, back: back, repetition: 0, interval: 0, efactor: 2.5, nextReview: getLocalNow() });
+            addedCount++;
+          }
+        }
+      }
+      if (addedCount > 0) {
+        saveDB(); renderDueFlashcards();
+        if (!document.getElementById('fc-manager-view').classList.contains('hidden')) renderFcList();
+        showMsg(`✅ ${addedCount}개의 플래시카드가 등록되었습니다!`); cancelCsvUpload(); document.getElementById('csv-file-input').value = "";
+      } else showMsg("유효한 데이터가 없습니다.");
+    }
+
+    async function getFcHint() {
+      if (!currentCard) return;
+      const resEl = document.getElementById('fc-ai-result'); resEl.classList.remove('hidden'); resEl.innerHTML = '<div class="text-center text-purple-400 font-bold animate-pulse text-[11px] py-2">✨ AI가 힌트를 고민하고 있습니다...</div>';
+      try {
+        const schema = { type: "OBJECT", properties: { hint: { type: "STRING" } } };
+        const prompt = `과목: ${currentCard.subject}\n질문: ${currentCard.front}\n정답: ${currentCard.back}\n\n사용자가 정답을 떠올리지 못하고 있습니다. 정답에 포함된 직접적인 핵심 단어는 절대 노출하지 말고, 정답을 유추할 수 있도록 돕는 아주 결정적인 '힌트'나 '초성'을 1~2문장으로 제공해주세요.`;
+        const res = await callGemini(prompt, schema);
+        resEl.innerHTML = `<strong class="text-purple-600 block mb-1"><i class="ri-lightbulb-flash-line"></i> AI 힌트:</strong> ${res.hint}`;
+      } catch(e) { resEl.innerHTML = `<span class="text-red-500">오류 발생: ${e.message}</span>`; }
+    }
+
+    async function getFcMnemonic() {
+      if (!currentCard) return;
+      const resEl = document.getElementById('fc-ai-result'); resEl.classList.remove('hidden'); resEl.innerHTML = '<div class="text-center text-blue-400 font-bold animate-pulse text-[11px] py-2">✨ AI가 암기 비법을 만들고 있습니다...</div>';
+      try {
+        const schema = { type: "OBJECT", properties: { mnemonic: { type: "STRING" } } };
+        const prompt = `과목: ${currentCard.subject}\n질문: ${currentCard.front}\n정답: ${currentCard.back}\n\n수험생이 위 내용을 쉽게 외울 수 있도록, 각 키워드의 앞글자를 딴 기발하고 재미있는 '두음문자 암기법(연상법)'을 만들어주세요. 1~2문장으로 짧고 강렬하게 설명해주세요.`;
+        const res = await callGemini(prompt, schema);
+        resEl.innerHTML = `<strong class="text-blue-600 block mb-1"><i class="ri-magic-line"></i> AI 암기비법:</strong> ${res.mnemonic}`;
+      } catch(e) { resEl.innerHTML = `<span class="text-red-500">오류 발생: ${e.message}</span>`; }
+    }
+
+    function toggleFcManager() { const view = document.getElementById('fc-manager-view'); view.classList.toggle('hidden'); if (!view.classList.contains('hidden')) { renderFcList(); document.getElementById('manual-card-form').classList.add('hidden'); document.getElementById('csv-upload-form').classList.add('hidden'); } }
+
+    function renderFcList() {
+      const container = document.getElementById('fc-list'); const filter = document.getElementById('fc-filter-subject').value;
+      const selectAllCb = document.getElementById('fc-select-all'); if(selectAllCb) selectAllCb.checked = false;
+      let filteredCards = filter === 'all' ? db.flashcards : db.flashcards.filter(c => c.subject === filter);
+      if(filteredCards.length === 0) { container.innerHTML = '<p class="text-sm text-gray-400 py-4 text-center">등록된 카드가 없습니다.</p>'; return; }
+      container.innerHTML = filteredCards.map((c, index) => `
+        <div class="flex justify-between items-center p-2.5 md:p-3 bg-gray-50 border border-gray-100 rounded-lg hover:border-emerald-300 transition-colors">
+           <div class="flex items-center gap-2 md:gap-3 flex-1 min-w-0 pr-2">
+             <input type="checkbox" class="fc-item-checkbox rounded text-emerald-500 focus:ring-emerald-500 border-gray-300 w-4 h-4 cursor-pointer" value="${c.id}" onchange="updateSelectAllFcState()">
+             <span class="text-[10px] md:text-xs font-bold text-gray-400 w-4 md:w-5 text-center shrink-0">${index + 1}</span>
+             <div class="min-w-0">
+               <span class="text-[9px] md:text-[10px] font-bold text-emerald-500 bg-emerald-50 px-1.5 py-0.5 rounded">${c.subject}</span>
+               <p class="font-bold text-xs md:text-sm text-slate-800 mt-1 truncate">${c.front}</p>
+             </div>
+           </div>
+           <div class="flex gap-1 md:gap-2 shrink-0">
+              <button onclick="editFc('${c.id}')" class="px-2 py-1 md:px-3 md:py-1.5 bg-white border border-gray-200 text-slate-600 rounded text-[10px] md:text-xs font-bold hover:bg-gray-100">수정</button>
+              <button onclick="deleteFc('${c.id}')" class="px-2 py-1 md:px-3 md:py-1.5 border border-red-100 text-red-500 rounded text-[10px] md:text-xs font-bold hover:bg-red-50">삭제</button>
+           </div>
+        </div>
+      `).join('');
+    }
+
+    function toggleSelectAllFc(source) { document.querySelectorAll('.fc-item-checkbox').forEach(cb => cb.checked = source.checked); }
+    function updateSelectAllFcState() { const cbs = document.querySelectorAll('.fc-item-checkbox'); const allCb = document.getElementById('fc-select-all'); if (allCb && cbs.length > 0) allCb.checked = Array.from(cbs).every(cb => cb.checked); }
+
+    function removeBracketsFromSelected() {
+      const selectedIds = Array.from(document.querySelectorAll('.fc-item-checkbox:checked')).map(cb => cb.value);
+      if (selectedIds.length === 0) { showMsg("선택된 카드가 없습니다."); return; }
+      if(!confirm(`선택한 ${selectedIds.length}개 카드의 대괄호를 지우시겠습니까?`)) return;
+      let count = 0;
+      db.flashcards.forEach(c => { if (selectedIds.includes(String(c.id))) { if (c.back.includes('[') || c.back.includes(']')) { c.back = c.back.replace(/\[/g, '').replace(/\]/g, count++); } } });
+      if(count > 0) { saveDB(); renderFcList(); renderDueFlashcards(); showMsg(`✅ ${count}개의 카드가 변환되었습니다!`); }
+    }
+
+    function deleteSelectedFc() {
+      const selectedIds = Array.from(document.querySelectorAll('.fc-item-checkbox:checked')).map(cb => cb.value);
+      if (selectedIds.length === 0) { showMsg("선택된 카드가 없습니다."); return; }
+      if(!confirm(`선택한 ${selectedIds.length}개의 카드를 삭제하시겠습니까?`)) return;
+      db.flashcards = db.flashcards.filter(c => !selectedIds.includes(String(c.id)));
+      saveDB(); renderFcList(); renderDueFlashcards(); showMsg(`${selectedIds.length}개의 카드가 일괄 삭제되었습니다.`);
+    }
+
+    function deleteFc(id) { if(!confirm('해당 카드를 삭제하시겠습니까?')) return; db.flashcards = db.flashcards.filter(c => String(c.id) !== String(id)); saveDB(); renderFcList(); renderDueFlashcards(); showMsg("카드가 삭제되었습니다."); }
+
+    function editFc(id) {
+      const c = db.flashcards.find(x => String(x.id) === String(id)); if(!c) return; editingFcId = c.id;
+      document.getElementById('manual-fc-title').innerHTML = '<i class="ri-edit-2-line text-emerald-500"></i> 플래시카드 수정하기';
+      document.getElementById('manual-fc-subject').value = c.subject; document.getElementById('manual-fc-front').value = c.front; document.getElementById('manual-fc-back').value = c.back;
+      document.getElementById('manual-fc-save-btn').textContent = '수정 완료';
+      document.getElementById('manual-card-form').classList.remove('hidden'); document.getElementById('fc-manager-view').classList.add('hidden'); document.getElementById('csv-upload-form').classList.add('hidden');
+    }
+
+    function toggleManualCardForm() {
+      editingFcId = null; document.getElementById('manual-fc-title').innerHTML = '<i class="ri-edit-circle-line text-emerald-500"></i> 새 플래시카드 입력';
+      document.getElementById('manual-fc-front').value = ''; document.getElementById('manual-fc-back').value = ''; document.getElementById('manual-fc-save-btn').textContent = '추가하기';
+      document.getElementById('fc-manager-view').classList.add('hidden'); document.getElementById('csv-upload-form').classList.add('hidden'); document.getElementById('manual-card-form').classList.toggle('hidden');
+    }
+
+    function cancelManualFlashcard() { editingFcId = null; document.getElementById('manual-card-form').classList.add('hidden'); }
+
+    function addManualFlashcard() {
+      try {
+        const subject = document.getElementById('manual-fc-subject').value; const front = document.getElementById('manual-fc-front').value.trim(); const back = document.getElementById('manual-fc-back').value.trim();
+        if (!front || !back) { showMsg('⚠️ 앞면과 뒷면을 모두 입력해주세요.'); return; }
+        if (editingFcId) {
+          const idx = db.flashcards.findIndex(x => String(x.id) === String(editingFcId));
+          if(idx > -1) { db.flashcards[idx].subject = subject; db.flashcards[idx].front = front; db.flashcards[idx].back = back; }
+          editingFcId = null; showMsg('✅ 카드가 수정되었습니다!');
+        } else {
+          db.flashcards.push({ id: Date.now().toString() + '-' + Math.floor(Math.random() * 1000000), subject, front, back, repetition: 0, interval: 0, efactor: 2.5, nextReview: getLocalNow() });
+          showMsg('✅ 카드가 추가되었습니다!');
+        }
+        saveDB(); document.getElementById('manual-card-form').classList.add('hidden'); renderDueFlashcards();
+      } catch(e) { showMsg("카드 저장 오류: " + e.message); }
+    }
+
+    function renderDueFlashcards() {
+      dueCards = db.flashcards.filter(isDue);
+      document.getElementById('fc-due-display').textContent = dueCards.length;
+      if (dueCards.length > 0) { 
+        document.getElementById('fc-workspace').classList.remove('hidden'); 
+        document.getElementById('fc-empty').classList.add('hidden'); 
+        loadNextCard(); 
+      } else { 
+        document.getElementById('fc-workspace').classList.add('hidden'); 
+        document.getElementById('fc-empty').classList.remove('hidden'); 
+      }
+    }
+
+    function loadNextCard() {
+      if (dueCards.length === 0) { renderDueFlashcards(); return; }
+      currentCard = dueCards[0];
+      
+      document.getElementById('fc-buttons').classList.add('hidden');
+      document.querySelectorAll('#fc-buttons .sm2-btn').forEach(btn => btn.classList.remove('ring-4', 'ring-offset-2', 'ring-rose-400', 'ring-orange-400', 'ring-blue-400', 'ring-emerald-400', 'animate-pulse'));
+      
+      const aiResult = document.getElementById('fc-ai-result');
+      if(aiResult) { aiResult.classList.add('hidden'); aiResult.innerHTML = ''; }
+
+      let e = currentCard.efactor || 2.5; let r = currentCard.repetition || 0; let iv = currentCard.interval || 0;
+      let nextGood = r === 0 ? 1 : (r === 1 ? 6 : Math.round(iv * e));
+      let nextEasy = r === 0 ? 4 : Math.round(nextGood * 1.3);
+
+      document.getElementById('fc-time-good').textContent = `${nextGood}일 후`;
+      document.getElementById('fc-time-easy').textContent = `${nextEasy}일 후`;
+
+      let reviewCount = currentCard.reviews !== undefined ? currentCard.reviews : (currentCard.repetition || 0);
+      let statusHtml = reviewCount === 0 ? '🆕 처음' : `🔁 ${reviewCount}회독`;
+      let statusClassFlip = reviewCount === 0 ? 'text-indigo-600 bg-indigo-50' : 'text-slate-500 bg-slate-100';
+      let statusClassCloze = reviewCount === 0 ? 'text-indigo-600 bg-indigo-50' : 'text-slate-500 bg-slate-100';
+
+      document.getElementById('fc-front-status').textContent = statusHtml;
+      document.getElementById('fc-front-status').className = `text-[10px] md:text-xs font-bold px-2 md:px-3 py-1 rounded-full shrink-0 ${statusClassFlip}`;
+      document.getElementById('fc-cloze-status').textContent = statusHtml;
+      document.getElementById('fc-cloze-status').className = `text-[10px] md:text-xs font-bold px-2 py-1 rounded-full inline-block ${statusClassCloze}`;
+
+      const hasCloze = /\[(.*?)\]/.test(currentCard.back);
+      if (hasCloze) {
+        document.getElementById('fc-flip-container').classList.add('hidden'); document.getElementById('fc-cloze-container').classList.remove('hidden');
+        renderFcClozeCard(currentCard);
+      } else {
+        document.getElementById('fc-cloze-container').classList.add('hidden'); document.getElementById('fc-flip-container').classList.remove('hidden');
+        document.getElementById('fc-card').classList.remove('flipped');
+        document.getElementById('fc-front-sub').textContent = currentCard.subject || ''; document.getElementById('fc-front-text').textContent = currentCard.front || ''; document.getElementById('fc-back-text').textContent = currentCard.back || '';
+      }
+    }
+
+    function renderFcClozeCard(card) {
+      document.getElementById('fc-cloze-sub').textContent = card.subject || ''; document.getElementById('fc-cloze-front').textContent = card.front || '';
+      document.getElementById('fc-cloze-check-btn').classList.remove('hidden');
+      
+      const container = document.getElementById('fc-cloze-back');
+      const regex = /\[(.*?)\]/g; let html = ''; let match; let lastIdx = 0; fcClozeState.answers = [];
+
+      let matches = []; let tempMatch; const tempRegex = /\[(.*?)\]/g;
+      while ((tempMatch = tempRegex.exec(card.back)) !== null) { matches.push(tempMatch[1]); }
+      const maxCharLen = matches.length > 0 ? Math.max(...matches.map(x => x.length)) : 10;
+      const uniformWidth = `clamp(60px, ${maxCharLen + 2}ch, 100%)`;
+
+      while ((match = regex.exec(card.back)) !== null) {
+        html += card.back.substring(lastIdx, match.index);
+        const ans = match[1].trim(); fcClozeState.answers.push(ans);
+        html += `<input type="text" class="fc-blank-input blank-input" data-answer="${ans}" style="width: ${uniformWidth};" onclick="setFcActiveInput(this)" placeholder="">`;
+        lastIdx = regex.lastIndex;
+      }
+      html += card.back.substring(lastIdx); container.innerHTML = html;
+
+      const bank = document.getElementById('fc-cloze-word-bank'); bank.innerHTML = '';
+      const shuffled = [...fcClozeState.answers].sort(() => Math.random() - 0.5);
+      shuffled.forEach(ans => { const safeAns = ans.replace(/'/g, "\\'"); bank.innerHTML += `<div class="word-chip" onclick="fillFcWordChip('${safeAns}')">${ans}</div>`; });
+
+      const inputs = container.querySelectorAll('.fc-blank-input');
+      inputs.forEach(input => { input.addEventListener('focus', (e) => { setFcActiveInput(e.target); }); input.addEventListener('input', (e) => { e.target.classList.remove('correct', 'wrong'); }); });
+      fcClozeState.activeInput = null; if(inputs.length > 0) inputs[0].focus();
+    }
+
+    function setFcActiveInput(el) { fcClozeState.activeInput = el; el.classList.remove('correct', 'wrong'); }
+    function fillFcWordChip(word) {
+      if (fcClozeState.activeInput) {
+        fcClozeState.activeInput.value = word; fcClozeState.activeInput.classList.remove('correct', 'wrong');
+        const inputs = Array.from(document.querySelectorAll('#fc-cloze-back .fc-blank-input'));
+        const nextEmpty = inputs.slice(inputs.indexOf(fcClozeState.activeInput) + 1).find(i => !i.value) || inputs.find(i => !i.value);
+        if (nextEmpty) nextEmpty.focus();
+      } else { showMsg("먼저 채워넣을 빈칸을 클릭해주세요."); }
+    }
+
+    function checkFcClozeAnswers() {
+      const inputs = document.querySelectorAll('#fc-cloze-back .fc-blank-input'); let correctCount = 0;
+      inputs.forEach(input => {
+        const actual = input.dataset.answer.replace(/\s+/g, ''); const user = input.value.replace(/\s+/g, '');
+        if (actual === user) { input.classList.add('correct'); input.classList.remove('wrong'); input.placeholder = ''; correctCount++; } 
+        else { input.classList.add('wrong'); input.classList.remove('correct'); if (!input.value) input.placeholder = "?"; }
+      });
+
+      document.getElementById('fc-cloze-check-btn').classList.add('hidden'); 
+      const btnContainer = document.getElementById('fc-buttons');
+      btnContainer.classList.remove('hidden');
+      btnContainer.classList.add('grid');
+      
+      const accuracy = inputs.length > 0 ? (correctCount / inputs.length) : 0;
+      document.querySelectorAll('#fc-buttons .sm2-btn').forEach(btn => btn.classList.remove('ring-4', 'ring-offset-2', 'ring-rose-400', 'ring-orange-400', 'ring-blue-400', 'ring-emerald-400', 'animate-pulse'));
+
+      if (accuracy === 1) { document.getElementById('fc-btn-easy').classList.add('ring-4', 'ring-offset-2', 'ring-emerald-400', 'animate-pulse'); showMsg("🎉 100% 완벽! '쉬움'을 추천합니다."); } 
+      else if (accuracy >= 0.75) { document.getElementById('fc-btn-good').classList.add('ring-4', 'ring-offset-2', 'ring-blue-400', 'animate-pulse'); showMsg("👍 75% 이상 정답! '보통'을 추천합니다."); } 
+      else if (accuracy >= 0.25) { document.getElementById('fc-btn-hard').classList.add('ring-4', 'ring-offset-2', 'ring-orange-400', 'animate-pulse'); showMsg("🔥 25%~75% 정답. '어려움'을 추천합니다."); } 
+      else { document.getElementById('fc-btn-again').classList.add('ring-4', 'ring-offset-2', 'ring-rose-400', 'animate-pulse'); showMsg("💪 25% 미만 정답. 다시 한 번 확실히 외워봅시다!"); }
+    }
+
+    function flipCard() { 
+      document.getElementById('fc-card').classList.add('flipped'); 
+      const btnContainer = document.getElementById('fc-buttons');
+      btnContainer.classList.remove('hidden');
+      btnContainer.classList.add('grid');
+    }
+
+    function rateCard(rating) {
+      let q = rating === 1 ? 0 : rating === 2 ? 3 : rating === 3 ? 4 : 5;
+      let r = currentCard.repetition || 0; let iv = currentCard.interval || 0; let e = currentCard.efactor || 2.5;
+
+      let nextGood = r === 0 ? 1 : (r === 1 ? 6 : Math.round(iv * e));
+      let nextEasy = r === 0 ? 4 : Math.round(nextGood * 1.3);
+
+      if (rating === 3) iv = nextGood;
+      else if (rating === 4) iv = nextEasy;
+      else if (rating === 2) iv = 0.5; 
+      else iv = 0; 
+
+      if (rating >= 3) r++; else r = 0;
+
+      e = e + (0.1 - (5 - q) * (0.08 + (5 - q) * 0.02)); if (e < 1.3) e = 1.3;
+      currentCard.repetition = r; currentCard.interval = iv; currentCard.efactor = e;
+      
+      let currentReviewCount = currentCard.reviews !== undefined ? currentCard.reviews : (r === 0 ? 0 : r);
+      currentCard.reviews = currentReviewCount + 1;
+
+      let nextDate = new Date();
+      if (iv === 0) {
+        nextDate.setMinutes(nextDate.getMinutes() + 1);
+        if(dueCards.length > 1) showMsg("카드 대기열 맨 뒤로 이동됨 (1분 후)");
+      }
+      else if (iv === 0.5) nextDate.setHours(nextDate.getHours() + 12);
+      else {
+        nextDate.setDate(nextDate.getDate() + iv);
+        nextDate.setHours(0, 0, 0, 0); 
+      }
+
+      const tzOffset = nextDate.getTimezoneOffset() * 60000;
+      currentCard.nextReview = (new Date(nextDate.getTime() - tzOffset)).toISOString().slice(0, 19);
+
+      const idx = db.flashcards.findIndex(c => c.id === currentCard.id);
+      if (idx > -1) db.flashcards[idx] = currentCard;
+      
+      saveDB(); 
+      markStudiedToday('fc');
+      dueCards.shift(); 
+      if (rating === 1) dueCards.push(currentCard); 
+      loadNextCard();
+    }
+
+    async function generateOutlineWithAI() {
+      const subject = document.getElementById('outline-subject').value;
+      const title = document.getElementById('outline-title').value.trim();
+      if (!title) { showMsg("주제(제목)를 먼저 입력해주세요!"); return; }
+      
+      showLoading("AI가 표준 목차 구조를 작성 중입니다...");
+      try {
+        const schema = { type: "OBJECT", properties: { outline: { type: "STRING" } } };
+        const prompt = `과목: ${subject}\n주제: ${title}\n\n위 주제에 대해 노무사 2차 시험 답안지에 쓸 수 있는 핵심 표준 목차를 작성해주세요. 반드시 'I. -> 1. -> (1)' 형태의 번호 체계를 엄격하게 사용해야 합니다. 다른 부가 설명 없이 목차 내용만 출력하세요.`;
+        const res = await callGemini(prompt, schema);
+        document.getElementById('outline-content').value = res.outline;
+        showMsg("✨ AI 목차 자동 생성 완료!");
+      } catch(e) { showMsg("목차 생성 실패: " + e.message); } finally { hideLoading(); }
+    }
+
+    function toggleOutlineAdder() { 
+      editingOutlineId = null; document.getElementById('outline-adder-title').innerHTML = '<i class="ri-file-list-line text-emerald-500"></i> 새 목차 구조 등록';
+      document.getElementById('outline-save-btn').textContent = '등록하기'; document.getElementById('outline-title').value = ''; document.getElementById('outline-content').value = '';
+      document.getElementById('outline-adder').classList.toggle('hidden'); 
+    }
+    function cancelOutlineEdit() { editingOutlineId = null; document.getElementById('outline-adder').classList.add('hidden'); }
+    
+    function editOutline(id) {
+      const o = db.outlines.find(x => String(x.id) === String(id)); if(!o) return; editingOutlineId = o.id;
+      document.getElementById('outline-adder-title').innerHTML = '<i class="ri-edit-line text-emerald-500"></i> 목차 내용 수정';
+      document.getElementById('outline-subject').value = o.subject; document.getElementById('outline-title').value = o.title; document.getElementById('outline-content').value = o.content;
+      document.getElementById('outline-save-btn').textContent = "수정 완료"; 
+      const adder = document.getElementById('outline-adder');
+      adder.classList.remove('hidden');
+      adder.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+    
+    function saveOutline() {
+      const subject = document.getElementById('outline-subject').value; const title = document.getElementById('outline-title').value.trim(); const content = document.getElementById('outline-content').value.trim();
+      if (!title || !content) { showMsg("제목과 내용을 모두 입력해주세요."); return; }
+      if (editingOutlineId) {
+         const idx = db.outlines.findIndex(x => String(x.id) === String(editingOutlineId));
+         if(idx > -1) { db.outlines[idx].subject = subject; db.outlines[idx].title = title; db.outlines[idx].content = content; }
+         editingOutlineId = null; showMsg("목차가 수정되었습니다.");
+      } else { db.outlines.push({ id: Date.now().toString() + '-' + Math.floor(Math.random() * 1000000), subject, title, content, repetition: 0, interval: 0, efactor: 2.5, nextReview: getLocalNow() }); showMsg("새 목차가 등록되었습니다."); }
+      saveDB(); document.getElementById('outline-title').value = ''; document.getElementById('outline-content').value = ''; document.getElementById('outline-adder').classList.add('hidden'); renderOutlineList(); 
+    }
+    
+    function renderOutlineList() {
+      const container = document.getElementById('outline-list');
+      const filterEl = document.getElementById('outline-filter-subject');
+      const filter = filterEl ? filterEl.value : 'all';
+      
+      let filteredOutlines = db.outlines || [];
+      if (filter !== 'all') { filteredOutlines = filteredOutlines.filter(o => o.subject === filter); }
+
+      if (filteredOutlines.length === 0) { container.innerHTML = '<p class="col-span-2 text-center text-gray-400 py-10">등록된 목차가 없습니다.</p>'; return; }
+      container.innerHTML = filteredOutlines.map(o => {
+        const isToday = isDue(o);
+        return `
+        <div class="p-4 md:p-6 bg-white border ${isToday ? 'border-amber-400 bg-amber-50/10' : 'border-gray-200'} rounded-xl shadow-sm flex flex-col justify-between hover:shadow-md transition-all group">
+          <div>
+            <div class="flex justify-between items-start">
+              <span class="text-[9px] md:text-[10px] font-bold text-amber-500 bg-amber-50 px-2 py-1 rounded-full">${o.subject}</span>
+              ${isToday ? '<span class="text-[9px] md:text-[10px] font-bold text-white bg-amber-500 px-2 py-1 rounded-full animate-pulse">오늘 복습</span>' : ''}
+            </div>
+            <h4 class="font-extrabold text-slate-800 text-base md:text-lg mt-3 mb-2">${o.title}</h4>
+          </div>
+          <div class="flex justify-end gap-1 md:gap-2 mt-4">
+            <button onclick="editOutline('${o.id}')" class="px-2 py-1.5 md:px-3 md:py-1.5 border border-gray-200 text-slate-600 rounded-lg text-xs font-bold hover:bg-gray-100">수정</button>
+            <button onclick="deleteOutline('${o.id}')" class="px-2 py-1.5 md:px-3 md:py-1.5 border border-red-100 text-red-500 rounded-lg text-xs font-bold hover:bg-red-50">삭제</button>
+            <button onclick="startBlankQuiz('${o.id}')" class="px-3 py-1.5 md:px-4 md:py-1.5 bg-amber-500 text-white rounded-lg text-xs font-bold hover:bg-amber-600 shadow-sm">퀴즈 시작</button>
+          </div>
+        </div>
+      `}).join('');
+    }
+
+    function deleteOutline(id) { if(!confirm("해당 목차를 삭제하시겠습니까?")) return; db.outlines = db.outlines.filter(o => String(o.id) !== String(id)); saveDB(); renderOutlineList(); showMsg("삭제되었습니다."); }
+    
+    function startBlankQuiz(id) {
+      blankState.outline = db.outlines.find(o => String(o.id) === String(id)); if(!blankState.outline) return;
+      document.getElementById('blank-list-view').classList.add('hidden'); document.getElementById('blank-quiz-view').classList.remove('hidden');
+      document.getElementById('quiz-subject').textContent = blankState.outline.subject; document.getElementById('quiz-title').textContent = blankState.outline.title;
+      generateBlankQuiz();
+    }
+    function closeBlankQuiz() { document.getElementById('blank-quiz-view').classList.add('hidden'); document.getElementById('blank-list-view').classList.remove('hidden'); renderOutlineList(); renderDashboard(); }
+    
+    function generateBlankQuiz() {
+      const level = document.getElementById('quiz-level').value; 
+      const lines = blankState.outline.content.split('\n'); 
+      const regex = /^([\s]*[IVX]+\.|[\s]*[Ⅰ-Ⅻ]+\.?|[\s]*\d+[\.\)]|[\s]*\(\d+\)|[\s]*[①-⑳]|[\s]*[가-힣]+[\.\)]|[\s]*\([가-힣]+\)|[\s]*[㈎-㈛])(.*)$/;
+      
+      let parsedLines = lines.map((line, idx) => {
+        let prefix = ''; let content = line; const match = line.match(regex);
+        if (match) { prefix = match[1]; content = match[2].trim(); } else { const spaceMatch = line.match(/^(\s*)(.*)$/); if (spaceMatch) { prefix = spaceMatch[1]; content = spaceMatch[2]; } }
+        return { id: idx, original: line, prefix, content, isBlank: false };
+      });
+      let candidates = parsedLines.filter(l => l.content.length > 0);
+      if (level === 'all') candidates.forEach(l => l.isBlank = true);
+      else if (level === '50') { candidates.sort(() => Math.random() - 0.5); candidates.slice(0, Math.ceil(candidates.length / 2)).forEach(l => l.isBlank = true); }
+      else if (level === '30') { candidates.sort(() => Math.random() - 0.5); candidates.slice(0, Math.ceil(candidates.length * 0.3)).forEach(l => l.isBlank = true); }
+      else if (level === 'main') candidates.forEach(l => { 
+        if (l.prefix.match(/[IVX]+\.|[Ⅰ-Ⅻ]+\.?|\d+\.|[가-힣]+\./)) l.isBlank = true; 
+      });
+
+      parsedLines.sort((a,b) => a.id - b.id); blankState.lines = parsedLines; blankState.answers = parsedLines.filter(l => l.isBlank).map(l => l.content); blankState.answers.sort(() => Math.random() - 0.5); 
+      
+      let o = blankState.outline;
+      let e = o.efactor || 2.5; let r = o.repetition || 0; let iv = o.interval || 0;
+      let nextGood = r === 0 ? 1 : (r === 1 ? 6 : Math.round(iv * e));
+      let nextEasy = r === 0 ? 4 : Math.round(nextGood * 1.3);
+      document.getElementById('quiz-time-good').textContent = `${nextGood}일 후`;
+      document.getElementById('quiz-time-easy').textContent = `${nextEasy}일 후`;
+
+      let reviewCount = o.reviews !== undefined ? o.reviews : (r === 0 ? 0 : r);
+      let statusHtml = reviewCount === 0 ? '🆕 처음' : `🔁 ${reviewCount}회독`;
+      let statusClass = reviewCount === 0 ? 'text-indigo-600 bg-indigo-50' : 'text-slate-500 bg-slate-100';
+
+      const statusEl = document.getElementById('quiz-status');
+      if (statusEl) {
+          statusEl.textContent = statusHtml;
+          statusEl.className = `text-[10px] md:text-xs font-bold px-2 py-1 rounded-full inline-block shrink-0 ${statusClass}`;
+      }
+
+      renderBlankQuizRoom();
+    }
+    
+    function renderBlankQuizRoom() {
+      const container = document.getElementById('quiz-lines'); container.innerHTML = '';
+      const blankLines = blankState.lines.filter(l => l.isBlank); const maxCharLen = blankLines.length > 0 ? Math.max(...blankLines.map(l => l.content.length)) : 10; 
+      const uniformWidth = `clamp(80px, ${maxCharLen + 2}ch, 100%)`;
+
+      blankState.lines.forEach(line => {
+        let indentClass = '';
+        let textClass = 'text-[13px] md:text-[15px] font-medium text-slate-700';
+        let prefixClass = 'font-bold text-slate-500';
+        let inputClass = '';
+        
+        const p = line.prefix.trim();
+        // 💡 계층별 들여쓰기 자동 적용 (Ⅰ - 1 - (1) - 1) - ① - ㈎)
+        if (/^[IVX]+\.|^[Ⅰ-Ⅻ]+\.?/.test(p)) {
+            indentClass = 'ml-0 mt-6 mb-3';
+            textClass = 'text-base md:text-lg font-extrabold text-slate-800';
+            prefixClass = 'text-emerald-600';
+            inputClass = 'font-extrabold text-emerald-700';
+        } else if (/^\d+\./.test(p)) {
+            indentClass = 'ml-4 md:ml-6 mt-3 mb-2';
+            textClass = 'text-[14px] md:text-[16px] font-bold text-slate-700';
+        } else if (/^\(\d+\)/.test(p)) {
+            indentClass = 'ml-8 md:ml-12 mb-2';
+        } else if (/^\d+\)/.test(p)) {
+            indentClass = 'ml-12 md:ml-16 mb-1.5';
+            textClass = 'text-[12px] md:text-[14px] font-medium text-slate-600';
+        } else if (/^[①-⑳]/.test(p)) {
+            indentClass = 'ml-16 md:ml-20 mb-1';
+            textClass = 'text-[12px] md:text-[14px] font-medium text-slate-600';
+        } else if (/^[가-힣]+\.|^\([가-힣]+\)|^[㈎-㈛]/.test(p)) {
+            indentClass = 'ml-20 md:ml-24 mb-1';
+            textClass = 'text-[12px] md:text-[14px] font-medium text-slate-600';
+        } else {
+            indentClass = 'ml-4 md:ml-6 mb-1'; // 기본 여백
+        }
+
+        const row = document.createElement('div'); 
+        row.className = `flex items-center flex-wrap ${indentClass} ${textClass}`; 
+        
+        const prefixSpan = document.createElement('span'); 
+        prefixSpan.textContent = line.prefix; 
+        prefixSpan.className = `mr-2 shrink-0 ${prefixClass}`; 
+        row.appendChild(prefixSpan);
+        
+        if (line.isBlank) {
+          const input = document.createElement('input'); input.type = "text"; 
+          input.className = `blank-input ${inputClass}`; 
+          input.dataset.answer = line.content; input.style.width = uniformWidth;
+          if (/^[IVX]+\.|^[Ⅰ-Ⅻ]+\.?/.test(p)) input.style.fontSize = 'inherit';
+          
+          input.addEventListener('focus', (e) => { blankState.activeInput = e.target; e.target.classList.remove('correct', 'wrong'); });
+          input.addEventListener('input', (e) => { e.target.classList.remove('correct', 'wrong'); }); row.appendChild(input);
+        } else { 
+          const contentSpan = document.createElement('span'); contentSpan.textContent = line.content; row.appendChild(contentSpan); 
+        }
+        container.appendChild(row);
+      });
+      
+      const bankContainer = document.getElementById('quiz-word-bank'); bankContainer.innerHTML = '';
+      blankState.answers.forEach(ans => {
+        const chip = document.createElement('div'); chip.className = "word-chip"; chip.textContent = ans; chip.onclick = () => fillWordChipOutline(ans); bankContainer.appendChild(chip);
+      });
+      blankState.activeInput = null; const firstInput = document.querySelector('.blank-input'); if(firstInput) firstInput.focus();
+      document.getElementById('quiz-check-btn').classList.remove('hidden');
+      document.getElementById('quiz-sm2-buttons').classList.add('hidden');
+      document.getElementById('quiz-sm2-buttons').classList.remove('grid');
+    }
+    
+    function fillWordChipOutline(word) {
+      if (blankState.activeInput) {
+        blankState.activeInput.value = word; blankState.activeInput.classList.remove('correct', 'wrong');
+        const inputs = Array.from(document.querySelectorAll('#quiz-lines .blank-input'));
+        const nextEmpty = inputs.slice(inputs.indexOf(blankState.activeInput) + 1).find(i => !i.value) || inputs.find(i => !i.value);
+        if (nextEmpty) nextEmpty.focus();
+      } else { showMsg("먼저 채워넣을 빈칸을 터치(클릭)해주세요."); }
+    }
+    
+    function checkBlankAnswers() {
+      const inputs = document.querySelectorAll('#quiz-lines .blank-input'); let correctCount = 0;
+      inputs.forEach(input => {
+        const actual = input.dataset.answer.replace(/\s+/g, ''); const user = input.value.replace(/\s+/g, '');
+        if (actual === user) { input.classList.add('correct'); input.classList.remove('wrong'); input.placeholder = ''; correctCount++; } 
+        else { input.classList.add('wrong'); input.classList.remove('correct'); if (!input.value) input.placeholder = "?"; }
+      });
+      
+      const accuracy = inputs.length > 0 ? (correctCount / inputs.length) : 0;
+      document.querySelectorAll('#quiz-sm2-buttons .sm2-btn').forEach(btn => btn.classList.remove('ring-4', 'ring-offset-2', 'ring-rose-400', 'ring-orange-400', 'ring-blue-400', 'ring-emerald-400', 'animate-pulse'));
+
+      if (accuracy === 1) { document.getElementById('quiz-btn-easy').classList.add('ring-4', 'ring-offset-2', 'ring-emerald-400', 'animate-pulse'); showMsg("🎉 100% 완벽! '쉬움'을 추천합니다."); } 
+      else if (accuracy >= 0.75) { document.getElementById('quiz-btn-good').classList.add('ring-4', 'ring-offset-2', 'ring-blue-400', 'animate-pulse'); showMsg("👍 75% 이상 정답! '보통'을 추천합니다."); } 
+      else if (accuracy >= 0.25) { document.getElementById('quiz-btn-hard').classList.add('ring-4', 'ring-offset-2', 'ring-orange-400', 'animate-pulse'); showMsg("🔥 25%~75% 정답. '어려움'을 추천합니다."); } 
+      else { document.getElementById('quiz-btn-again').classList.add('ring-4', 'ring-offset-2', 'ring-rose-400', 'animate-pulse'); showMsg("💪 25% 미만 정답. 다시 한 번 확실히 외워봅시다!"); }
+      
+      document.getElementById('quiz-check-btn').classList.add('hidden');
+      const btnContainer = document.getElementById('quiz-sm2-buttons');
+      btnContainer.classList.remove('hidden');
+      btnContainer.classList.add('grid');
+    }
+
+    function rateOutline(rating) {
+      let outline = blankState.outline;
+      let q = rating === 1 ? 0 : rating === 2 ? 3 : rating === 3 ? 4 : 5;
+      let r = outline.repetition || 0; let iv = outline.interval || 0; let e = outline.efactor || 2.5;
+
+      if (rating >= 3) {
+        if (r === 0) iv = 1; else if (r === 1) iv = 6; else iv = Math.round(iv * e);
+        r++;
+      } else { iv = 0; r = 0; }
+
+      e = e + (0.1 - (5 - q) * (0.08 + (5 - q) * 0.02)); if (e < 1.3) e = 1.3;
+      
+      let currentReviewCount = outline.reviews !== undefined ? outline.reviews : (r === 0 ? 0 : r);
+      outline.reviews = currentReviewCount + 1;
+
+      let nextDate = new Date();
+      if (iv === 0) nextDate.setMinutes(nextDate.getMinutes() + 1);
+      else if (iv === 0.5) nextDate.setHours(nextDate.getHours() + 12);
+      else nextDate.setDate(nextDate.getDate() + iv);
+
+      outline.repetition = r; outline.interval = iv; outline.efactor = e;
+      outline.nextReview = new Date(nextDate - nextDate.getTimezoneOffset()*60000).toISOString().slice(0,19);
+
+      const idx = db.outlines.findIndex(o => o.id === outline.id);
+      if (idx > -1) db.outlines[idx] = outline;
+      saveDB(); 
+      markStudiedToday('outline'); 
+      closeBlankQuiz();
+    }
+
+    function updateExamQList() {
+      const sub = document.getElementById('exam-subject').value; const sel = document.getElementById('exam-question-select'); sel.innerHTML = '<option value="">직접 입력하기</option>';
+      db.questions.filter(q => q.subject === sub).forEach(q => { const opt = document.createElement('option'); opt.value = String(q.id); opt.textContent = `[추출] ${q.question.substring(0, 30)}...`; sel.appendChild(opt); });
+      previewQuestion();
+    }
+
+    function previewQuestion() {
+      const id = document.getElementById('exam-question-select').value;
+      if (id) { const q = db.questions.find(x => String(x.id) === String(id)); if (q) document.getElementById('exam-direct-q').value = q.question; } 
+      else { document.getElementById('exam-direct-q').value = ''; }
+    }
+
+    function toggleExamManager() {
+      const view = document.getElementById('exam-manager-view'); view.classList.toggle('hidden');
+      if(!view.classList.contains('hidden')) { document.getElementById('exam-edit-form').classList.add('hidden'); renderExamList(); }
+    }
+
+    function renderExamList() {
+      const container = document.getElementById('exam-list'); const currentSubject = document.getElementById('exam-subject').value;
+      const filtered = db.questions.filter(q => q.subject === currentSubject);
+      if(filtered.length === 0) { container.innerHTML = '<p class="text-sm text-gray-400 py-4 text-center">이 과목에 추출된 문제가 없습니다.</p>'; return; }
+      container.innerHTML = filtered.map(q => `
+        <div class="p-3 bg-gray-50 border border-gray-200 rounded-lg hover:border-blue-300 transition-colors">
+           <div class="flex justify-between items-start mb-2"><span class="text-[10px] text-blue-500 font-bold bg-blue-50 px-2 py-0.5 rounded">${q.subject}</span>
+              <div class="flex gap-2"><button onclick="editExamQ('${q.id}')" class="px-2 py-1 bg-white border border-gray-200 text-xs font-bold text-slate-600 rounded hover:bg-gray-100">수정</button><button onclick="deleteExamQ('${q.id}')" class="px-2 py-1 border border-red-100 text-xs font-bold text-red-500 rounded hover:bg-red-50">삭제</button></div>
+           </div>
+           <p class="font-bold text-sm text-slate-800 mb-1 truncate">${q.question}</p>
+           <p class="text-[11px] text-gray-500 truncate border-t border-gray-200 pt-1 mt-1">모범답안: ${q.rubric || '없음'}</p>
+        </div>
+      `).join('');
+    }
+
+    function deleteExamQ(id) { if(!confirm('문제를 삭제하시겠습니까?')) return; db.questions = db.questions.filter(q => String(q.id) !== String(id)); saveDB(); renderExamList(); updateExamQList(); showMsg("삭제되었습니다."); }
+
+    function editExamQ(id) {
+      const q = db.questions.find(x => String(x.id) === String(id)); if(!q) return; editingExamId = q.id;
+      document.getElementById('edit-exam-subject').value = q.subject; document.getElementById('edit-exam-q').value = q.question; document.getElementById('edit-exam-rubric').value = q.rubric || '';
+      document.getElementById('exam-edit-form').classList.remove('hidden');
+    }
+
+    function saveExamEdit() {
+      if(!editingExamId) return;
+      const idx = db.questions.findIndex(x => String(x.id) === String(editingExamId));
+      if(idx > -1) { db.questions[idx].subject = document.getElementById('edit-exam-subject').value; db.questions[idx].question = document.getElementById('edit-exam-q').value.trim(); db.questions[idx].rubric = document.getElementById('edit-exam-rubric').value.trim(); saveDB(); }
+      editingExamId = null; document.getElementById('exam-edit-form').classList.add('hidden'); renderExamList(); updateExamQList(); showMsg('문제가 성공적으로 수정되었습니다.');
+    }
+
+    function cancelExamEdit() { editingExamId = null; document.getElementById('exam-edit-form').classList.add('hidden'); }
+
+    async function handleExamRubricUpload(e) {
+      const file = e.target.files[0]; if(!file) return;
+      document.getElementById('exam-rubric-name').innerHTML = `<i class="ri-check-line mr-1"></i>${file.name} 첨부완료`;
+      try {
+        const buf = await file.arrayBuffer(); const pdf = await pdfjsLib.getDocument(buf).promise; let text = '';
+        for (let i=1; i<=pdf.numPages; i++) { const page = await pdf.getPage(i); const content = await page.getTextContent(); text += content.items.map(it => it.str).join(' ') + '\n'; }
+        examState.uploadedRubricText = text;
+      } catch(err) { showMsg("PDF 읽기 실패. 텍스트로 된 정상적인 PDF인지 확인해주세요."); }
+    }
+
+    function startExam() {
+      const sub = document.getElementById('exam-subject').value;
+      const qText = document.getElementById('exam-direct-q').value.trim();
+      const time = parseInt(document.getElementById('exam-time').value);
+      const id = document.getElementById('exam-question-select').value;
+      
+      let baseRubric = '';
+      if (id) { const q = db.questions.find(x => String(x.id) === String(id)); if (q) baseRubric = q.rubric; }
+      
+      let combinedRubric = '';
+      if (baseRubric) combinedRubric += `[기본 모범답안 및 배점]\n${baseRubric}\n\n`;
+      if (examState.uploadedRubricText) combinedRubric += `[강사 채점평 및 주의사항 (가장 중요하게 반영할 것)]\n${examState.uploadedRubricText}`;
+
+      if (!qText) { showMsg("문제를 입력해주세요."); return; }
+
+      if (examState.timer) clearInterval(examState.timer);
+      examState = { subject: sub, question: qText, rubric: combinedRubric, time: time, seconds: time * 60, totalPage: Math.floor(time / 5), currPage: 1, answers: {}, timer: null, uploadedRubricText: examState.uploadedRubricText };
+
+      document.getElementById('room-subject').textContent = sub; document.getElementById('room-q-preview').textContent = qText;
+      document.getElementById('room-q-full').textContent = qText; document.getElementById('room-total-page').textContent = examState.totalPage;
+      document.getElementById('char-count').textContent = '0';
+      document.getElementById('exam-setup').style.display = 'none'; document.getElementById('exam-room').style.display = 'block';
+
+      renderAnswerSheet(); updateTimerDisplay();
+      examState.timer = setInterval(() => {
+        examState.seconds--; updateTimerDisplay();
+        if (examState.seconds <= 0) { clearInterval(examState.timer); showMsg("⏰ 시간이 종료되었습니다! 자동 제출합니다."); submitExam(true); }
+      }, 1000);
+    }
+
+    function updateTimerDisplay() {
+      const m = Math.floor(examState.seconds / 60).toString().padStart(2, '0'); const s = (examState.seconds % 60).toString().padStart(2, '0');
+      const el = document.getElementById('timer'); el.textContent = `${m}:${s}`;
+      if (examState.seconds < 300) el.classList.add('text-rose-500'); else el.classList.remove('text-rose-500');
+    }
+
+    function renderAnswerSheet() {
+      const container = document.getElementById('answer-lines'); container.innerHTML = '';
+      for (let i = 1; i <= LINES_PER_PAGE; i++) {
+        const key = `${examState.currPage}-${i}`; const savedVal = examState.answers[key] || '';
+        const row = document.createElement('div'); row.className = 'answer-row';
+        const numDiv = document.createElement('div'); numDiv.className = 'row-num'; numDiv.textContent = i;
+        const wrapDiv = document.createElement('div'); wrapDiv.className = 'row-input-wrapper';
+        const input = document.createElement('input'); input.type = 'text'; input.className = 'row-input'; input.maxLength = MAX_CHARS_PER_LINE; input.dataset.key = key; input.value = savedVal;
+        const indicator = document.createElement('span'); indicator.className = 'char-indicator'; indicator.textContent = `${savedVal.length}/${MAX_CHARS_PER_LINE}`;
+        wrapDiv.appendChild(input); wrapDiv.appendChild(indicator); row.appendChild(numDiv); row.appendChild(wrapDiv); container.appendChild(row);
+      }
+      document.getElementById('room-curr-page').textContent = examState.currPage;
+
+      const inputs = container.querySelectorAll('.row-input');
+      inputs.forEach((input, idx) => {
+        input.addEventListener('input', (e) => {
+          const val = e.target.value; examState.answers[e.target.dataset.key] = val;
+          const ind = e.target.nextElementSibling; ind.textContent = `${val.length}/${MAX_CHARS_PER_LINE}`;
+          if (val.length >= MAX_CHARS_PER_LINE) { ind.classList.add('full'); if (idx < inputs.length - 1) inputs[idx + 1].focus(); } else { ind.classList.remove('full'); }
+          document.getElementById('char-count').textContent = Object.values(examState.answers).join('').length;
+        });
+        input.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') { e.preventDefault(); if (idx < inputs.length - 1) inputs[idx + 1].focus(); else changePage(1); } 
+          else if (e.key === 'Backspace' && e.target.value === '' && idx > 0) { e.preventDefault(); inputs[idx - 1].focus(); } 
+          else if (e.key === 'ArrowUp' && idx > 0) { e.preventDefault(); inputs[idx - 1].focus(); } 
+          else if (e.key === 'ArrowDown' && idx < inputs.length - 1) { e.preventDefault(); inputs[idx + 1].focus(); }
+        });
+      });
+      if (inputs.length > 0) inputs[0].focus();
+    }
+
+    function changePage(dir) {
+      const next = examState.currPage + dir;
+      if (next >= 1 && next <= examState.totalPage) { examState.currPage = next; renderAnswerSheet(); } else if (dir > 0) showMsg("마지막 페이지입니다."); else showMsg("첫 번째 페이지입니다.");
+    }
+
+    async function submitExam(auto = false) {
+      if (!auto && !confirm("제출하고 AI 채점을 진행하시겠습니까?")) return;
+      clearInterval(examState.timer); showLoading("AI 채점관이 답안을 분석 중입니다...");
+
+      const fullAnswer = Object.keys(examState.answers).sort((a, b) => {
+          const [ap, al] = a.split('-').map(Number); const [bp, bl] = b.split('-').map(Number); return ap !== bp ? ap - bp : al - bl;
+        }).map(k => examState.answers[k]).filter(v => v.trim()).join('\n');
+
+      const schema = { type: "OBJECT", properties: { score: { type: "INTEGER" }, details: { type: "OBJECT", properties: { issue: { type: "INTEGER" }, law: { type: "INTEGER" }, logic: { type: "INTEGER" }, conclusion: { type: "INTEGER" }, format: { type: "INTEGER" } }, required: ["issue", "law", "logic", "conclusion", "format"] }, feedback: { type: "STRING" }, good: { type: "STRING" }, missing: { type: "STRING" }, advice: { type: "STRING" }, next3: { type: "ARRAY", items: { type: "STRING" } } }, required: ["score", "details", "feedback", "good", "missing", "advice", "next3"] };
+      
+      const prompt = `과목: ${examState.subject}\n문제: ${examState.question}\n\n${examState.rubric || "[자료 없음]"}\n\n[학생 답안]\n${fullAnswer || "미작성"}\n\n당신은 아주 깐깐한 노무사 2차 시험 채점위원입니다. 학생 답안을 [기본 모범답안]과 한 줄 한 줄 치밀하게 대조하여 100점 만점 기준으로 채점하세요. 특히 [강사 채점평 및 주의사항]이 있다면, 수험생들이 자주 범하는 오류나 누락 포인트에 이 학생도 빠지지 않았는지 최우선으로 검토하고 가차없이 감점하세요. 쟁점25, 법적근거30, 논리25, 결론10, 형식10 기준으로 세부 점수를 매기고, 구체적인 피드백을 제공하세요.`;
+
+      try {
+        const result = await callGemini(prompt, schema);
+        result.details = result.details || {}; result.details.issue = result.details.issue || 0; result.details.law = result.details.law || 0; result.details.logic = result.details.logic || 0; result.details.conclusion = result.details.conclusion || 0; result.details.format = result.details.format || 0; result.next3 = result.next3 || [];
+        
+        const record = { id: Date.now(), date: getToday(), subject: examState.subject, score: result.score, feedback: result, fullAnswer: fullAnswer };
+        db.history.push(record); 
+        markStudiedToday('exam'); 
+        saveDB();
+        
+        examState.uploadedRubricText = ''; 
+        document.getElementById('exam-rubric-file').value = '';
+        document.getElementById('exam-rubric-name').innerHTML = `<i class="ri-upload-cloud-2-line mr-1"></i>여기를 눌러 PDF 첨부`;
+
+        document.getElementById('exam-room').style.display = 'none'; document.getElementById('exam-setup').style.display = 'block';
+        renderExamResult(record);
+      } catch(e) {
+        showMsg(e.message); document.getElementById('exam-room').style.display = 'none'; document.getElementById('exam-setup').style.display = 'block';
+      } finally { hideLoading(); }
+    }
+
+    function renderExamResult(data) {
+      const fb = data.feedback;
+      document.getElementById('res-score').innerHTML = `${data.score}<span class="text-2xl text-gray-300">점</span>`;
+      document.getElementById('res-feedback').textContent = fb.feedback || '';
+
+      const setBar = (id, val, max) => { const safeVal = Math.min(Math.max(val || 0, 0), max); document.getElementById(`score-${id}`).textContent = safeVal; document.getElementById(`bar-${id}`).style.width = `${(safeVal / max) * 100}%`; };
+      setBar('issue', fb.details.issue, 25); setBar('law', fb.details.law, 30); setBar('logic', fb.details.logic, 25); setBar('conc', fb.details.conclusion, 10); setBar('form', fb.details.format, 10);
+
+      document.getElementById('res-good').textContent = fb.good || ''; document.getElementById('res-miss').textContent = fb.missing || ''; document.getElementById('res-next').innerHTML = (fb.next3 || []).map(t => `<li>${t}</li>`).join('');
+      
+      const myAnswerEl = document.getElementById('res-my-answer');
+      if (myAnswerEl) myAnswerEl.textContent = data.fullAnswer || '저장된 답안이 없습니다.';
+
+      navigate('result');
+    }
+
+    function exportDB() { const blob = new Blob([JSON.stringify(db, null, 2)], { type: 'application/json' }); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `nomusa_backup_${getToday()}.json`; a.click(); showMsg("✅ 백업 파일이 다운로드되었습니다."); }
+    function importDB() { document.getElementById('import-file-input').click(); }
+    function doImportDB(event) {
+      const file = event.target.files[0]; if (!file) return; const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const imported = JSON.parse(e.target.result);
+          if (!imported.history || !imported.flashcards) { showMsg("❌ 올바른 백업 파일이 아닙니다."); return; }
+          if (confirm(`백업 데이터를 복구하시겠습니까?\n(현재 데이터는 덮어씌워집니다)`)) { setAppDB(imported); saveDB(); renderDashboard(); showMsg("✅ 데이터가 복구되었습니다!"); }
+        } catch(err) { showMsg("❌ 파일 파싱 오류: " + err.message); }
+      };
+      reader.readAsText(file); event.target.value = '';
+    }
+    function resetDB() { if (confirm("정말로 모든 학습 기록을 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다!")) { localStorage.removeItem('nomusa_db_v4'); location.reload(); } }
+    
+    window.navigate = navigate;
+    window.toggleCsvUploadForm = toggleCsvUploadForm;
+    window.cancelCsvUpload = cancelCsvUpload;
+    window.processCsvUpload = processCsvUpload;
+    window.toggleFcManager = toggleFcManager;
+    window.toggleManualCardForm = toggleManualCardForm;
+    window.cancelManualFlashcard = cancelManualFlashcard;
+    window.addManualFlashcard = addManualFlashcard;
+    window.renderFcList = renderFcList;
+    window.toggleSelectAllFc = toggleSelectAllFc;
+    window.updateSelectAllFcState = updateSelectAllFcState;
+    window.removeBracketsFromSelected = removeBracketsFromSelected;
+    window.deleteSelectedFc = deleteSelectedFc;
+    window.editFc = editFc;
+    window.deleteFc = deleteFc;
+    window.flipCard = flipCard;
+    window.checkFcClozeAnswers = checkFcClozeAnswers;
+    window.rateCard = rateCard;
+    window.getFcHint = getFcHint;
+    window.getFcMnemonic = getFcMnemonic;
+    window.setFcActiveInput = setFcActiveInput;
+    window.fillFcWordChip = fillFcWordChip;
+    
+    window.renderOutlineList = renderOutlineList;
+    window.toggleOutlineAdder = toggleOutlineAdder;
+    window.cancelOutlineEdit = cancelOutlineEdit;
+    window.saveOutline = saveOutline;
+    window.editOutline = editOutline;
+    window.deleteOutline = deleteOutline;
+    window.startBlankQuiz = startBlankQuiz;
+    window.closeBlankQuiz = closeBlankQuiz;
+    window.generateBlankQuiz = generateBlankQuiz;
+    window.checkBlankAnswers = checkBlankAnswers;
+    window.rateOutline = rateOutline;
+    window.generateOutlineWithAI = generateOutlineWithAI;
+    window.fillWordChipOutline = fillWordChipOutline;
+
+    window.updateExamQList = updateExamQList;
+    window.previewQuestion = previewQuestion;
+    window.toggleExamManager = toggleExamManager;
+    window.editExamQ = editExamQ;
+    window.deleteExamQ = deleteExamQ;
+    window.saveExamEdit = saveExamEdit;
+    window.cancelExamEdit = cancelExamEdit;
+    window.handleExamRubricUpload = handleExamRubricUpload;
+    window.startExam = startExam;
+    window.submitExam = submitExam;
+    window.changePage = changePage;
+
+    window.searchLawDB = searchLawDB;
+    window.processAIConvert = processAIConvert;
+    window.handleFileDisplay = handleFileDisplay;
+    
+    window.saveApiKey = saveApiKey;
+    window.exportDB = exportDB;
+    window.importDB = importDB;
+    window.doImportDB = doImportDB;
+    window.resetDB = resetDB;
+    window.viewHistory = viewHistory;
+    window.analyzeStudyHistory = analyzeStudyHistory;
+    window.renderDashboard = renderDashboard;
+    window.renderDueFlashcards = renderDueFlashcards;
+
+  </script>
+
   <script type="module">
-    // 💡 샌드박스 오류를 내는 코드를 모두 지우고 원래의 정상적인 모듈 스크립트로 복구했습니다.
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
     import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
     import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
@@ -636,86 +1761,83 @@
       appId: "1:361338496072:web:798c1a6695cbfab5a7647d"
     };
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const firestore = getFirestore(app);
-    let unsubSnapshot = null;
+    try {
+      const app = initializeApp(firebaseConfig);
+      const auth = getAuth(app);
+      const firestore = getFirestore(app);
+      let unsubSnapshot = null;
 
-    // 💡 에러 발생 시 명확하게 원인(도메인 차단 등)을 알려주도록 수정
-    window.loginWithGoogle = () => {
-      const provider = new GoogleAuthProvider();
-      signInWithPopup(auth, provider).catch(error => {
-        console.error("Login Error:", error);
-        if (error.code === 'auth/unauthorized-domain') {
-          alert("🚨 구글 로그인 차단됨!\n\n현재 웹사이트 주소가 Firebase에 등록되지 않았습니다.\nFirebase 콘솔 -> [Authentication] -> [Settings(설정)] -> [Authorized domains(승인된 도메인)]에 현재 깃허브 주소를 추가해주세요.");
-        } else if (error.code === 'auth/popup-blocked') {
-          alert("🚨 팝업이 차단되었습니다. 브라우저 설정에서 팝업을 허용해주세요.");
-        } else {
+      window.loginWithGoogle = () => {
+        const provider = new GoogleAuthProvider();
+        signInWithPopup(auth, provider).catch(error => {
+          console.error("Login Error:", error);
           alert("로그인 중 오류가 발생했습니다: " + error.message);
+        });
+      };
+
+      window.logoutGoogle = () => { signOut(auth).then(() => { alert("로그아웃 되었습니다."); }); };
+
+      onAuthStateChanged(auth, (user) => {
+        window.currentUser = user;
+        const statusEl = document.getElementById('auth-status'); const headerStatus = document.getElementById('header-auth-status');
+        const loginBtn = document.getElementById('login-btn'); const logoutBtn = document.getElementById('logout-btn');
+
+        if (user) {
+          if (statusEl) statusEl.textContent = user.displayName + " (연동됨)"; 
+          if (headerStatus) { headerStatus.textContent = "Cloud Sync: ON"; headerStatus.classList.replace('text-slate-400', 'text-blue-400'); }
+          if (loginBtn) loginBtn.classList.add('hidden'); 
+          if (logoutBtn) logoutBtn.classList.remove('hidden');
+
+          unsubSnapshot = onSnapshot(doc(firestore, 'users', user.uid), (docSnap) => {
+            if (docSnap.exists()) {
+              const cloudDB = docSnap.data().db;
+              if (cloudDB) {
+                window.setAppDB(cloudDB);
+                try { localStorage.setItem('nomusa_db_v4', JSON.stringify(cloudDB)); } catch(e){}
+                
+                if(document.getElementById('page-dashboard').classList.contains('active')) renderDashboard();
+                if(document.getElementById('page-flashcard').classList.contains('active')) renderDueFlashcards();
+                if(document.getElementById('page-exam').classList.contains('active')) updateExamQList();
+                if(document.getElementById('page-blank').classList.contains('active')) renderOutlineList();
+              }
+            } else { window.triggerCloudSave(); }
+          });
+        } else {
+          if (statusEl) statusEl.textContent = "로컬 모드 (로그인 안됨)"; 
+          if (headerStatus) { headerStatus.textContent = "Mode: Local Storage"; headerStatus.classList.replace('text-blue-400', 'text-slate-400'); }
+          if (loginBtn) loginBtn.classList.remove('hidden'); 
+          if (logoutBtn) logoutBtn.classList.add('hidden');
+          if (unsubSnapshot) unsubSnapshot();
         }
       });
-    };
 
-    window.logoutGoogle = () => { 
-        if(confirm("로그아웃 하시겠습니까?")) {
-            signOut(auth).then(() => { alert("로그아웃 되었습니다."); }); 
-        }
-    };
+      window.triggerCloudSave = () => {
+        if (window.currentUser && window.getAppDB) {
+          const currentDB = window.getAppDB();
+          if (!currentDB) return;
 
-    onAuthStateChanged(auth, (user) => {
-      window.currentUser = user;
-      const statusEl = document.getElementById('auth-status'); const headerStatus = document.getElementById('header-auth-status');
-      const loginBtn = document.getElementById('login-btn'); const logoutBtn = document.getElementById('logout-btn');
-
-      if (user) {
-        if (statusEl) statusEl.textContent = user.displayName + " (연동됨)"; 
-        if (headerStatus) { headerStatus.textContent = "Cloud Sync: ON"; headerStatus.classList.replace('text-slate-400', 'text-blue-400'); }
-        if (loginBtn) loginBtn.classList.add('hidden'); 
-        if (logoutBtn) logoutBtn.classList.remove('hidden');
-
-        unsubSnapshot = onSnapshot(doc(firestore, 'users', user.uid), (docSnap) => {
-          if (docSnap.exists()) {
-            const cloudDB = docSnap.data().db;
-            if (cloudDB) {
-              window.getAppDB = () => db;
-              db = { ...db, ...cloudDB };
-              try { localStorage.setItem('nomusa_db_v4', JSON.stringify(cloudDB)); } catch(e){}
-              
-              if(document.getElementById('page-dashboard').classList.contains('active')) renderDashboard();
-              if(document.getElementById('page-flashcard').classList.contains('active')) renderDueFlashcards();
-              if(document.getElementById('page-exam').classList.contains('active')) updateExamQList();
-              if(document.getElementById('page-blank').classList.contains('active')) renderOutlineList();
+          const removeUndefined = (obj) => {
+            if (Array.isArray(obj)) return obj.map(removeUndefined);
+            if (obj !== null && typeof obj === 'object') {
+              return Object.keys(obj).reduce((acc, key) => {
+                if (obj[key] !== undefined) acc[key] = removeUndefined(obj[key]);
+                return acc;
+              }, {});
             }
-          } else { window.triggerCloudSave(); }
-        });
-      } else {
-        if (statusEl) statusEl.textContent = "로컬 모드 (로그인 안됨)"; 
-        if (headerStatus) { headerStatus.textContent = "Mode: Local Storage"; headerStatus.classList.replace('text-blue-400', 'text-slate-400'); }
-        if (loginBtn) loginBtn.classList.remove('hidden'); 
-        if (logoutBtn) logoutBtn.classList.add('hidden');
-        if (unsubSnapshot) unsubSnapshot();
-      }
-    });
+            return obj;
+          };
 
-    window.triggerCloudSave = () => {
-      if (window.currentUser && db) {
-        const removeUndefined = (obj) => {
-          if (Array.isArray(obj)) return obj.map(removeUndefined);
-          if (obj !== null && typeof obj === 'object') {
-            return Object.keys(obj).reduce((acc, key) => {
-              if (obj[key] !== undefined) acc[key] = removeUndefined(obj[key]);
-              return acc;
-            }, {});
-          }
-          return obj;
-        };
-
-        const sanitizedDB = removeUndefined(db);
-        setDoc(doc(firestore, 'users', window.currentUser.uid), { db: sanitizedDB }, { merge: true }).catch(err => {
-            console.error("Sync Error:", err);
-        });
-      }
-    };
+          const sanitizedDB = removeUndefined(currentDB);
+          setDoc(doc(firestore, 'users', window.currentUser.uid), { db: sanitizedDB }, { merge: true }).catch(err => {
+              console.error("Sync Error:", err);
+            });
+        }
+      };
+    } catch(e) {
+      window.loginWithGoogle = () => alert("미리보기 화면에서는 로그인 기능을 사용할 수 없습니다. 깃허브 페이지에서 확인해주세요.");
+      window.logoutGoogle = () => {};
+      window.triggerCloudSave = () => {};
+    }
   </script>
 </body>
 </html>
