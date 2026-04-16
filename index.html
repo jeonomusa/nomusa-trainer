@@ -81,7 +81,7 @@
     .fc-item-checkbox { width: 18px; height: 18px; border-radius: 4px; border-gray-300; text-emerald-500; cursor: pointer; }
     .chart-wrapper { position: relative; height: 220px; width: 100%; }
 
-    /* 💡 전체화면 시 시험장 스타일 */
+    /* 전체화면 시 시험장 스타일 */
     :fullscreen #exam-room { background: #f8fafc; padding: 20px; overflow-y: auto; }
     :-webkit-full-screen #exam-room { background: #f8fafc; padding: 20px; overflow-y: auto; }
   </style>
@@ -202,12 +202,12 @@
       </div>
     </div>
 
-    <!-- AI 자료 변환 -->
     <div id="page-convert" class="page-content">
       <h2 class="text-2xl font-extrabold text-slate-800 mb-2 flex items-center gap-2"><i class="ri-robot-line"></i> AI 자료 변환</h2>
       <p class="text-sm text-gray-500 mb-6">문제지/모범답안을 업로드하거나 직접 텍스트를 붙여넣으면 AI가 분석하여 문제나 카드로 변환해줍니다.</p>
       
       <div class="neo-card p-4 md:p-8">
+        
         <div class="flex gap-6 mb-4 md:mb-6 border-b border-gray-100 pb-4">
           <label class="flex items-center gap-2 cursor-pointer text-sm font-bold text-slate-700">
             <input type="radio" name="input-mode" value="pdf" checked onchange="toggleInputMode()" class="w-4 h-4 text-emerald-500"> PDF 파일 업로드
@@ -264,7 +264,6 @@
       </div>
     </div>
 
-    <!-- 플래시카드 -->
     <div id="page-flashcard" class="page-content">
       <h2 class="text-2xl font-extrabold text-slate-800 mb-2 flex items-center gap-2"><i class="ri-stack-line"></i> 안키형 플래시카드</h2>
       <p class="text-sm text-gray-500 mb-6">빈칸이 있는 카드는 단어장 모드로, 일반 카드는 뒤집기 모드로 알아서 작동합니다.</p>
@@ -398,7 +397,6 @@
       </div>
     </div>
 
-    <!-- 목차 빈칸 채우기 -->
     <div id="page-blank" class="page-content">
       <h2 class="text-2xl font-extrabold text-slate-800 mb-2 flex items-center gap-2"><i class="ri-edit-2-line"></i> 목차 빈칸 채우기</h2>
       <p class="text-sm text-gray-500 mb-6">전체적인 구조 암기를 위해 목차의 빈칸을 채워보세요. 이제 목차도 알고리즘으로 관리됩니다.</p>
@@ -517,7 +515,6 @@
       </div>
     </div>
     
-    <!-- 실전 모의고사 -->
     <div id="page-exam" class="page-content">
       <h2 class="text-2xl font-extrabold text-slate-800 mb-2 flex items-center gap-2"><i class="ri-edit-box-line"></i> 실전 모의고사</h2>
       <p class="text-sm text-gray-500 mb-6">강사님의 채점평을 바탕으로 가장 깐깐하게 채점받고, 부족한 점을 점검하세요!</p>
@@ -632,7 +629,6 @@
       </div>
     </div>
 
-    <!-- 모의고사 결과 -->
     <div id="page-result" class="page-content">
       <div class="max-w-4xl mx-auto space-y-4 md:space-y-6" id="result-container">
         
@@ -691,7 +687,6 @@
       </div>
     </div>
 
-    <!-- 설정 -->
     <div id="page-settings" class="page-content">
       <h2 class="text-2xl font-extrabold text-slate-800 mb-6 flex items-center gap-2"><i class="ri-settings-4-line"></i> 설정</h2>
       <div class="max-w-xl mx-auto space-y-4 md:space-y-6">
@@ -705,6 +700,8 @@
               <div><p class="text-[9px] md:text-[10px] font-bold text-gray-400 uppercase tracking-widest">동기화 상태</p><p class="text-xs md:text-sm font-bold text-slate-800" id="auth-status">연결 확인 중...</p></div>
             </div>
           </div>
+          <button id="login-btn" onclick="window.loginWithGoogle()" class="w-full mt-4 py-2.5 md:py-3 bg-white border border-gray-300 text-gray-700 text-sm font-bold rounded-xl hover:bg-gray-50 flex justify-center items-center gap-2"><svg class="w-4 h-4 md:w-5 md:h-5" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/><path fill="none" d="M1 1h22v22H1z"/></svg>구글로 로그인</button>
+          <button id="logout-btn" onclick="window.logoutGoogle()" class="w-full mt-4 py-2.5 md:py-3 bg-slate-100 text-slate-600 font-bold rounded-xl hover:bg-slate-200 flex justify-center items-center gap-2 hidden">로그아웃</button>
         </div>
 
         <div class="neo-card p-6 md:p-8 border-2 border-emerald-100 bg-emerald-50/30">
@@ -764,8 +761,7 @@
       if (window.triggerCloudSave) window.triggerCloudSave(); 
     }
 
-    const MODEL_NAME = "gemini-2.5-flash-preview-09-2025";
-    const apiKey = ""; 
+    const MODEL_NAME = "gemini-2.5-flash";
     const LINES_PER_PAGE = 22; const MAX_CHARS_PER_LINE = 40; 
     let examState = { subject: '', question: '', rubric: '', time: 0, seconds: 0, totalPage: 5, currPage: 1, timer: null, answers: {}, uploadedRubricText: '' };
     let blankState = { outline: null, lines: [], answers: [], activeInput: null };
@@ -852,7 +848,7 @@
     }
 
     async function callGemini(prompt, schema, images = []) {
-      const activeKey = apiKey || getApiKey();
+      const activeKey = getApiKey();
       const url = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${activeKey}`;
       let parts = [{ text: prompt }];
       if (images && images.length > 0) { images.slice(0, 3).forEach(imgData => { parts.push({ inlineData: { mimeType: "image/jpeg", data: imgData } }); }); }
@@ -1107,7 +1103,7 @@
       } else {
         textQ = document.getElementById('text-q').value.trim();
         if (!textQ) { showMsg('변환할 텍스트를 입력해주세요.'); return; }
-        showLoading('AI가 텍스트를 정밀 분석 중입니다...');
+        showLoading('AI가 텍스트 정밀 분석 중입니다...');
       }
 
       tempConvertType = document.getElementById('convert-type').value;
@@ -1842,7 +1838,6 @@
       closeBlankQuiz();
     }
 
-    // 💡 1. 모의고사 채점평: PDF / 텍스트 입력 모드 토글
     function toggleRubricMode() {
       const mode = document.querySelector('input[name="rubric-mode"]:checked').value;
       if (mode === 'pdf') {
@@ -1929,7 +1924,6 @@
       let combinedRubric = '';
       if (baseRubric) combinedRubric += `[기본 모범답안 및 배점]\n${baseRubric}\n\n`;
       
-      // 💡 선택된 모드에 따라 텍스트 또는 PDF 내용을 적용
       let finalRubricInput = '';
       const rMode = document.querySelector('input[name="rubric-mode"]:checked').value;
       if (rMode === 'text') {
@@ -1950,7 +1944,6 @@
       document.getElementById('char-count').textContent = '0';
       document.getElementById('exam-setup').style.display = 'none'; document.getElementById('exam-room').style.display = 'block';
 
-      // 💡 4. 방해금지(전체화면) 모드 실행
       requestFullScreen();
 
       renderAnswerSheet(); updateTimerDisplay();
@@ -2011,7 +2004,6 @@
     }
 
     async function performSubmitExam() {
-      // 💡 제출 시 전체화면 자동 해제
       exitFullScreen();
       
       clearInterval(examState.timer); showLoading("AI 채점관이 답안을 분석 중입니다...");
@@ -2028,7 +2020,6 @@
         const result = await callGemini(prompt, schema);
         result.details = result.details || {}; result.details.issue = result.details.issue || 0; result.details.law = result.details.law || 0; result.details.logic = result.details.logic || 0; result.details.conclusion = result.details.conclusion || 0; result.details.format = result.details.format || 0; result.next3 = result.next3 || [];
         
-        // 💡 2. 재도전 및 비교를 위해 원본 question, rubric도 명시적으로 저장
         const record = { id: Date.now(), date: getToday(), subject: examState.subject, question: examState.question, rubric: examState.rubric, score: result.score, feedback: result, fullAnswer: fullAnswer };
         db.history.push(record); 
         markStudiedToday('exam'); 
@@ -2049,7 +2040,6 @@
     function renderExamResult(data) {
       const fb = data.feedback;
       
-      // 💡 2. 점수 변화 비교 로직 (과거 동일한 문제 응시 기록 탐색)
       let trendHtml = '';
       if (data.question) {
          const attempts = db.history.filter(h => h.question === data.question).sort((a,b) => a.id - b.id);
@@ -2069,10 +2059,9 @@
       
       document.getElementById('res-score').innerHTML = `${data.score}<span class="text-xl md:text-2xl text-gray-300 ml-1">점</span>`;
       
-      // 트렌드 뱃지가 들어갈 영역 생성
       let scoreBox = document.getElementById('res-score').parentNode;
       let existingBadge = document.getElementById('score-trend-badge');
-      if(existingBadge) existingBadge.remove(); // 기존 뱃지 초기화
+      if(existingBadge) existingBadge.remove(); 
       
       if(trendHtml) {
           scoreBox.insertAdjacentHTML('beforeend', `<div id="score-trend-badge">${trendHtml}</div>`);
@@ -2085,14 +2074,12 @@
 
       document.getElementById('res-good').textContent = fb.good || ''; document.getElementById('res-miss').textContent = fb.missing || ''; document.getElementById('res-next').innerHTML = (fb.next3 || []).map(t => `<li>${t}</li>`).join('');
       
-      // 💡 3. 좌우 분할 비교 패널 렌더링
       const myAnswerEl = document.getElementById('res-my-answer');
       if (myAnswerEl) myAnswerEl.textContent = data.fullAnswer || '저장된 답안이 없습니다.';
       
       const rubricEl = document.getElementById('res-rubric');
       if (rubricEl) {
          let rawRubric = data.rubric || '저장된 모범답안이 없습니다.';
-         // 불필요한 시스템 마크다운 태그 정리
          rawRubric = rawRubric.replace(/\[기본 모범답안 및 배점\]/g, '').replace(/\[강사 채점평 및 주의사항.*?\]/g, '\n[강사 채점평/주의사항]');
          rubricEl.textContent = rawRubric.trim();
       }
@@ -2178,8 +2165,8 @@
     window.submitExam = submitExam;
     window.performSubmitExam = performSubmitExam;
     window.changePage = changePage;
-    window.retryExam = retryExam; // 💡 재도전 함수 추가
-    window.toggleRubricMode = toggleRubricMode; // 💡 모범답안 텍스트 모드 함수 추가
+    window.retryExam = retryExam;
+    window.toggleRubricMode = toggleRubricMode;
 
     window.searchLawDB = searchLawDB;
     window.compareConceptsWithAI = compareConceptsWithAI;
