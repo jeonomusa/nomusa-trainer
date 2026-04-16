@@ -251,7 +251,7 @@
            <p class="text-xs text-gray-500 mb-4">아래 내용을 검토하고 필요 시 직접 수정한 후 저장 버튼을 누르세요. 불필요한 항목은 '삭제'를 눌러 뺄 수 있습니다.</p>
            
            <div id="convert-preview-list" class="space-y-4 mb-6 max-h-[500px] overflow-y-auto pr-2">
-              </div>
+           </div>
            
            <div class="flex justify-end gap-3">
              <button onclick="cancelConvert()" class="px-5 py-2.5 bg-slate-100 text-slate-600 font-bold rounded-xl hover:bg-slate-200 active:scale-95">취소</button>
@@ -663,8 +663,6 @@
               <div><p class="text-[9px] md:text-[10px] font-bold text-gray-400 uppercase tracking-widest">동기화 상태</p><p class="text-xs md:text-sm font-bold text-slate-800" id="auth-status">연결 확인 중...</p></div>
             </div>
           </div>
-          <button id="login-btn" onclick="window.loginWithGoogle()" class="w-full py-2.5 md:py-3 bg-white border border-gray-300 text-gray-700 text-sm font-bold rounded-xl hover:bg-gray-50 flex justify-center items-center gap-2"><svg class="w-4 h-4 md:w-5 md:h-5" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/><path fill="none" d="M1 1h22v22H1z"/></svg>구글로 로그인</button>
-          <button id="logout-btn" onclick="window.logoutGoogle()" class="w-full py-2.5 md:py-3 bg-slate-100 text-slate-600 font-bold rounded-xl hover:bg-slate-200 flex justify-center items-center gap-2 hidden">로그아웃</button>
         </div>
 
         <div class="neo-card p-6 md:p-8 border-2 border-emerald-100 bg-emerald-50/30">
@@ -724,7 +722,7 @@
       if (window.triggerCloudSave) window.triggerCloudSave(); 
     }
 
-    const MODEL_NAME = "gemini-2.5-flash-preview-09-2025";
+    const MODEL_NAME = "gemini-2.5-flash";
     const apiKey = ""; 
     const LINES_PER_PAGE = 22; const MAX_CHARS_PER_LINE = 40; 
     let examState = { subject: '', question: '', rubric: '', time: 0, seconds: 0, totalPage: 5, currPage: 1, timer: null, answers: {}, uploadedRubricText: '' };
@@ -742,7 +740,7 @@
     
     function getApiKey() {
       let key = ''; try { key = localStorage.getItem('gemini_api_key'); } catch(e){}
-      return key;
+      if(!key) { showMsg("설정 탭에서 Gemini API 키를 먼저 입력해주세요!"); throw new Error("No API Key"); } return key;
     }
 
     function customConfirm(msg, onConfirm) {
@@ -2062,56 +2060,33 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-    import { getAuth, signInWithPopup, GoogleAuthProvider, signInWithCustomToken, signInAnonymously, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
     import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-    try {
-      let configObj;
-      // 💡 환경 감지: 캔버스 내부(__firebase_config 존재) vs 개인 환경(로컬/깃허브 페이지)
-      if (typeof __firebase_config !== 'undefined') {
-          configObj = JSON.parse(__firebase_config);
-      } else {
-          // 찌로님의 개인 환경용 하드코딩 파이어베이스 정보
-          configObj = {
-              apiKey: "AIzaSyAkAfhZev3uF9qzAcqfhwBrKWorV10qNWE",
-              authDomain: "nomusa-trainer.firebaseapp.com",
-              projectId: "nomusa-trainer",
-              storageBucket: "nomusa-trainer.firebasestorage.app",
-              messagingSenderId: "361338496072",
-              appId: "1:361338496072:web:798c1a6695cbfab5a7647d"
-          };
-      }
+    const firebaseConfig = {
+      apiKey: "AIzaSyAkAfhZev3uF9qzAcqfhwBrKWorV10qNWE",
+      authDomain: "nomusa-trainer.firebaseapp.com",
+      projectId: "nomusa-trainer",
+      storageBucket: "nomusa-trainer.firebasestorage.app",
+      messagingSenderId: "361338496072",
+      appId: "1:361338496072:web:798c1a6695cbfab5a7647d"
+    };
 
-      const app = initializeApp(configObj);
+    try {
+      const app = initializeApp(firebaseConfig);
       const auth = getAuth(app);
       const firestore = getFirestore(app);
-      const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-
-      // 개인 환경용 구글 로그인 기능 부활
-      window.loginWithGoogle = () => {
-          const provider = new GoogleAuthProvider();
-          signInWithPopup(auth, provider).catch(error => {
-              console.error("Login Error:", error);
-              alert("로그인 중 오류가 발생했습니다: " + error.message);
-          });
-      };
-
-      window.logoutGoogle = () => { 
-          signOut(auth).then(() => { alert("로그아웃 되었습니다."); }); 
-      };
-
-      const initAuth = async () => {
-        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-          await signInWithCustomToken(auth, __initial_auth_token);
-        } else if (typeof __firebase_config !== 'undefined') {
-          // 캔버스 내부인데 토큰이 없는 경우에만 익명 로그인 (개인 환경에서는 사용자가 구글 로그인 버튼을 누르게 둠)
-          await signInAnonymously(auth);
-        }
-      };
-      
-      initAuth();
-
       let unsubSnapshot = null;
+
+      window.loginWithGoogle = () => {
+        const provider = new GoogleAuthProvider();
+        signInWithPopup(auth, provider).catch(error => {
+          console.error("Login Error:", error);
+          alert("로그인 중 오류가 발생했습니다: " + error.message);
+        });
+      };
+
+      window.logoutGoogle = () => { signOut(auth).then(() => { alert("로그아웃 되었습니다."); }); };
 
       onAuthStateChanged(auth, (user) => {
         window.currentUser = user;
@@ -2121,14 +2096,14 @@
         const logoutBtn = document.getElementById('logout-btn');
 
         if (user) {
-          if (statusEl) statusEl.textContent = "동기화 연결됨 (" + user.uid.substring(0, 5) + "...)"; 
+          if (statusEl) statusEl.textContent = user.displayName + " (연동됨)"; 
           if (headerStatus) { headerStatus.textContent = "Cloud Sync: ON"; headerStatus.classList.replace('text-slate-400', 'text-blue-400'); }
           if (loginBtn) loginBtn.classList.add('hidden'); 
           if (logoutBtn) logoutBtn.classList.remove('hidden');
           
           if (unsubSnapshot) unsubSnapshot();
           
-          const docRef = doc(firestore, 'artifacts', appId, 'users', user.uid, 'data', 'nomusaDB');
+          const docRef = doc(firestore, 'users', user.uid);
           
           unsubSnapshot = onSnapshot(docRef, (docSnap) => {
             if (docSnap.exists()) {
@@ -2178,6 +2153,17 @@
           };
 
           const sanitizedDB = removeUndefined(currentDB);
-          const docRef = doc(firestore, 'artifacts', appId, 'users', window.currentUser.uid, 'data', 'nomusaDB');
-          
-          setDoc(docRef, {
+          setDoc(doc(firestore, 'users', window.currentUser.uid), { db: sanitizedDB }, { merge: true }).catch(err => {
+              console.error("Sync Error:", err);
+          });
+        }
+      };
+    } catch(e) {
+      console.error("Firebase init failed:", e);
+      window.loginWithGoogle = () => alert("로그인 오류: 환경 설정을 확인해주세요.");
+      window.logoutGoogle = () => {};
+      window.triggerCloudSave = () => {};
+    }
+  </script>
+</body>
+</html>
