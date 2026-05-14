@@ -626,12 +626,8 @@
           <div class="bg-white p-3 border border-gray-200 rounded-xl flex items-center justify-between gap-4 md:gap-6 shadow-sm">
             <div class="text-center"><p class="text-[9px] md:text-[10px] font-bold text-gray-400">총 글자수</p><p class="text-base md:text-lg font-extrabold text-emerald-500" id="char-count">0</p></div>
             <div class="text-center"><p class="text-[9px] md:text-[10px] font-bold text-gray-400">페이지</p><p class="text-base md:text-lg font-extrabold text-slate-800"><span id="room-curr-page">1</span> / <span id="room-total-page">20</span></p></div>
-<<<<<<< HEAD
             <button type="button" id="exam-fullscreen-btn" title="시험 화면만 전체화면" class="px-3 md:px-4 py-2 md:py-2.5 bg-white border border-slate-200 text-slate-600 font-bold text-[10px] md:text-xs rounded-lg hover:bg-slate-50 active:scale-95 whitespace-nowrap">전체화면</button>
-            <button onclick="submitExam(false)" class="px-4 md:px-6 py-2 md:py-3 bg-rose-500 hover:bg-rose-600 text-white font-bold text-xs md:text-sm rounded-lg active:scale-95">제출</button>
-=======
             <button type="button" id="exam-submit-btn" onclick="submitExam(false)" class="px-4 md:px-6 py-2 md:py-3 bg-rose-500 hover:bg-rose-600 text-white font-bold text-xs md:text-sm rounded-lg active:scale-95 disabled:opacity-50 disabled:pointer-events-none">제출</button>
->>>>>>> dae7bf3a7b3005f37d67454683bb584c81073429
           </div>
         </div>
 
@@ -1123,7 +1119,6 @@
       return rev <= getLocalNow();
     }
 
-<<<<<<< HEAD
     function collectExamMaterialsFromDb(subject) {
       const sub = String(subject || '').trim();
       return (db.flashcards || []).filter(fc => fc && String(fc.subject || '').trim() === sub).slice(0, 16).map(fc => ({
@@ -1154,39 +1149,9 @@
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
-=======
-    async function gradeAnswerViaServer({ subject, question, rubric, fullAnswer, materials }) {
-      const res = await fetch('/api/grade-answer', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          subject,
-          question,
-          rubric,
-          fullAnswer,
-          materials: Array.isArray(materials) ? materials : [],
-        }),
->>>>>>> dae7bf3a7b3005f37d67454683bb584c81073429
       });
       let data = null;
       try { data = await res.json(); } catch (e) {}
-      if (!res.ok) {
-        const msg = (data && data.message) ? data.message : `HTTP ${res.status}`;
-        throw new Error(msg);
-      }
-      return data;
-    }
-
-    async function examGroundedExplainViaServer({ subject, question, userAnswer, rubricExcerpt, materials }) {
-      const res = await fetch('/api/exam-grounded-explain', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ subject, question, userAnswer, rubricExcerpt, materials }),
-      });
-      let data = null;
-      try {
-        data = await res.json();
-      } catch (e) {}
       if (!res.ok) {
         const msg = (data && data.message) ? data.message : `HTTP ${res.status}`;
         throw new Error(msg);
@@ -1894,11 +1859,7 @@
               <tr class="border-b border-gray-50 hover:bg-gray-50 group">
                   <td class="py-3 px-2 text-[12px] text-gray-500 text-center">${h.date}</td>
                   <td class="py-3 px-2 font-bold text-slate-700 text-[13px] text-center">${h.subject}</td>
-<<<<<<< HEAD
                   <td class="py-3 px-2 text-emerald-600 font-extrabold text-center">${h.score !== null && h.score !== undefined && h.score !== '' ? `${h.score}점` : '미확정'}</td>
-=======
-                  <td class="py-3 px-2 text-emerald-600 font-extrabold text-center">${typeof h.score === 'number' ? h.score + '점' : '<span class="text-amber-600 text-[10px]">미확정</span>'}</td>
->>>>>>> dae7bf3a7b3005f37d67454683bb584c81073429
                   <td class="py-3 px-2 text-center whitespace-nowrap">
                       <button onclick="viewHistory(${h.id})" class="px-3 py-1 bg-emerald-50 text-emerald-600 text-[10px] font-bold rounded hover:bg-emerald-500 hover:text-white transition-all shadow-sm">결과</button>
                       <button onclick="retryExam(${h.id})" class="px-3 py-1 bg-blue-50 text-blue-600 text-[10px] font-bold rounded hover:bg-blue-500 hover:text-white transition-all shadow-sm ml-1"><i class="ri-refresh-line"></i> 재도전</button>
@@ -1977,23 +1938,15 @@
       if(ctxScore) {
         const sortedHistory = [...db.history].sort((a,b) => a.id - b.id);
         const scoreLabels = sortedHistory.map((h, i) => `${i+1}회차`);
-<<<<<<< HEAD
         const scoreData = sortedHistory.map(h => {
           const n = Number(h.score);
           return Number.isFinite(n) ? n : null;
         });
-=======
-        const scoreData = sortedHistory.map((h) => (typeof h.score === 'number' ? h.score : null));
->>>>>>> dae7bf3a7b3005f37d67454683bb584c81073429
 
         if(chartInstances['scores']) chartInstances['scores'].destroy();
         chartInstances['scores'] = new Chart(ctxScore, {
             type: 'line',
-<<<<<<< HEAD
             data: { labels: scoreLabels.length ? scoreLabels : ['-'], datasets: [{ label: '모의고사 점수', data: scoreData.length ? scoreData : [null], spanGaps: true, borderColor: '#f43f5e', backgroundColor: 'rgba(244, 63, 94, 0.1)', borderWidth: 2, pointBackgroundColor: '#f43f5e', fill: true, tension: 0.3 }] },
-=======
-            data: { labels: scoreLabels.length ? scoreLabels : ['-'], datasets: [{ label: '모의고사 점수', data: scoreData.length ? scoreData : [0], borderColor: '#f43f5e', backgroundColor: 'rgba(244, 63, 94, 0.1)', borderWidth: 2, pointBackgroundColor: '#f43f5e', fill: true, tension: 0.3, spanGaps: true }] },
->>>>>>> dae7bf3a7b3005f37d67454683bb584c81073429
             options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { min: 0, max: 100 } } }
         });
       }
@@ -2007,12 +1960,8 @@
 
       const lines = db.history.slice(-5).map(h => {
         const missing = (h.feedback && typeof h.feedback.missing === 'string') ? h.feedback.missing : '';
-<<<<<<< HEAD
         const sc = (h.score !== null && h.score !== undefined && h.score !== '') ? `${h.score}점` : '미확정';
         return `[${h.subject}] ${sc} - ${missing}`;
-=======
-        return `[${h.subject}] ${typeof h.score === 'number' ? h.score + '점' : '점수 미확정'} - ${missing}`;
->>>>>>> dae7bf3a7b3005f37d67454683bb584c81073429
       });
       const historyText = lines.join('\n').trim();
       if (!historyText) { showMsg("분석할 기록 정보가 부족합니다."); return; }
@@ -3495,28 +3444,6 @@
       retryGroundedRegradeLoading = true;
       showLoading('근거 자료를 다시 선별하고 채점합니다…');
       try {
-<<<<<<< HEAD
-        const body = {
-          subject: examState.subject,
-          question: examState.question,
-          rubric: examState.rubric,
-          fullAnswer,
-        };
-        const mats = collectExamMaterialsFromDb(examState.subject);
-        if (mats.length > 0) body.materials = mats;
-        const result = await gradeAnswerViaServer(body);
-        result.details = result.details || {}; result.details.issue = result.details.issue || 0; result.details.law = result.details.law || 0; result.details.logic = result.details.logic || 0; result.details.conclusion = result.details.conclusion || 0; result.details.format = result.details.format || 0; result.next3 = result.next3 || [];
-        
-        const record = { id: Date.now(), date: getToday(), subject: examState.subject, question: examState.question, rubric: examState.rubric, score: result.score, feedback: result, fullAnswer: fullAnswer };
-        db.history.push(record); 
-        markStudiedToday('exam'); 
-        saveDB();
-        
-        examState.uploadedRubricText = ''; 
-        document.getElementById('exam-rubric-file').value = '';
-        document.getElementById('exam-rubric-name').innerHTML = `<i class="ri-upload-cloud-2-line mr-1"></i>여기를 눌러 PDF 첨부`;
-        document.getElementById('exam-rubric-text').value = '';
-=======
         const fa = String(rec.fullAnswer || '');
         const pack = gatherExamGroundingMaterials(rec.subject, rec.question, {
           userAnswer: fa,
@@ -3528,7 +3455,6 @@
         });
         lastExamGroundingPack = pack;
         updateExamGroundingPanelFromPack();
->>>>>>> dae7bf3a7b3005f37d67454683bb584c81073429
 
         const result = await gradeAnswerViaServer({
           subject: rec.subject,
@@ -3923,15 +3849,7 @@
     }
 
     function renderExamResult(data) {
-<<<<<<< HEAD
       __examResultContextRecord = data;
-      const fb = normalizeExamFeedback(data.feedback, data.score);
-      fb.groundingMetrics = { materialsSent: collectExamMaterialsFromDb(data.subject).length };
-
-      if (typeof localStorage !== 'undefined' && localStorage.getItem('debug_grounding') === '1')
-        console.log('[exam grounding]', fb.groundingReasonType, fb.groundingStrength, 'score=', data.score);
-
-=======
       lastExamResultRecord = data;
 
       const explainOut = document.getElementById('res-ai-explain-out');
@@ -3954,15 +3872,18 @@
         groundedPanel.innerHTML = '';
       }
 
-      const fb = data.feedback;
-      
->>>>>>> dae7bf3a7b3005f37d67454683bb584c81073429
+      const fb = normalizeExamFeedback(data.feedback, data.score);
+      data.feedback = fb;
+      fb.groundingMetrics = { materialsSent: collectExamMaterialsFromDb(data.subject).length };
+
+      if (typeof localStorage !== 'undefined' && localStorage.getItem('debug_grounding') === '1')
+        console.log('[exam grounding]', fb.groundingReasonType, fb.groundingStrength, 'score=', data.score);
+
       let trendHtml = '';
       if (data.question && typeof data.score === 'number') {
          const attempts = db.history.filter(h => h.question === data.question).sort((a,b) => a.id - b.id);
          const currIdx = attempts.findIndex(h => h.id === data.id);
          if (currIdx > 0) {
-<<<<<<< HEAD
             const prevScore = attempts[currIdx - 1].score;
             const currNum = coerceExamScore(data.score);
             const prevNum = coerceExamScore(prevScore);
@@ -3971,22 +3892,9 @@
               if (diff > 0) trendHtml = `<div class="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full text-[11px] font-extrabold mt-2 tracking-wide animate-pulse">▲ 이전 대비 ${diff}점 상승!</div>`;
               else if (diff < 0) trendHtml = `<div class="bg-rose-100 text-rose-700 px-3 py-1 rounded-full text-[11px] font-extrabold mt-2 tracking-wide">▼ 이전 대비 ${Math.abs(diff)}점 하락</div>`;
               else trendHtml = `<div class="bg-gray-100 text-gray-500 px-3 py-1 rounded-full text-[11px] font-extrabold mt-2 tracking-wide">- 이전 점수와 동일</div>`;
-=======
-            const prevRow = attempts[currIdx - 1];
-            if (typeof prevRow.score === 'number') {
-            const diff = data.score - prevRow.score;
-            if (diff > 0) {
-                trendHtml = `<div class="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full text-[11px] font-extrabold mt-2 tracking-wide animate-pulse">▲ 이전 대비 ${diff}점 상승!</div>`;
-            } else if (diff < 0) {
-                trendHtml = `<div class="bg-rose-100 text-rose-700 px-3 py-1 rounded-full text-[11px] font-extrabold mt-2 tracking-wide">▼ 이전 대비 ${Math.abs(diff)}점 하락</div>`;
-            } else {
-                trendHtml = `<div class="bg-gray-100 text-gray-500 px-3 py-1 rounded-full text-[11px] font-extrabold mt-2 tracking-wide">- 이전 점수와 동일</div>`;
->>>>>>> dae7bf3a7b3005f37d67454683bb584c81073429
-            }
             }
          }
       }
-<<<<<<< HEAD
 
       const scoreEl = document.getElementById('res-score');
       const scoreNum = coerceExamScore(data.score);
@@ -4004,13 +3912,6 @@
       renderExamGroundingUsedBlock(fb);
       renderExamGroundingCtas(fb);
 
-=======
-      
-      document.getElementById('res-score').innerHTML = typeof data.score === 'number'
-        ? `${data.score}<span class="text-xl md:text-2xl text-gray-300 ml-1">점</span>`
-        : `<span class="block text-xl md:text-3xl font-black text-slate-500 leading-tight">점수 미확정</span><span class="block text-[10px] md:text-[11px] font-bold text-slate-400 mt-1 max-w-xs mx-auto">저장 학습 자료 인용 검증 미통과 또는 자료 없음</span>`;
-      
->>>>>>> dae7bf3a7b3005f37d67454683bb584c81073429
       let scoreBox = document.getElementById('res-score').parentNode;
       let existingBadge = document.getElementById('score-trend-badge');
       if(existingBadge) existingBadge.remove(); 
@@ -4019,16 +3920,11 @@
           scoreBox.insertAdjacentHTML('beforeend', `<div id="score-trend-badge">${trendHtml}</div>`);
       }
 
-<<<<<<< HEAD
-      document.getElementById('res-feedback').textContent =
-        fb.feedback || fb.groundingReason || '';
-=======
       document.getElementById('res-feedback').textContent = fb.insufficientGrounding === true
         ? (fb.groundingReason || '저장된 학습 자료에서 채점에 필요한 유효 인용을 확보하지 못했습니다.')
-        : (fb.feedback || '');
+        : (fb.feedback || fb.groundingReason || '');
       renderExamGradeGroundingRow(data);
       renderExamGroundingFollowUpActions(data);
->>>>>>> dae7bf3a7b3005f37d67454683bb584c81073429
 
       const det = fb.details || {};
       const setBar = (id, val, max) => { const safeVal = Math.min(Math.max(val || 0, 0), max); document.getElementById(`score-${id}`).textContent = safeVal; document.getElementById(`bar-${id}`).style.width = `${(safeVal / max) * 100}%`; };
