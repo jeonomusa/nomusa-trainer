@@ -81,9 +81,9 @@
     .fc-item-checkbox { width: 18px; height: 18px; border-radius: 4px; border-gray-300; text-emerald-500; cursor: pointer; }
     .chart-wrapper { position: relative; height: 220px; width: 100%; }
 
-    /* 전체화면 적용 시 시험장 배경 */
-    :fullscreen #exam-room { background: #f8fafc; padding: 20px; overflow-y: auto; }
-    :-webkit-full-screen #exam-room { background: #f8fafc; padding: 20px; overflow-y: auto; }
+    /* 시험 영역만 전체화면일 때 (요소 자체가 fullscreen) */
+    #exam-room:fullscreen { background: #f8fafc; padding: 20px; overflow-y: auto; min-height: 100%; box-sizing: border-box; }
+    #exam-room:-webkit-full-screen { background: #f8fafc; padding: 20px; overflow-y: auto; min-height: 100%; box-sizing: border-box; }
   </style>
 </head>
 <body class="pb-24">
@@ -626,6 +626,7 @@
           <div class="bg-white p-3 border border-gray-200 rounded-xl flex items-center justify-between gap-4 md:gap-6 shadow-sm">
             <div class="text-center"><p class="text-[9px] md:text-[10px] font-bold text-gray-400">총 글자수</p><p class="text-base md:text-lg font-extrabold text-emerald-500" id="char-count">0</p></div>
             <div class="text-center"><p class="text-[9px] md:text-[10px] font-bold text-gray-400">페이지</p><p class="text-base md:text-lg font-extrabold text-slate-800"><span id="room-curr-page">1</span> / <span id="room-total-page">20</span></p></div>
+            <button type="button" id="exam-fullscreen-btn" title="시험 화면만 전체화면" class="px-3 md:px-4 py-2 md:py-2.5 bg-white border border-slate-200 text-slate-600 font-bold text-[10px] md:text-xs rounded-lg hover:bg-slate-50 active:scale-95 whitespace-nowrap">전체화면</button>
             <button onclick="submitExam(false)" class="px-4 md:px-6 py-2 md:py-3 bg-rose-500 hover:bg-rose-600 text-white font-bold text-xs md:text-sm rounded-lg active:scale-95">제출</button>
           </div>
         </div>
@@ -657,6 +658,9 @@
         
         <div class="neo-card p-6 md:p-10 text-center relative overflow-hidden bg-gradient-to-b from-white to-emerald-50/30">
           <h2 class="text-lg md:text-xl font-extrabold text-slate-800 mb-2">AI 정밀 채점 결과</h2>
+          <div id="res-grounding-banner" class="hidden max-w-xl mx-auto mb-4 rounded-xl border px-4 py-3 text-left leading-relaxed"></div>
+          <p id="res-grounding-debug" class="hidden max-w-xl mx-auto mb-3 font-mono text-[10px] text-slate-500 text-left whitespace-pre-wrap"></p>
+          <div id="res-grounding-actions" class="hidden max-w-xl mx-auto mb-4 flex flex-wrap items-center justify-center gap-2"></div>
           
           <div class="flex flex-col items-center justify-center my-4 md:my-6">
              <div class="text-5xl md:text-7xl font-black text-emerald-500 flex items-center justify-center" id="res-score">
@@ -665,6 +669,16 @@
           </div>
           
           <p class="text-xs md:text-sm font-bold text-slate-600 bg-white inline-block px-4 py-2 md:px-6 md:py-3 rounded-full border border-gray-100" id="res-feedback"></p>
+        </div>
+
+        <div id="res-grounding-used-wrap" class="neo-card p-4 md:p-6 border border-slate-200 bg-slate-50/60 hidden">
+          <details id="res-grounding-used-details" class="group">
+            <summary class="cursor-pointer font-bold text-sm text-slate-800 list-none flex items-center gap-2">
+              <i class="ri-arrow-down-s-line group-open:rotate-180 transition-transform"></i>
+              채점에 사용된 자료 인용
+            </summary>
+            <div id="res-grounding-used-body" class="mt-3 text-[12px] text-slate-700 space-y-2"></div>
+          </details>
         </div>
 
         <div class="neo-card p-4 md:p-8">
@@ -797,17 +811,71 @@
     let searchLawLoading = false;
     let analyzeHistoryLoading = false;
 
-    function requestFullScreen() {
-      const doc = window.document;
-      const docEl = doc.documentElement;
-      const requestFullScreen = docEl.requestFullscreen || docEl.mozRequestFullScreen || docEl.webkitRequestFullScreen || docEl.msRequestFullscreen;
-      if (requestFullScreen) requestFullScreen.call(docEl).catch(err => console.log(err));
+    function getExamRoomEl() {
+      return document.getElementById('exam-room');
     }
-    
+
+    function isExamRoomFullscreen() {
+      const room = getExamRoomEl();
+      return !!(room && document.fullscreenElement === room);
+    }
+
+    function syncExamFullscreenButton() {
+      const btn = document.getElementById('exam-fullscreen-btn');
+      if (!btn) return;
+      const on = isExamRoomFullscreen();
+      btn.textContent = on ? '전체화면 해제' : '전체화면';
+      btn.title = on ? '전체화면 종료 (또는 ESC)' : '시험 화면만 전체화면(ESC로 종료)';
+    }
+
     function exitFullScreen() {
       const doc = window.document;
-      const exitFullScreen = doc.exitFullscreen || doc.mozCancelFullScreen || doc.webkitExitFullscreen || doc.msExitFullscreen;
-      if (exitFullScreen && doc.fullscreenElement) exitFullScreen.call(doc).catch(err => console.log(err));
+      const exitFn =
+        doc.exitFullscreen ||
+        doc.mozCancelFullScreen ||
+        doc.webkitExitFullscreen ||
+        doc.msExitFullscreen;
+      if (!exitFn || !doc.fullscreenElement) return Promise.resolve();
+      return Promise.resolve(exitFn.call(doc)).catch(() => {});
+    }
+
+    async function toggleExamFullscreen() {
+      const el = getExamRoomEl();
+      if (!el) return;
+      try {
+        if (document.fullscreenElement === el) {
+          await exitFullScreen();
+        } else {
+          const req =
+            el.requestFullscreen ||
+            el.webkitRequestFullscreen ||
+            el.mozRequestFullScreen ||
+            el.msRequestFullscreen;
+          if (!req) {
+            showMsg('이 브라우저에서는 전체화면을 지원하지 않습니다.');
+            return;
+          }
+          const ret = req.call(el);
+          if (ret && typeof ret.then === 'function') await ret;
+        }
+      } catch (e) {
+        console.error('전체화면 전환 실패:', e);
+        showMsg('전체화면 전환에 실패했습니다.');
+      } finally {
+        syncExamFullscreenButton();
+      }
+    }
+
+    let examFullscreenControlsWired = false;
+    function wireExamFullscreenControls() {
+      if (examFullscreenControlsWired) return;
+      examFullscreenControlsWired = true;
+      document.getElementById('exam-fullscreen-btn')?.addEventListener('click', toggleExamFullscreen);
+      const sync = () => syncExamFullscreenButton();
+      document.addEventListener('fullscreenchange', sync);
+      document.addEventListener('webkitfullscreenchange', sync);
+      document.addEventListener('mozfullscreenchange', sync);
+      document.addEventListener('MSFullscreenChange', sync);
     }
 
     function customConfirm(msg, onConfirm) {
@@ -872,11 +940,36 @@
       return rev <= getLocalNow();
     }
 
-    async function gradeAnswerViaServer({ subject, question, rubric, fullAnswer }) {
+    function collectExamMaterialsFromDb(subject) {
+      const sub = String(subject || '').trim();
+      return (db.flashcards || []).filter(fc => fc && String(fc.subject || '').trim() === sub).slice(0, 16).map(fc => ({
+        id: String(fc.id),
+        type: 'flashcard',
+        label: String(fc.front || '').slice(0, 120),
+        text: `${String(fc.front || '')}\n${String(fc.back || '')}`,
+      })).filter(m => m.text.trim().length > 2);
+    }
+
+    async function gradeAnswerViaServer(body) {
       const res = await fetch('/api/grade-answer', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ subject, question, rubric, fullAnswer }),
+        body: JSON.stringify(body),
+      });
+      let data = null;
+      try { data = await res.json(); } catch (e) {}
+      if (!res.ok) {
+        const msg = (data && data.message) ? data.message : `HTTP ${res.status}`;
+        throw new Error(msg);
+      }
+      return data;
+    }
+
+    async function examGroundedExplainViaServer(body) {
+      const res = await fetch('/api/exam-grounded-explain', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
       });
       let data = null;
       try { data = await res.json(); } catch (e) {}
@@ -1085,7 +1178,7 @@
               <tr class="border-b border-gray-50 hover:bg-gray-50 group">
                   <td class="py-3 px-2 text-[12px] text-gray-500 text-center">${h.date}</td>
                   <td class="py-3 px-2 font-bold text-slate-700 text-[13px] text-center">${h.subject}</td>
-                  <td class="py-3 px-2 text-emerald-600 font-extrabold text-center">${h.score}점</td>
+                  <td class="py-3 px-2 text-emerald-600 font-extrabold text-center">${h.score !== null && h.score !== undefined && h.score !== '' ? `${h.score}점` : '미확정'}</td>
                   <td class="py-3 px-2 text-center whitespace-nowrap">
                       <button onclick="viewHistory(${h.id})" class="px-3 py-1 bg-emerald-50 text-emerald-600 text-[10px] font-bold rounded hover:bg-emerald-500 hover:text-white transition-all shadow-sm">결과</button>
                       <button onclick="retryExam(${h.id})" class="px-3 py-1 bg-blue-50 text-blue-600 text-[10px] font-bold rounded hover:bg-blue-500 hover:text-white transition-all shadow-sm ml-1"><i class="ri-refresh-line"></i> 재도전</button>
@@ -1164,12 +1257,15 @@
       if(ctxScore) {
         const sortedHistory = [...db.history].sort((a,b) => a.id - b.id);
         const scoreLabels = sortedHistory.map((h, i) => `${i+1}회차`);
-        const scoreData = sortedHistory.map(h => h.score);
+        const scoreData = sortedHistory.map(h => {
+          const n = Number(h.score);
+          return Number.isFinite(n) ? n : null;
+        });
 
         if(chartInstances['scores']) chartInstances['scores'].destroy();
         chartInstances['scores'] = new Chart(ctxScore, {
             type: 'line',
-            data: { labels: scoreLabels.length ? scoreLabels : ['-'], datasets: [{ label: '모의고사 점수', data: scoreData.length ? scoreData : [0], borderColor: '#f43f5e', backgroundColor: 'rgba(244, 63, 94, 0.1)', borderWidth: 2, pointBackgroundColor: '#f43f5e', fill: true, tension: 0.3 }] },
+            data: { labels: scoreLabels.length ? scoreLabels : ['-'], datasets: [{ label: '모의고사 점수', data: scoreData.length ? scoreData : [null], spanGaps: true, borderColor: '#f43f5e', backgroundColor: 'rgba(244, 63, 94, 0.1)', borderWidth: 2, pointBackgroundColor: '#f43f5e', fill: true, tension: 0.3 }] },
             options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { min: 0, max: 100 } } }
         });
       }
@@ -1183,7 +1279,8 @@
 
       const lines = db.history.slice(-5).map(h => {
         const missing = (h.feedback && typeof h.feedback.missing === 'string') ? h.feedback.missing : '';
-        return `[${h.subject}] ${h.score}점 - ${missing}`;
+        const sc = (h.score !== null && h.score !== undefined && h.score !== '') ? `${h.score}점` : '미확정';
+        return `[${h.subject}] ${sc} - ${missing}`;
       });
       const historyText = lines.join('\n').trim();
       if (!historyText) { showMsg("분석할 기록 정보가 부족합니다."); return; }
@@ -2221,9 +2318,8 @@
       document.getElementById('char-count').textContent = '0';
       document.getElementById('exam-setup').style.display = 'none'; document.getElementById('exam-room').style.display = 'block';
 
-      requestFullScreen();
-
       renderAnswerSheet(); updateTimerDisplay();
+      syncExamFullscreenButton();
       examState.timer = setInterval(() => {
         examState.seconds--; updateTimerDisplay();
         if (examState.seconds <= 0) { clearInterval(examState.timer); showMsg("⏰ 시간이 종료되었습니다! 자동 제출합니다."); performSubmitExam(); }
@@ -2292,7 +2388,15 @@
         }).map(k => examState.answers[k]).filter(v => v.trim()).join('\n');
 
       try {
-        const result = await gradeAnswerViaServer({ subject: examState.subject, question: examState.question, rubric: examState.rubric, fullAnswer });
+        const body = {
+          subject: examState.subject,
+          question: examState.question,
+          rubric: examState.rubric,
+          fullAnswer,
+        };
+        const mats = collectExamMaterialsFromDb(examState.subject);
+        if (mats.length > 0) body.materials = mats;
+        const result = await gradeAnswerViaServer(body);
         result.details = result.details || {}; result.details.issue = result.details.issue || 0; result.details.law = result.details.law || 0; result.details.logic = result.details.logic || 0; result.details.conclusion = result.details.conclusion || 0; result.details.format = result.details.format || 0; result.next3 = result.next3 || [];
         
         const record = { id: Date.now(), date: getToday(), subject: examState.subject, question: examState.question, rubric: examState.rubric, score: result.score, feedback: result, fullAnswer: fullAnswer };
@@ -2312,28 +2416,272 @@
       } finally { examState.isSubmitting = false; hideLoading(); }
     }
 
+    function coerceExamScore(s) {
+      if (s === null || s === undefined || s === '') return NaN;
+      const n = Number(s);
+      return Number.isFinite(n) ? n : NaN;
+    }
+
+    function normalizeExamFeedback(fbRaw, dataScore) {
+      const fb =
+        fbRaw && typeof fbRaw === 'object' && !Array.isArray(fbRaw) ? { ...fbRaw } : {};
+      const finite = coerceExamScore(dataScore);
+      if (typeof fb.groundingReasonType !== 'string') {
+        if (Number.isFinite(finite)) fb.groundingReasonType = 'legacy_ungrounded';
+        else if (fb.insufficientGrounding === true) fb.groundingReasonType = 'no_materials_provided';
+        else fb.groundingReasonType = 'quote_validation_failed';
+      }
+      return fb;
+    }
+
+    /** 결과 카드 CTA 순서는 groundingReasonType 기준 (explain API와 같은 enum 이름) */
+    const EXAM_GROUNDING_CTA_ORDER = {
+      no_materials_provided: ['add-materials', 'materials-hub', 'explain-only'],
+      no_relevant_materials_selected: ['materials-hub', 'regrade', 'explain-only'],
+      model_returned_no_citations: ['regrade', 'explain-only', 'materials-hub'],
+      quote_validation_failed: ['used-materials', 'regrade', 'explain-only'],
+      only_one_valid_citation: ['regrade', 'used-materials', 'materials-hub'],
+      limited_material_coverage: ['regrade', 'used-materials', 'materials-hub'],
+      sufficient_valid_citations: ['used-materials', 'explain-only', 'add-materials'],
+      legacy_ungrounded: ['materials-hub', 'explain-only', 'regrade'],
+    };
+
+    const EXAM_GROUNDING_CTA_LABELS = {
+      'add-materials': '관련 학습 카드 만들기',
+      'materials-hub': '카드 목록으로',
+      'regrade': '같은 설정으로 다시 채점',
+      'used-materials': '사용된 근거 인용 보기',
+      'explain-only': '자료 기반 해설',
+    };
+
+    let __examResultContextRecord = null;
+
+    function getExamGroundingBannerContent(fb, dataScore) {
+      const type = fb && fb.groundingReasonType;
+      if (!type || type === 'legacy_ungrounded') return null;
+      const finiteSc = coerceExamScore(dataScore);
+      const insufficient =
+        fb.insufficientGrounding === true || fb.score === null || !Number.isFinite(finiteSc);
+      if (insufficient && type !== 'legacy_ungrounded') {
+        const map = {
+          no_materials_provided: { title: '점수 미확정', subtitle: '제출된 학습 자료가 없거나 비었습니다. 같은 과목의 플래시카드를 쌓은 뒤 다시 채점해 보세요.' },
+          no_relevant_materials_selected: { title: '점수 미확정', subtitle: '보낸 자료 중 본문이 있는 카드를 찾지 못했습니다. 카드 앞면·뒷면 내용을 확인해 주세요.' },
+          model_returned_no_citations: { title: '점수 미확정', subtitle: '모델이 자료 인용을 내지 않았습니다. 잠시 후 다시 채점하거나 자료를 보강해 보세요.' },
+          quote_validation_failed: { title: '점수 미확정', subtitle: '인용문이 자료 본문과 맞지 않아 근거로 쓸 수 없었습니다.' },
+        };
+        const spec = map[type];
+        const fallback = fb.groundingReason && String(fb.groundingReason).trim();
+        return { variant: 'warning', title: spec ? spec.title : '점수 미확정', subtitle: spec ? spec.subtitle : (fallback || '저장된 자료만으로 점수를 확정하지 못했습니다.') };
+      }
+      if (type === 'sufficient_valid_citations') {
+        return { variant: 'ok', title: '자료 기반 채점', subtitle: '선택된 학습 자료에서 근거가 충분히 확인되어 점수를 확정했습니다.' };
+      }
+      if (type === 'only_one_valid_citation' || type === 'limited_material_coverage') {
+        return {
+          variant: 'partial',
+          title: '부분 근거 채점',
+          subtitle: type === 'limited_material_coverage'
+            ? '보낸 학습 출처가 적어 근거가 제한적입니다. 카드를 더 쌓으면 재채점 품질이 좋아집니다.'
+            : '유효한 자료 인용이 한 건뿐이라 보수적으로 채점했습니다.',
+        };
+      }
+      return { variant: 'partial', title: '자료 연계 채점', subtitle: (fb.groundingReason && String(fb.groundingReason).trim()) || '학습 자료와 연계해 채점했습니다.' };
+    }
+
+    function applyExamGroundingBanner(fb, dataScore) {
+      const el = document.getElementById('res-grounding-banner');
+      if (!el) return;
+      const row = getExamGroundingBannerContent(fb, dataScore);
+      if (!row && !(fb && fb.groundingReasonType === 'legacy_ungrounded')) {
+        el.classList.add('hidden');
+        el.textContent = '';
+        return;
+      }
+      if (!row && fb && fb.groundingReasonType === 'legacy_ungrounded') {
+        el.classList.remove('hidden');
+        el.className = 'max-w-xl mx-auto mb-4 rounded-xl border border-slate-200 bg-white px-4 py-3 text-left leading-relaxed text-[12px] md:text-[13px] text-slate-700';
+        el.innerHTML = '<div class="font-extrabold tracking-tight text-slate-800">모범답안 중심 채점</div><p class="mt-1 opacity-90">학습 카드 근거는 사용하지 않았습니다. 카드와 함께 보내면 자료 기반 채점·해설을 쓸 수 있습니다.</p>';
+        return;
+      }
+      el.classList.remove('hidden');
+      const styles =
+        row.variant === 'warning'
+          ? 'border-amber-200 bg-amber-50/90 text-amber-950'
+          : row.variant === 'partial'
+            ? 'border-amber-300 bg-white text-slate-800'
+            : 'border-emerald-200 bg-emerald-50/50 text-emerald-950';
+      el.className =
+        `max-w-xl mx-auto mb-4 rounded-xl border px-4 py-3 text-left leading-relaxed text-[12px] md:text-[13px] ${styles}`.trim();
+      el.innerHTML = `<div class="font-extrabold tracking-tight">${row.title}</div><p class="mt-1 opacity-95">${row.subtitle}</p>`;
+    }
+
+    function updateExamGroundingDebugStrip(fb) {
+      const el = document.getElementById('res-grounding-debug');
+      if (!el) return;
+      if (typeof localStorage !== 'undefined' && localStorage.getItem('debug_grounding') === '1') {
+        const cite = fb && Array.isArray(fb.citations) ? fb.citations.length : 0;
+        const mat = fb && fb.groundingMetrics && typeof fb.groundingMetrics.materialsSent === 'number' ? fb.groundingMetrics.materialsSent : '?';
+        el.classList.remove('hidden');
+        el.textContent =
+          `[grounding] type=${fb && fb.groundingReasonType}` +
+          ` strength=${fb && fb.groundingStrength}` +
+          ` insufficient=${fb && fb.insufficientGrounding}` +
+          ` citations=${cite}` +
+          ` materials±${mat}`;
+      } else {
+        el.classList.add('hidden');
+        el.textContent = '';
+      }
+    }
+
+    function renderExamGroundingCtas(fb) {
+      const wrap = document.getElementById('res-grounding-actions');
+      if (!wrap) return;
+      const gt = fb && fb.groundingReasonType;
+      if (!gt || !EXAM_GROUNDING_CTA_ORDER[gt]) {
+        wrap.classList.add('hidden');
+        wrap.innerHTML = '';
+        return;
+      }
+      const order = EXAM_GROUNDING_CTA_ORDER[gt];
+      const citeLen = fb && Array.isArray(fb.citations) ? fb.citations.length : 0;
+      const parts = [];
+      order.forEach((key, idx) => {
+        if (key === 'used-materials' && citeLen === 0 && gt !== 'quote_validation_failed') return;
+        const label = EXAM_GROUNDING_CTA_LABELS[key] || key;
+        const primary = idx === 0 ? ' bg-emerald-600 hover:bg-emerald-700 text-white border-emerald-600' : ' bg-white hover:bg-slate-50 text-slate-700 border-slate-200';
+        parts.push(
+          `<button type="button" onclick="examGroundingCta('${key}')" class="px-3 py-2 rounded-lg text-[11px] md:text-xs font-bold border shadow-sm transition-all active:scale-95${primary}">${escapeHtml(label)}</button>`,
+        );
+      });
+      if (parts.length === 0) {
+        wrap.classList.add('hidden');
+        wrap.innerHTML = '';
+        return;
+      }
+      wrap.classList.remove('hidden');
+      wrap.innerHTML = parts.join('');
+    }
+
+    function renderExamGroundingUsedBlock(fb) {
+      const wrap = document.getElementById('res-grounding-used-wrap');
+      const body = document.getElementById('res-grounding-used-body');
+      if (!wrap || !body) return;
+      const cites = fb && Array.isArray(fb.citations) ? fb.citations : [];
+      if (cites.length === 0) {
+        wrap.classList.add('hidden');
+        body.textContent = '';
+        return;
+      }
+      wrap.classList.remove('hidden');
+      body.innerHTML = cites
+        .map(
+          (c, i) =>
+            `<div class="p-2 rounded-lg bg-white border border-slate-100 text-left"><span class="text-[10px] font-bold text-slate-400">#${i + 1} ${escapeHtml(c.label || c.materialId || '')}</span><blockquote class="mt-1 pl-2 border-l-2 border-emerald-300 whitespace-pre-wrap">${escapeHtml(c.quote || '')}</blockquote></div>`,
+        )
+        .join('');
+    }
+
+    function scrollToExamUsedMaterials() {
+      const wrap = document.getElementById('res-grounding-used-wrap');
+      const det = document.getElementById('res-grounding-used-details');
+      if (det) det.open = true;
+      if (wrap) wrap.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    async function examGroundingCta(key) {
+      const rec = __examResultContextRecord;
+      if (!rec) return;
+      if (key === 'materials-hub') {
+        navigate('flashcard');
+        return;
+      }
+      if (key === 'add-materials') {
+        navigate('flashcard');
+        document.getElementById('fc-manager-view')?.classList.add('hidden');
+        document.getElementById('csv-upload-form')?.classList.add('hidden');
+        document.getElementById('manual-card-form')?.classList.remove('hidden');
+        return;
+      }
+      if (key === 'regrade') {
+        retryExam(rec.id);
+        return;
+      }
+      if (key === 'used-materials') {
+        const cites = __examResultContextRecord && __examResultContextRecord.feedback && __examResultContextRecord.feedback.citations;
+        if (Array.isArray(cites) && cites.length > 0) scrollToExamUsedMaterials();
+        else document.getElementById('res-rubric')?.closest('.neo-card')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        return;
+      }
+      if (key === 'explain-only') {
+        const materials = collectExamMaterialsFromDb(rec.subject);
+        if (materials.length === 0) {
+          showMsg('과목에 저장된 카드가 없어 자료 기반 해설을 요청할 수 없습니다.');
+          return;
+        }
+        showLoading('자료 기반 해설 작성 중…');
+        try {
+          const rubricExcerpt = String(rec.rubric || '').slice(0, 16000);
+          const ex = await examGroundedExplainViaServer({
+            subject: rec.subject,
+            question: rec.question,
+            userAnswer: rec.fullAnswer || '',
+            rubricExcerpt,
+            materials,
+          });
+          customConfirm(
+            `<div class="text-left text-sm space-y-2"><div class="font-bold text-emerald-700">${ex.groundingReasonType || ''} · ${escapeHtml(ex.groundingStrength || '')}</div><div>${escapeHtml(ex.verdict || ex.insufficientReason || '')}</div><div class="text-slate-600 whitespace-pre-wrap">${escapeHtml(ex.explanation || '')}</div></div>`,
+            () => {},
+          );
+        } catch (e) {
+          showMsg(e.message);
+        } finally {
+          hideLoading();
+        }
+      }
+    }
+
     function renderExamResult(data) {
-      const fb = data.feedback;
-      
+      __examResultContextRecord = data;
+      const fb = normalizeExamFeedback(data.feedback, data.score);
+      fb.groundingMetrics = { materialsSent: collectExamMaterialsFromDb(data.subject).length };
+
+      if (typeof localStorage !== 'undefined' && localStorage.getItem('debug_grounding') === '1')
+        console.log('[exam grounding]', fb.groundingReasonType, fb.groundingStrength, 'score=', data.score);
+
       let trendHtml = '';
       if (data.question) {
          const attempts = db.history.filter(h => h.question === data.question).sort((a,b) => a.id - b.id);
          const currIdx = attempts.findIndex(h => h.id === data.id);
          if (currIdx > 0) {
             const prevScore = attempts[currIdx - 1].score;
-            const diff = data.score - prevScore;
-            if (diff > 0) {
-                trendHtml = `<div class="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full text-[11px] font-extrabold mt-2 tracking-wide animate-pulse">▲ 이전 대비 ${diff}점 상승!</div>`;
-            } else if (diff < 0) {
-                trendHtml = `<div class="bg-rose-100 text-rose-700 px-3 py-1 rounded-full text-[11px] font-extrabold mt-2 tracking-wide">▼ 이전 대비 ${Math.abs(diff)}점 하락</div>`;
-            } else {
-                trendHtml = `<div class="bg-gray-100 text-gray-500 px-3 py-1 rounded-full text-[11px] font-extrabold mt-2 tracking-wide">- 이전 점수와 동일</div>`;
+            const currNum = coerceExamScore(data.score);
+            const prevNum = coerceExamScore(prevScore);
+            if (Number.isFinite(currNum) && Number.isFinite(prevNum)) {
+              const diff = currNum - prevNum;
+              if (diff > 0) trendHtml = `<div class="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full text-[11px] font-extrabold mt-2 tracking-wide animate-pulse">▲ 이전 대비 ${diff}점 상승!</div>`;
+              else if (diff < 0) trendHtml = `<div class="bg-rose-100 text-rose-700 px-3 py-1 rounded-full text-[11px] font-extrabold mt-2 tracking-wide">▼ 이전 대비 ${Math.abs(diff)}점 하락</div>`;
+              else trendHtml = `<div class="bg-gray-100 text-gray-500 px-3 py-1 rounded-full text-[11px] font-extrabold mt-2 tracking-wide">- 이전 점수와 동일</div>`;
             }
          }
       }
-      
-      document.getElementById('res-score').innerHTML = `${data.score}<span class="text-xl md:text-2xl text-gray-300 ml-1">점</span>`;
-      
+
+      const scoreEl = document.getElementById('res-score');
+      const scoreNum = coerceExamScore(data.score);
+      if (fb.insufficientGrounding === true || !Number.isFinite(scoreNum)) {
+        scoreEl.className =
+          'text-4xl md:text-6xl font-black text-amber-600 flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2';
+        scoreEl.innerHTML = '<span>미확정</span><span class="text-base md:text-lg font-bold text-slate-500">근거 확인 필요</span>';
+      } else {
+        scoreEl.className = 'text-5xl md:text-7xl font-black text-emerald-500 flex items-center justify-center';
+        scoreEl.innerHTML = `${Math.round(scoreNum)}<span class="text-xl md:text-2xl text-gray-300 ml-1">점</span>`;
+      }
+
+      applyExamGroundingBanner(fb, data.score);
+      updateExamGroundingDebugStrip(fb);
+      renderExamGroundingUsedBlock(fb);
+      renderExamGroundingCtas(fb);
+
       let scoreBox = document.getElementById('res-score').parentNode;
       let existingBadge = document.getElementById('score-trend-badge');
       if(existingBadge) existingBadge.remove(); 
@@ -2342,7 +2690,8 @@
           scoreBox.insertAdjacentHTML('beforeend', `<div id="score-trend-badge">${trendHtml}</div>`);
       }
 
-      document.getElementById('res-feedback').textContent = fb.feedback || '';
+      document.getElementById('res-feedback').textContent =
+        fb.feedback || fb.groundingReason || '';
 
       const setBar = (id, val, max) => { const safeVal = Math.min(Math.max(val || 0, 0), max); document.getElementById(`score-${id}`).textContent = safeVal; document.getElementById(`bar-${id}`).style.width = `${(safeVal / max) * 100}%`; };
       setBar('issue', fb.details.issue, 25); setBar('law', fb.details.law, 30); setBar('logic', fb.details.logic, 25); setBar('conc', fb.details.conclusion, 10); setBar('form', fb.details.format, 10);
@@ -2390,6 +2739,7 @@
     
     window.customConfirm = customConfirm;
     window.navigate = navigate;
+    window.examGroundingCta = examGroundingCta;
     window.toggleCsvUploadForm = toggleCsvUploadForm;
     window.cancelCsvUpload = cancelCsvUpload;
     window.processCsvUpload = processCsvUpload;
@@ -2437,6 +2787,7 @@
     window.cancelExamEdit = cancelExamEdit;
     window.handleExamRubricUpload = handleExamRubricUpload;
     window.startExam = startExam;
+    wireExamFullscreenControls();
     window.submitExam = submitExam;
     window.performSubmitExam = performSubmitExam;
     window.changePage = changePage;

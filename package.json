@@ -1,0 +1,9 @@
+{
+  "name": "cpla-trainer",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test api/grounding.test.mjs",
+    "grounding:aggregate": "node scripts/aggregate-grounding-log.mjs"
+  }
+}

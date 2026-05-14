@@ -1,0 +1,19 @@
+모의고사·근거 채점 수동 회귀 시나리오 (통과해야 하는 대표 행동)
+================================================================
+
+[S1] 레거시 채점 (materials 키 미전송)
+  - 준비: /api/grade-answer 에 subject·question·rubric·fullAnswer 만 POST (materials 없음)
+  - 기대: HTTP 200, score 숫자, groundingReasonType=legacy_ungrounded, citations=[] 또는 없음과 동등
+
+[S2] 자료 기반 성공 (플래시카드 JSON으로 materials 전달)
+  - 준비: usable text가 있는 materials 2건 이상, 모델이 자료 문자열 그대로 인용하도록 답변 품질 유지
+  - 기대: HTTP 200, score 숫자, groundingReasonType in (only_one_valid_citation|limited_material_coverage|sufficient_valid_citations), citations.length>=1
+
+[S3] 인용 검증 실패 → 미확정
+  - 준비: materials usable 1건 이상인데 모델이 존재하지 않는 인용 문자열 반환하도록 유도(또는 스텁)·또는 잘못된 materialId
+  - 기대: HTTP 200, score=null, insufficientGrounding=true, groundingReasonType=quote_validation_failed
+
+해설 API 동일 패턴:
+  [S2e] explain + materials 우선 검증 후 citations.length>=1, groundingReasonType 부여됨.
+  [S1e] explain materials 키 없음 → legacy_ungrounded.
+
